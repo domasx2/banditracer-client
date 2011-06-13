@@ -1,0 +1,1 @@
+exports.levels={'level1':require('./levels/level1'),'level2':require('./levels/level2')};
