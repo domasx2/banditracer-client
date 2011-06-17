@@ -1,13 +1,22 @@
-var settings=exports.settings={SCREEN_WIDTH:1000,  //screen width in pixels
-                                SCREEN_HEIGHT:700, //screen height in pixels
-                                LOGIC_FPS:60,        //logic updates per second
+var settings=exports.settings={SCREEN_WIDTH:700,  //screen width in pixels
+                                SCREEN_HEIGHT:600, //screen height in pixels
+                                LOGIC_FPS:60,        //logic updates per second -- no effect atm, same as render_fps.
                                 RENDER_FPS:60,        //renders per second
                                 TILE_SCALE:50,     //tile height/width in pixels
                                 PHYS_SCALE:10,    //pixels in a meter
-                                SERVER:'ws://82.135.230.59:8081/websocket'};     //game server
+                                SERVER:'ws://www.banditracer.eu:8000',//game server
+                                DEBUG:false};     //display additional info n stuff
                                 
 exports.get=function(name){
     return settings[name];
+};
+
+exports.init=function(){
+    for(var key in settings){
+        if(window.hasOwnProperty(key)){
+            settings[key]=window.key;   
+        }
+    }
 };
 
 exports.set=function(name, value){

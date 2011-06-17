@@ -44,22 +44,18 @@ var Projectile=exports.Projectile=function(pars){
     this.getState=function(){
         return {'p':utils.vectorToList(this.body.GetPosition()),
                 'a':utils.degrees(this.body.GetAngle()),
-                'lv':this.body.GetLinearVelocity(),
-                'av':this.body.GetAngularVelocity()
-                }
+                'lv':this.body.GetLinearVelocity()}
     };
     
     this.interpolate=function(s1, s2, q){
         return {'p':utils.interpolatePoints(s1.p, s2.p, q),
                 'a':utils.interpolateInts(s1.a, s2.a, q),
-                'lv':s1.lv,
-                'av':s1.av};
+                'lv':s1.lv};
     };
     
     this.setState=function(state){
         this.body.SetXForm(utils.listToVector(state.p), utils.radians(state.a));
         this.body.SetLinearVelocity(utils.listToVector(state.lv));
-        this.body.SetAngularVelocity(state.av);  
     };
 
     

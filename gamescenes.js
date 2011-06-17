@@ -18,7 +18,7 @@ var LevelScene=exports.LevelScene=function(game, level, cache){
     this.started=false;
     
     
-    this.max_laps=1;
+    this.max_laps=3;
     var i;
     //BUILD BACKGROUND FROM TILES
     var tiles=[];    
@@ -70,20 +70,22 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
     this.game=game;
     this.processed_events={};
     this.world.mode=world.MODE_CLIENT;
-    this.last_event_no=0;
+    this.last_event_no=0; //the last event that was processed
+    this.last_known_event_no=0; //the last known event
     this.queued_updates=[];
     this.time_to_start=3000;
     this.player_car=null;
     this.upds_stacked=0;
     this.time=0;
     this.delta=0;
-    this.delta_t=0;
+    this.deltas=[];
     this.delta_q=0;
     this.states={};
     this.queued_events={};
     this.extradelay=50;
     this.last_upd_time=0;
     this.carid=null;
+    this.bfs=0;//bad frames;
     
     this.controllers[this.controllers.length]=this.controller=new controllers.MultiplayerController();
     
@@ -127,6 +129,7 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
                     }
                     //else state is min state
                     else{
+                        this.bfs++;
                         state=minst[objid];
                         this.last_upd_time=mint;
                        /* if(!(mint==target_time)){
@@ -155,8 +158,9 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
         
         if(this.time_to_start<0)this.started=true;
         
-        var target_time=this.time-this.delta-70;
-        this.processEvents(target_time+this.delta);
+        var target_time=this.time+this.delta-40;
+        //console.log(this.time+' '+target_time);
+        this.processEvents(target_time);
         
         if( this.started){
             //set object state
@@ -190,7 +194,8 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
    
     this.sendInfo=function(){
         //if(this.upds_stacked<5){
-            this.game.getCommunicator().queueMessage('GAME_UPDATE', {'actions':this.controller.actions, 'eventno':this.last_event_no});
+            
+            this.game.getCommunicator().queueMessage('GAME_UPDATE', {'actions':this.controller.actions, 'eventno':this.last_known_event_no});
             this.upds_stacked++;
         //}
     };
@@ -226,6 +231,7 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
                 if(event.no>this.last_event_no && (!this.queued_events[event.no])){
                     event.t=update.t;
                     this.queued_events[event.no]=event;
+                    this.last_known_event_no=event.no;
                     
                 }
             }
@@ -243,7 +249,7 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
             }
             for(k=0;k<tarray.length-1;k++){
                 t=tarray[k];
-                if(t < (this.time-this.delta-150)){
+                if(t < (this.time+this.delta-300)){
                     delete this.states[t];
                 }
             }
@@ -254,9 +260,14 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
         }
         if(update){
             var delta=this.time-update.t;
-            this.delta_t+=delta;
-            this.delta_q+=1;
-            this.delta=parseInt(this.delta_t/this.delta_q);
+            this.deltas.push(delta);
+            dlen=this.deltas.length;
+            this.delta_q+=delta;
+            if(dlen>60){
+                this.delta_q-=this.deltas.shift();
+                dlen=60;
+            }
+            this.delta=parseInt(this.delta_q/dlen);
             //console.log(this.delta);
         }
         this.queued_updates=[];
@@ -267,7 +278,7 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
        this.renderer.render(display);
  
        //render HUD
-       this.renderer.renderHUD(display, this.player_car, msDuration, this.max_laps, this.time_to_start, this.paused);
+       this.renderer.renderHUD(display, this.player_car, msDuration, this.max_laps, this.time_to_start, this.paused, this.delta, this.bfs);
     };
     
     this.handleMessage=function(cmd, payload){
@@ -294,6 +305,7 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, 
     //PLAYER CAR
     this.player_car=this.world.event('create', {'type':'car', 'obj_name':'Racer', 'pars':{'position':[this.world.start_positions[1].x+1, this.world.start_positions[1].y+2],
                                                                                                'angle':this.world.start_positions[1].angle,
+                                                                                               'alias':this.game.title_scene.alias.getText(),
                                                                                                'weapon1':'Machinegun',
                                                                                                'weapon2':'MineLauncher'}})
 
@@ -306,6 +318,7 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, 
         if(this.world.start_positions[i+1]){
            var aicar=this.world.event('create', {'type':'car', 'obj_name':'Racer', 'pars':{'position':[this.world.start_positions[i+1].x+1, this.world.start_positions[i+1].y+2],
                                                                                                'angle':this.world.start_positions[i+1].angle,
+                                                                                               'alias':'Bot '+i,
                                                                                                'weapon1':'Machinegun',
                                                                                                'weapon2':'MineLauncher'}})
            
@@ -345,7 +358,17 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, 
         
         //if we reached max laps, end race
         if(this.player_car.lap > this.max_laps){
-            this.game.showEndGameScene(this.player_car.getRacePosition());
+             var table=[], car;
+             for(var i=0;i<this.world.objects['car'].length;i++){
+                car=this.world.objects['car'][i];               
+                table.push({'place':String(car.getRacePosition()),
+                           'id':String(i),
+                           'player':car.alias,
+                           'kills':String(car.kills),
+                           'deaths':String(car.deaths)});
+            }
+            
+            this.game.showGameOver(table);
         };
     };
    

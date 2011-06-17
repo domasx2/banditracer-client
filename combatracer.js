@@ -111,7 +111,7 @@ var Communicator=exports.Communicator=function(game){
                          'payload':this.messages[i][1]};
                 msg=json.stringify(msg);
                 this.socket.send(msg);
-                console.log('sent '+msg);
+              //  console.log('sent '+msg);
             }
             this.messages=[];
         }else if (this.status=='closed'){
@@ -137,7 +137,7 @@ var Communicator=exports.Communicator=function(game){
     };
     
     this.onmessage=function(m){ 
-        console.log('message received '+m.data);
+        //console.log('message received '+m.data);
         m=json.parse(m.data);
         this.game.director.getScene().handleMessage(m.cmd, m.payload);
         
@@ -162,6 +162,7 @@ var Communicator=exports.Communicator=function(game){
 };
 
 exports.Game=function(){
+    settings.init();
     this.director=null;
     this.cache=new renderer.ImageCache();
     this.socket=null;

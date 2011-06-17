@@ -41,7 +41,7 @@
 exports.Bandit={};
 exports.Racer={'width':2,
                'height':4,
-               'filename':'yellow_car.png',
+               'filenames':['yellow_car.png', 'blue_car.png', 'green_car.png', 'pink_car.png'],
                 'power':90,
                 'max_steer_angle':20,
                 'max_speed':150,

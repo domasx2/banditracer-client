@@ -56,6 +56,24 @@ var UIElement=exports.UIElement=function(pars){
     return this;  
 };
 
+var Image=exports.Image=function(pars){
+  /*
+  pars:
+  scene
+  position
+  filename
+  */
+   pars.size=[0, 0];
+   this.filename=pars.filename;
+   Image.superConstructor.apply(this, [pars]);
+   this.update=null;
+   this.draw=function(renderer){
+        renderer.drawUIImage(this.filename, this.position);
+   }
+};
+
+gamejs.utils.objects.extend(Image, UIElement);
+
 var Table=exports.Table=function(pars){
     
     /*pars:
@@ -95,6 +113,7 @@ var Table=exports.Table=function(pars){
         this.calcSize();
         this.hover_row_id=null;
         this.selected_row_id=null;
+        this.scene.refresh=true;
     };
 
     this.calcSize=function(){
@@ -127,12 +146,15 @@ var Table=exports.Table=function(pars){
             evt=evts[i];
             if(evt[0]=='mousemotion'){
                 this.hover_row_id=this.getRowIdByPos(evt[1]);
+                this.scene.refresh=true;
             }
             else if(evt[0]=='click'){
                 this.selected_row_id=this.getRowIdByPos(evt[1]);
+                this.scene.refresh=true;
             }
             else if(evt[0]=='mouseout'){
                 this.hover_row_id=null;
+                this.scene.refresh=true;
             }
         }
     };
@@ -237,6 +259,7 @@ var TrackInfoDisplay=exports.TrackInfoDisplay=function(pars){
             this.trackimg=new gamejs.Surface(new_sz[0], new_sz[1]);
             this.trackimg.blit(img, new gamejs.Rect([0, 0], new_sz), new gamejs.Rect([0, 0], img.getSize()));
         }else  this.trackimg=null;
+        this.scene.refresh=true;
     };
     
     
@@ -274,6 +297,7 @@ var LevelSelector=exports.LevelSelector=function(pars){
         }
         this.trackdisplay.setTrack(levelkey);
         this.selected=levelkey;
+        this.scene.refresh=true;
     };
     p=40;
     
@@ -293,7 +317,7 @@ var LevelSelector=exports.LevelSelector=function(pars){
                                         'onclick':this.select,
                                         'scope':this,
                                         'arg':levelkey});
-        p+=28;   
+        p+=32;   
     }
     
     this.scene.addObject(this);
@@ -312,6 +336,8 @@ var TextBox=exports.TextBox=function(pars){
     size
     text
     font
+    onchange
+    scope
     */
     pars.size=pars.size ? pars.size: [150, 25];
     TextBox.superConstructor.apply(this, [pars]);
@@ -319,19 +345,28 @@ var TextBox=exports.TextBox=function(pars){
     this.font=pars.font ? pars.font : skin.textbox.font;
     this.blip=false; //show cursor?
     this.ms=500;     // time till cursor is shown/hidden
-    this.pos=this.text.length;    //cursor position in characters
     this.upper=false;
     this.tbsize=[this.size[0]-8, this.size[1]]; //text display box size
-    this.tbposition=[this.position[0]+4, this.position[1]]; //text display box position
+    this.tbposition=[this.position[0]+4, this.position[1]-2]; //text display box position
+    this.onchange=pars.onchange
+    this.pos=this.text.length;
     
     this.blipon=function(){
         this.blip=true;
         this.ms=500;
+        this.scene.refresh=true;
     };
     
+
     this.setText=function(text){
         this.text=text;
         this.pos=this.text.length;
+        this.scene.refresh=true;
+    };
+    
+    this._setText=function(text){
+        this.text=text;
+        this.scene.refresh=true;
     };
     
     this.getText=function(){
@@ -345,6 +380,7 @@ var TextBox=exports.TextBox=function(pars){
             if(this.ms<0){
                 this.blip= !this.blip;
                 this.ms=500;
+                this.scene.refresh=true;
             };
             
             var evt, charcode;
@@ -367,9 +403,9 @@ var TextBox=exports.TextBox=function(pars){
                     if(charcode==8){
                         if(this.text){
                             if(this.pos==this.text.length){
-                                this.text=this.text.substr(0,this.text.length-1);
+                                this._setText(this.text.substr(0,this.text.length-1));
                             }else {
-                                this.text=this.text.substr(0, this.pos-1)+this.text.substr(this.pos, this.text.length);
+                                this._setText(this.text.substr(0, this.pos-1)+this.text.substr(this.pos, this.text.length));
                             }
                             this.blipon();
                             this.pos--;
@@ -381,9 +417,9 @@ var TextBox=exports.TextBox=function(pars){
                         if(this.upper)c=c.toUpperCase();
                         else c=c.toLowerCase();
                         if(this.pos==this.text.length){
-                            this.text+=c;
+                            this._setText(this.text+c);
                         }else{
-                            this.text=this.text.substr(0, this.pos)+c+this.text.substr(this.pos, this.text.length);
+                            this._setText(this.text.substr(0, this.pos)+c+this.text.substr(this.pos, this.text.length));
                         }
                         this.pos++;
                         this.blipon();
@@ -413,6 +449,7 @@ var TextBox=exports.TextBox=function(pars){
             this.blip=false;
             this.upper=false;
         }
+       // console.log(this.pos);
         
     };
     
@@ -486,7 +523,6 @@ var Button=exports.Button=function(pars){
      pars:
      scene
      position
-     size
      text
      onclick
      arg  --optional, second argument of callback
@@ -494,7 +530,7 @@ var Button=exports.Button=function(pars){
      scope --optional, default is scene
      
     */
-    pars.size=pars.size ? pars.size :  [200, 30];
+    pars.size= [200, 30];
     Button.superConstructor.apply(this, [pars]);
     this.text=pars.text;
     this.onclick=pars.onclick;
@@ -505,12 +541,17 @@ var Button=exports.Button=function(pars){
     
     this.draw=function(renderer){
         
-        this.drawBorder(renderer, skin.button.border, 2);
+        /*this.drawBorder(renderer, skin.button.border, 2);
         if(this.selected) this.fill(renderer, skin.button.selected_fill);
         else if(this.hover) this.fill(renderer, skin.button.hover_fill); 
-        else this.fill(renderer, skin.button.fill);
+        else this.fill(renderer, skin.button.fill);*/
+        if(this.selected)renderer.drawUIImage('button_selected.png', this.position);
+        else if(this.hover)renderer.drawUIImage('button_hover.png', this.position);
+        else renderer.drawUIImage('button.png', this.position);
+        
+        var sz=renderer.cache.getTextSize(this.text, this.font);
        
-        renderer.drawText(this.text, this.font, [this.position[0]+8, this.position[1]]);
+        renderer.drawText(this.text, this.font, [this.position[0]+8, this.position[1]+(this.size[1]-sz[1])/2-2 ]);
         // FF6A00
     };
     
@@ -523,6 +564,9 @@ var Button=exports.Button=function(pars){
                     scope._onclick=this.onclick;
                     scope._onclick(this, this.arg);
                 }
+                if(evts[i][0]=='focus' || evts[i][0]=='blur' || evts[i][0]=='mouseover' || evts[i][0]=='mouseout'){
+                    this.scene.refresh=true;
+                }
             }
         }
     };
@@ -534,13 +578,26 @@ gamejs.utils.objects.extend(Button, UIElement);
 
 var UIScene=exports.UIScene=function(game, cache){
     this.cache=cache;
-    this.objects=[];
-    this._objects=[];
     this.game=game;
+    //interactable objects
+    this.objects=[];
+    
+    //disabled objects
+    this._objects=[];
+
+    //element that is being focused
     this.focused_element;
+    
+    //is alert box being displayed?
     this.alerted=false;
-    this.ping=false; //if ping is set to true, ping server every 10 seconds
+    
+    
+    //if ping is set to true, this scene will ping the server every ms_to_ping miliseconds so as not to time out.
+    this.ping=false;     
     this.ms_to_ping=10000;
+    
+    //if set to true, will redraw screen and set to false
+    this.refresh=true; 
   
     this.alert=function(text, button){
         if(!this.alerted){
@@ -550,10 +607,9 @@ var UIScene=exports.UIScene=function(game, cache){
         this.objects=[];
         if(!(button===false)){
             new Button({'scene':this,
-                        'position':[this.renderer.width/2-50,
+                        'position':[this.renderer.width/2-100,
                                     this.renderer.height/2-16+20-50],
-                        'size':[100, 32],
-                        'text':'   Ok',
+                        'text':' Ok',
                         'onclick':this.clearAlert});
         }
         
@@ -570,6 +626,7 @@ var UIScene=exports.UIScene=function(game, cache){
     
     this.addObject=function(obj){
         this.objects[this.objects.length]=obj;
+        this.refresh=true;
     };
     
     this.returnToTitle=function(){
@@ -686,7 +743,8 @@ var UIScene=exports.UIScene=function(game, cache){
         };
   };
   
-  this.draw=function(display, msDuration){ 
+  this.draw=function(display){
+        if(!this.refresh)return;
         this.renderer.setSurface(display);
         this.renderer.fillBackground(skin.ui_background);
         
@@ -712,6 +770,7 @@ var UIScene=exports.UIScene=function(game, cache){
                 if(this.objects[i].draw) this.objects[i].draw(this.renderer);  
             };
         }
+        this.refresh=false;
         
   };
   

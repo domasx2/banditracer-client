@@ -20,7 +20,7 @@ var LobbyScene=exports.LobbyScene=function(game, cache, lobby_id){
         this.game.getCommunicator().queueMessage('LEAVE_LOBBY');
     };
     
-    this.refresh=function(){
+    this.refresh_lobby=function(){
         this.game.getCommunicator().queueMessage('GET_LOBBY_INFO');
     };
     
@@ -85,7 +85,7 @@ var LobbyScene=exports.LobbyScene=function(game, cache, lobby_id){
     this.trackdisplay=new ui.TrackInfoDisplay({'scene':this,
                                                'position':[340, 70]});
     
-    this.refresh();
+    this.refresh_lobby();
     return this;
 
 };
@@ -123,7 +123,7 @@ gamejs.utils.objects.extend(GameOverScene, ui.UIScene);
 var JoinLobbyScene=exports.JoinLobbyScene=function(game, cache){
     JoinLobbyScene.superConstructor.apply(this, [game, cache]);
     
-    this.refresh=function(){
+    this.refresh_lobbies=function(){
         this.lobby_table.setData([]);
         this.lobby_table.no_data_text='Loading, please wait...';
         this.game.getCommunicator().queueMessage('LIST_LOBBIES', {});  
@@ -170,7 +170,7 @@ var JoinLobbyScene=exports.JoinLobbyScene=function(game, cache){
     new ui.Button({'scene':this,
                   'position':[220, 410],
                   'text':'Refresh',
-                  'onclick':this.refresh});
+                  'onclick':this.refresh_lobbies});
     
     new ui.Button({'scene':this,
                   'position':[430, 410],
@@ -187,7 +187,7 @@ var JoinLobbyScene=exports.JoinLobbyScene=function(game, cache){
                                   'selectable':true,
                                   'columns':columns});
     
-    this.refresh();
+    this.refresh_lobbies();
     
     
 };
@@ -305,49 +305,50 @@ var TitleScene=exports.TitleScene=function(game, cache){
 
   
     //labels and buttons
-    new ui.Label({'scene':this,
+    
+    new ui.Image({'filename':'title3.png',
                  'position':[10, 10],
-                 'text':'Bandit Racer',
-                 'font':'header'});
+                 'scene':this});
+    
+    new ui.Image({'filename':'guncar.png',
+                 'position':[280, 130],
+                 'scene':this});
     
     new ui.Label({'scene':this,
-                 'position':[20, 70],
+                 'position':[20, 90],
                  'text':'Single player'});
     
     new ui.Button({'scene':this,
-                  'position':[20, 110],
-                  'size':[200, 30],
+                  'position':[20, 130],
                   'text':'Play a single race',
                   'onclick':this.playAgainstBots});
 
     
-    
-    
-    
+
     new ui.Label({'scene':this,
-                 'position':[20, 210],
+                 'position':[20, 190],
                  'text':'Multiplayer'});
     
-    new ui.Label({'scene':this,
-                 'position':[20, 260],
-                 'text':'Nickname:'})
     
-    this.alias=new ui.TextBox({'scene':this,
-                                'text':'Guest',
-                                'position':[130, 260],
-                                'size':[150, 25]});
     
     new ui.Button({'scene':this,
-                  'position':[20, 300],
-                  'size':[200, 30],
+                  'position':[20, 230],
                   'text':'Create lobby',
                   'onclick':this.createLobby});
     
     new ui.Button({'scene':this,
-                  'position':[20, 340],
-                  'size':[200, 30],
+                  'position':[20,270],
                   'text':'Join a lobby',
                   'onclick':this.joinLobby});
+    
+    new ui.Label({'scene':this,
+                 'position':[20, 320],
+                 'text':'Nickname:'})
+    
+    this.alias=new ui.TextBox({'scene':this,
+                                'text':'Guest',
+                                'position':[20, 350],
+                                'size':[150, 25]});
     
     return this;  
 };

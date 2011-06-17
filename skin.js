@@ -6,17 +6,18 @@ exports.alert_box_background='#FFE566';
 
 //fonts name:[css description, color]
 exports.fonts={'hud':['30px "Showcard Gothic"', 'red'],         //in game hud
-               'header':['40px Aharoni', '#282828'],            //ui scene headers
-               'default':['20px Aharoni', '#282828'],           //labels, default if not specified
+               'header':['40px Aharoni', '#351A15'],            //ui scene headers
+               'default':['20px Aharoni', '#351A15'],           //labels, default if not specified
                'small_header':['bold 16px Arial', 'black'],     //table headers
                'small':['bold 14px Arial', 'black'],             //table cells
-               'alias':['bold 14px Arial', '#4CFF00']  //ingame multiplayer player alias
+               'alias':['bold 14px Arial', '#4CFF00'],  //ingame multiplayer player alias
+               'button':['20px Aharoni', '#351A15']
                }; 
                
 
 //ui button
 exports.button={'border':'#282828',              //button border
-                'font':'default',                 //default font
+                'font':'button',                 //default font
                 'fill':'#FFE566',                 //default fill
                 'hover_fill':'#FFBE00',          //fill on hover
                 'selected_fill':'#FF6A00'};       //fill when selected

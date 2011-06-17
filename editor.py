@@ -461,10 +461,10 @@ class TilesetViewPanel(wx.Panel):
                         dc.DrawBitmap(tile.thumb, x, y)
                         if(tile==app.selected):
                             dc.SetPen(wx.Pen('blue', 4))
-                            dc.DrawLine(x, y, x, y+tile_width)
-                            dc.DrawLine(x, y, x+tile_width, y)
-                            dc.DrawLine(x+tile_width, y,  x+tile_width, y+tile_width)
-                            dc.DrawLine(x, y+tile_width, x+tile_width, y+tile_width)
+                            dc.DrawLine(x, y, x, y+TILE_WIDTH_PX)
+                            dc.DrawLine(x, y, x+TILE_WIDTH_PX, y)
+                            dc.DrawLine(x+TILE_WIDTH_PX, y,  x+TILE_WIDTH_PX, y+TILE_WIDTH_PX)
+                            dc.DrawLine(x, y+TILE_WIDTH_PX, x+TILE_WIDTH_PX, y+TILE_WIDTH_PX)
                         i+=1
                         
     def OnMouse(self, e):       
@@ -473,7 +473,7 @@ class TilesetViewPanel(wx.Panel):
         if e.LeftUp() and app.level:
             tiles=app.getTiles()
             for tile in tiles:
-                if x>=tile.x and x<tile.x+tile_width and y>=tile.y and y<tile.y+tile_width:
+                if x>=tile.x and x<tile.x+TILE_WIDTH_PX and y>=tile.y and y<tile.y+TILE_WIDTH_PX:
                     app.select(tile)
                     break
         self.Refresh();             

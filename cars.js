@@ -417,7 +417,9 @@ var Car = exports.Car = function(pars){
             }
             var bp=this.body.GetPosition()
             renderer.drawCar(this.filename, bp, this.getAngle());
-            if(this.alias){
+            
+            //only draw alias on multiplayer games
+            if(this.alias && (this.world.mode==1)){
                 renderer.drawText(this.alias, 'alias', renderer.getScreenPoint([bp.x-this.width, bp.y-this.height]));
             }
         }
@@ -447,7 +449,6 @@ var Car = exports.Car = function(pars){
         
         this.body.SetLinearVelocity(new box2d.b2Vec2(0, 0));
         this.body.PutToSleep();
-        console.log(utils.vectorToList(this.body.GetPosition()));
         
         var wheels=this.getWheels();
         for(var i=0;i<wheels.length;i++){

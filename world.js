@@ -173,7 +173,15 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
             var carpars=car_descriptions[descr.obj_name];
             var pars={'world':this};
             utils.copy(descr.pars, pars);
-            utils.copy(carpars, pars);            
+            utils.copy(carpars, pars);
+            delete pars['filenames'];
+            var alt=this.objects['car'] ? this.objects['car'].length : 0;
+            if(alt>=carpars.filenames.length){
+                pars['filename']=carpars.filenames[0];
+            }
+            else{
+                pars['filename']=carpars.filenames[alt];
+            }
             obj=new cars.Car(pars);
             if(descr.pars.weapon1)obj.weapon1=new weapons[descr.pars.weapon1]({'car':obj});
             if(descr.pars.weapon2)obj.weapon2=new weapons[descr.pars.weapon2]({'car':obj});
