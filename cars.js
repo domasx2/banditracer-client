@@ -14,7 +14,7 @@ var ACC_BRAKE=exports.ACC_BRAKE=2;
 
 
 
-var Wheel = exports.Wheel = function(car, x, y, world, revolving, powered){
+var Wheel = exports.Wheel = function(car, x, y, width, length, world, revolving, powered, filename){
     /*
     x, y - local coordinates of the wheel
     */
@@ -23,8 +23,8 @@ var Wheel = exports.Wheel = function(car, x, y, world, revolving, powered){
     this.position=[x, y];
     this.angle=0;
     this.car=car;
-    this.length=0.8;
-    this.width=0.4;
+    this.length=length;
+    this.width=width;
     this.revolving=revolving=revolving ? true : false;
     this.body=null;
     this.joint=null;
@@ -34,6 +34,7 @@ var Wheel = exports.Wheel = function(car, x, y, world, revolving, powered){
     this.respawn_location=null;
     this.respawn_angle=0;
     this.powered=powered;
+    this.filename=filename;
     
     var def=new box2d.b2BodyDef();
     def.position=this.car.body.GetWorldPoint(utils.listToVector(this.position));
@@ -81,7 +82,7 @@ var Wheel = exports.Wheel = function(car, x, y, world, revolving, powered){
     };
     
     this.draw=function(renderer){
-        renderer.drawCar('wheel.png', this.car.body.GetWorldPoint(new box2d.b2Vec2(this.x, this.y)), utils.degrees(this.body.GetAngle()))
+       renderer.drawCar(this.filename, this.car.body.GetWorldPoint(new box2d.b2Vec2(this.x, this.y)), utils.degrees(this.body.GetAngle()));
     };
     
     this.getLocalVelocity=function(){
@@ -232,7 +233,7 @@ var Car = exports.Car = function(pars){
     var wheeldef, i;
     for(i=0;i<pars.wheels.length;i++){
         wheeldef=pars.wheels[i];
-        this.wheels[this.wheels.length]=new Wheel(this, wheeldef.x, wheeldef.y, this.world, pars.wheels[i].revolving, pars.wheels[i].powered);
+        this.wheels[this.wheels.length]=new Wheel(this, wheeldef.x, wheeldef.y, wheeldef.width, wheeldef.length, this.world, wheeldef.revolving, wheeldef.powered, wheeldef.filename);
     }
     
     
@@ -413,7 +414,7 @@ var Car = exports.Car = function(pars){
             var wheels=this.getWheels();
             var i;
             for(i=0;i<wheels.length;i++){
-                wheels[i].draw(renderer);            
+                wheels[i].draw(renderer);
             }
             var bp=this.body.GetPosition()
             renderer.drawCar(this.filename, bp, this.getAngle());
@@ -532,7 +533,7 @@ var Car = exports.Car = function(pars){
         var i, wheel;
         
             
-        for(i=0;i<4;i++){
+        for(i=0;i<wheels.length;i++){
             wheels[i].killSidewaysVelocity();
         }
       

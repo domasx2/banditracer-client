@@ -38,18 +38,46 @@
  
 */
 
-exports.Bandit={};
+exports.Bandit={'width':1.6,
+                'height':3.5,
+                'name':'Bandit',
+                'filenames':['bandit.png'],
+                'power':100,
+                'max_speed':135,
+                'max_steer_angle':20,
+                'health':80,
+                'main_weapon':'Machinegun',
+                'wheels':[{'x':-1, 'y':-1, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
+                          {'x':1, 'y':-1, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
+                          {'x':-1, 'y':1.1, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'},
+                          {'x':1, 'y':1.1, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'}]
+                };
 exports.Racer={'width':2,
+                'name':'Racer',
                'height':4,
                'filenames':['yellow_car.png', 'blue_car.png', 'green_car.png', 'pink_car.png'],
                 'power':90,
-                'max_steer_angle':20,
-                'max_speed':150,
+                'max_steer_angle':18,
+                'max_speed':145,
                 'health':100,
-                'wheels':[{'x':-1, 'y':-1.2, 'revolving':true, 'powered':true},
-                          {'x':1, 'y':-1.2, 'revolving':true, 'powered':true},
-                          {'x':-1, 'y':1.2, 'revolving':false, 'powered':false},
-                          {'x':1, 'y':1.2, 'revolving':false, 'powered':false}]
+                'main_weapon':'Machinegun',
+                'wheels':[{'x':-1, 'y':-1.2, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
+                          {'x':1, 'y':-1.2, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
+                          {'x':-1, 'y':1.2, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'},
+                          {'x':1, 'y':1.2, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'}]
                 
             };
-exports.Hick={};
+exports.Brawler={'width':3,
+                'height':6,
+                'name':'Brawler',
+                'filenames':['suv.png'],
+                'power':150,
+                'max_steer_angle':17,
+                'max_speed':140,
+                'health':160,
+                'main_weapon':'MissileLauncher',
+                'wheels':[{'x':-1.5, 'y':-2.2, 'width':0.6, 'length':1.2, 'revolving':true, 'powered':true, 'filename':'big_wheel.png'},
+                          {'x':1.5, 'y':-2.2, 'width':0.6, 'length':1.2, 'revolving':true, 'powered':true, 'filename':'big_wheel.png'},
+                          {'x':-1.5, 'y':2, 'width':0.6, 'length':1.2, 'revolving':false, 'powered':false, 'filename':'big_wheel.png'},
+                          {'x':1.5, 'y':2, 'width':0.6, 'length':1.2, 'revolving':false, 'powered':false, 'filename':'big_wheel.png'}]
+                };

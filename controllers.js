@@ -82,7 +82,7 @@ exports.AIController=function(car, world, scene){
         
         
         //try and fire machinegun if something is in front
-        if(this.car.weapon1 && this.car.weapon1.type=='machinegun'){
+        if(this.car.weapon1 && ( this.car.weapon1.type=='machinegun' || this.car.weapon1.type=='missilelauncher')){
             this.car.fire_weapon1=false;
             var i, c;
             for(i=0;i<this.world.objects['car'].length;i++){
@@ -119,28 +119,49 @@ exports.MultiplayerController=function(){
                    
     
     this.update=function(keys_down, ms){
+        var changed=false;
+        
+        var accelerate, steer, fire_weapon1, fire_weapon2;
 
         if(keys_down[this.bindings.accelerate]){
-            this.actions.accelerate=ACC_ACCELERATE;
+            accelerate=ACC_ACCELERATE;
         }else if(keys_down[this.bindings.brake]){
-            this.actions.accelerate=ACC_BRAKE;
+            accelerate=ACC_BRAKE;
         }else{
-            this.actions.accelerate=ACC_NONE;
+            accelerate=ACC_NONE;
         }
         
         if(keys_down[this.bindings.steer_right]){
-            this.actions.steer=STEER_RIGHT;
+            steer=STEER_RIGHT;
         }else if(keys_down[this.bindings.steer_left]){
-            this.actions.steer=STEER_LEFT;
+            steer=STEER_LEFT;
         }else{
-            this.actions.steer=STEER_NONE;
+            steer=STEER_NONE;
         }
         
-        if(keys_down[this.bindings.fire_weapon1]) this.actions.fire_weapon1=true;
-        else this.actions.fire_weapon1=false;
+        if(keys_down[this.bindings.fire_weapon1]) fire_weapon1=true;
+        else fire_weapon1=false;
         
-        if(keys_down[this.bindings.fire_weapon2]) this.actions.fire_weapon2=true;
-        else this.actions.fire_weapon2=false;
+        if(keys_down[this.bindings.fire_weapon2]) fire_weapon2=true;
+        else fire_weapon2=false;
+        
+        if(!(accelerate===this.actions.accelerate)){
+            this.actions.accelerate=accelerate;
+            changed=true;
+        }
+        if(!(steer===this.actions.steer)){
+            this.actions.steer=steer;
+            changed=true;
+        }
+        if(!(fire_weapon1===this.actions.fire_weapon1)){
+            this.actions.fire_weapon1=fire_weapon1;
+            changed=true;
+        }
+        if(!(fire_weapon2===this.actions.fire_weapon2)){
+            this.actions.fire_weapon2=fire_weapon2;
+            changed=true;
+        }
+        return changed;
         
     };
     

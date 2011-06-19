@@ -16,17 +16,9 @@ var Animation=exports.Animation=function(pars){
     this.duration=pars.duration;
     this.type='animation';
     
-    this.getState=function(){
-        return {'a':this.age};  
-    };
-    
-    this.interpolate=function(s1, s2, q){
-        return {'a':utils.interpolateInts(s1.a, s2.a, q)};
-    }
-    
-    this.setState=function(state){
-        this.age=state.a;
-    };
+    this.getState=function(){return null;};  
+    this.interpolate=function(){};
+    this.setState=function(){};
     
     this.update=function(msDuration){
         this.age+=msDuration;

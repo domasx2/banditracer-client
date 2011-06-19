@@ -4,6 +4,7 @@ var levels=require('./levels');
 var utils=require('./utils');
 var skin=require('./skin');
 var settings=require('./settings');
+var car_descriptions=require('./car_descriptions');
 
 var UIElement=exports.UIElement=function(pars){
     /*
@@ -68,7 +69,7 @@ var Image=exports.Image=function(pars){
    Image.superConstructor.apply(this, [pars]);
    this.update=null;
    this.draw=function(renderer){
-        renderer.drawUIImage(this.filename, this.position);
+        if(this.filename) renderer.drawUIImage(this.filename, this.position);
    }
 };
 
@@ -266,6 +267,77 @@ var TrackInfoDisplay=exports.TrackInfoDisplay=function(pars){
     
 };
 gamejs.utils.objects.extend(TrackInfoDisplay, UIElement);
+
+
+
+var CarSelector=exports.CarSelector=function(pars){
+    /*
+     pars:
+     scene
+     position
+     options - [{'label':x, 'valye':y}, ...]
+     onselect
+     scope
+    */
+    this.scene=pars.scene;
+    this.position=pars.position;
+    this.selected=null;
+    this.size=[0, 0];
+    var p=0;
+    this.btns={};
+    this.onselect=pars.onselect;
+    this.scope=pars.scope;
+    
+    this.queueEvent=function(){};
+    this.update=function(){this.events=[]};
+    this.draw=function(renderer){};
+    
+    this.options=[];
+    var cd;
+    for(var key in car_descriptions){
+        cd=car_descriptions[key];
+        if(cd && cd.name){
+            this.options.push({'label':cd.name, 'value':key});
+        }
+    }
+    this.selected=null;
+    this.scene.addObject(this);
+    
+
+    this.select=function(btn, value){
+        this.selected=value;
+        for(v in this.btns){
+            this.btns[v].selected=value===v ? true : false;
+        }
+        if(this.onselect){
+            if(this.scope){
+                this.scope._onselect=this.onselect;
+                this.scope._onselect(value);
+            }else{
+                this.onselect(value);
+            }
+        }
+        this.img.filename=(value+'_descr.png').toLowerCase();
+        this.scene.refresh=true;
+    };
+    
+    var opt;
+    for(var i=0;i<this.options.length;i++){
+        opt=this.options[i]
+        this.btns[opt.value]=new Button({'scene':this.scene,
+                                        'position':[this.position[0], this.position[1]+p],
+                                        'text':opt.label,
+                                        'onclick':this.select,
+                                        'scope':this,
+                                        'arg':opt.value});
+        p+=32;   
+    }
+    
+    this.img=new Image({'scene':this.scene,
+                       'position':[this.position[0], this.position[1]+p],
+                       'filename':''});
+    return this;
+};
 
 var LevelSelector=exports.LevelSelector=function(pars){
     /*

@@ -120,14 +120,14 @@ var Communicator=exports.Communicator=function(game){
     };
     
     this.connect=function(){
-        console.log('connecting');
+       console.log('connecting');
         this.socket = new WebSocket(settings.get('SERVER'));
         this.status='connecting';
         var self=this;
         this.socket.onopen = function() {self.onopen();};
         this.socket.onmessage = function(m) {self.onmessage(m);};
         this.socket.onclose = function() {self.onclose();};
-        this.socket.onerror = function() {self.onerror();};    
+        this.socket.onerror = function() {self.onerror();};
     };
     
     this.onopen=function(){
@@ -137,7 +137,7 @@ var Communicator=exports.Communicator=function(game){
     };
     
     this.onmessage=function(m){ 
-        //console.log('message received '+m.data);
+       // console.log('message received '+m);
         m=json.parse(m.data);
         this.game.director.getScene().handleMessage(m.cmd, m.payload);
         
@@ -221,8 +221,8 @@ exports.Game=function(){
         this.director.replaceScene(this.level_scene);
     };
     
-    this.playLevel=function(level){
-         this.level_scene=new gamescenes.SingleplayerLevelScene(this, level.data, this.cache);
+    this.playLevel=function(level, car){
+         this.level_scene=new gamescenes.SingleplayerLevelScene(this, level.data, this.cache, car);
          this.director.replaceScene(this.level_scene);
     };
 };

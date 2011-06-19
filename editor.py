@@ -221,17 +221,21 @@ class CarPosition(Rotatable, Selectable, FollowMouse):
         if x!=None:
             if self.angle==90:
                 y+=self.size[1]
+                x+=self.size[0]
             if self.angle==180:
                 y+=self.size[1]
                 x+=self.size[0]
             if self.angle==270:
-                x+=self.size[0]
-        dc.DrawRotatedText(str(self.pos), x or self.x+5, y or self.y, self.angle)
+                y+=self.size[1]
+      #  print(self.angle)
+        dc.DrawRotatedText(str(self.pos), x or self.x+5, y or self.y, -self.angle)
         
     
     def set(self, x, y):
-        self.x=x-self.size[0]/2
-        self.y=y-self.size[1]/2
+       # self.x=x-self.size[0]/2
+        #self.y=y-self.size[1]/2
+        self.x=x
+        self.y=y
 
         app=wx.GetApp()
         for pos in app.level.car_positions:

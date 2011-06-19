@@ -4,6 +4,7 @@ var world=require('./world');
 var renderer=require('./renderer');
 var settings=require('./settings');
 var controllers=require('./controllers');
+var car_descriptions=require('./car_descriptions');
 
 var LevelScene=exports.LevelScene=function(game, level, cache){
     this.game=game;
@@ -86,6 +87,7 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
     this.last_upd_time=0;
     this.carid=null;
     this.bfs=0;//bad frames;
+    this.send_update=true; //send update to server?
     
     this.controllers[this.controllers.length]=this.controller=new controllers.MultiplayerController();
     
@@ -158,7 +160,7 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
         
         if(this.time_to_start<0)this.started=true;
         
-        var target_time=this.time+this.delta-40;
+        var target_time=this.time+this.delta-10;
         //console.log(this.time+' '+target_time);
         this.processEvents(target_time);
         
@@ -177,9 +179,10 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
 
             
             //update controllers
-            var i;
+            var i, c;
             for(i=0;i<this.controllers.length;i++){       
-               this.controllers[i].update(this.keys_down, msDuration);
+               c=this.controllers[i].update(this.keys_down, msDuration);
+               if(c)this.send_update=true;
             }     
             //update world
             this.world.update(msDuration);
@@ -194,10 +197,11 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
    
     this.sendInfo=function(){
         //if(this.upds_stacked<5){
-            
+         if(this.send_update){   
             this.game.getCommunicator().queueMessage('GAME_UPDATE', {'actions':this.controller.actions, 'eventno':this.last_known_event_no});
-            this.upds_stacked++;
-        //}
+           // console.log('sent update');
+            this.send_update=false;
+        }
     };
     
     this.processEvents=function(target_time){
@@ -205,6 +209,7 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
             var event=this.queued_events[this.last_event_no+1];
             this.world.handleEvent(event.type, event.descr);
             this.last_event_no=event.no;
+           // this.send_update=true;
             delete this.queued_events[event.no];
             
             if((!this.player_car) && this.carid){
@@ -296,17 +301,19 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
 };
 gamejs.utils.objects.extend(MultiplayerLevelScene, LevelScene);
 
-var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, cache){
+var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, cache, car){
     SingleplayerLevelScene.superConstructor.apply(this, [game, level, cache]);
+    
 
     
 
     
     //PLAYER CAR
-    this.player_car=this.world.event('create', {'type':'car', 'obj_name':'Racer', 'pars':{'position':[this.world.start_positions[1].x+1, this.world.start_positions[1].y+2],
+    var ct=car ? car : 'Racer';
+    this.player_car=this.world.event('create', {'type':'car', 'obj_name':ct, 'pars':{'position':[this.world.start_positions[1].x+1, this.world.start_positions[1].y+2],
                                                                                                'angle':this.world.start_positions[1].angle,
                                                                                                'alias':this.game.title_scene.alias.getText(),
-                                                                                               'weapon1':'Machinegun',
+                                                                                               'weapon1':car_descriptions[ct].main_weapon,
                                                                                                'weapon2':'MineLauncher'}})
 
     if(!this.test_ai) this.controllers[this.controllers.length]=new controllers.PlayerCarController(this.player_car);
@@ -314,12 +321,17 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, 
     
     if(!this.test_ai){
     //BUILD AI CARS
+     var cartypes=[];
+     for(var k in car_descriptions){
+        cartypes.push(k);
+     }
      for(i=1;i<4;i++){
         if(this.world.start_positions[i+1]){
-           var aicar=this.world.event('create', {'type':'car', 'obj_name':'Racer', 'pars':{'position':[this.world.start_positions[i+1].x+1, this.world.start_positions[i+1].y+2],
+           var ct=cartypes[Math.floor(Math.random()*(cartypes.length))];
+           var aicar=this.world.event('create', {'type':'car', 'obj_name':ct, 'pars':{'position':[this.world.start_positions[i+1].x+1, this.world.start_positions[i+1].y+2],
                                                                                                'angle':this.world.start_positions[i+1].angle,
                                                                                                'alias':'Bot '+i,
-                                                                                               'weapon1':'Machinegun',
+                                                                                               'weapon1':car_descriptions[ct].main_weapon,
                                                                                                'weapon2':'MineLauncher'}})
            
            this.controllers[this.controllers.length]=new controllers.AIController(aicar, this.world, this);
@@ -366,6 +378,11 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, 
                            'player':car.alias,
                            'kills':String(car.kills),
                            'deaths':String(car.deaths)});
+                table.sort(function(a, b){
+                   if(a.place>b.place) return 1;
+                   else if(a.place<b.place) return -1;
+                   return 0;
+                });
             }
             
             this.game.showGameOver(table);

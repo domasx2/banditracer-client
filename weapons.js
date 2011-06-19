@@ -77,10 +77,11 @@ var Projectile=exports.Projectile=function(pars){
     this.impact=function(obj, cpoint, direction){
         if(obj.type=='car' || obj.type=='prop'){
             this.car.world.event('destroy', this.id);
-            this.car.world.event('create', {'type':'animation', 'obj_name':'small_explosion', 'pars':{'position':utils.vectorToList(this.body.GetPosition())}});
+            
             if(obj.type=='car'){
                 obj.hit(this.damage, this.car);
             }
+            if(this.onimpact) this.onimpact();
         }
     };
     
@@ -140,8 +141,8 @@ var Mine=exports.Mine=function(pars){
             for(i=0;i<this.car.world.objects['car'].length; i++){
                 c=this.car.world.objects['car'][i];
                 if((c==obj) || (vectors.distance(utils.vectorToList(this.position), utils.vectorToList(c.body.GetPosition()))<=8)){
-                 
-                    c.hit(this.damage, this.car); 
+                    c.hit(this.damage, this.car);
+                    if(this.onimpact) this.onimpact();
                     
                 }
             }
@@ -160,8 +161,49 @@ var Mine=exports.Mine=function(pars){
         this.car.world.event('destroy', this.id);
     };
     
+   
+    
     return this;
 };
+
+var Missile=exports.Missile=function(pars){
+    /*
+    pars:
+    car   - car obj;
+    position - [x, y]
+    angle    - degrees
+    */
+    pars.speed=400;
+    pars.width=0.5;
+    pars.height=2.5;
+    pars.damage=25;
+    
+    this.tts=50;
+    Missile.superConstructor.apply(this, [pars]);
+    
+    this.destroy=function(){
+        this.car.world.event('destroy', this.id);
+    };
+    
+     this.onimpact=function(){
+        this.car.world.event('create', {'type':'animation', 'obj_name':'explosion', 'pars':{'position':utils.vectorToList(this.body.GetPosition())}});
+    };
+    
+    this.draw=function(renderer, msDuration){
+        renderer.drawCar('missile.png', utils.vectorToList(this.body.GetPosition()), utils.degrees(this.body.GetAngle()));
+    };
+    
+     this.update=function(msDuration){
+        this.tts-=msDuration;
+        if(this.tts<0){
+            this.car.world.event('create', {'type':'animation', 'obj_name':'smoke', 'pars':{'position':this.body.GetWorldPoint(utils.listToVector([0, 1.25]))}});
+            this.tts=50;
+        }
+    };
+    
+    return this;
+}
+gamejs.utils.objects.extend(Missile, Projectile);
 
 var Bullet=exports.Bullet=function(pars){
     /*
@@ -170,7 +212,7 @@ var Bullet=exports.Bullet=function(pars){
     position - [x, y]
     angle    - degrees
     */
-    pars.speed=400;
+    pars.speed=500;
     pars.width=0.3;
     pars.height=0.8;
     pars.damage=5;
@@ -178,10 +220,15 @@ var Bullet=exports.Bullet=function(pars){
     this.color='#FFD800';
     
     
+    this.onimpact=function(){
+        this.car.world.event('create', {'type':'animation', 'obj_name':'small_explosion', 'pars':{'position':utils.vectorToList(this.body.GetPosition())}});
+    };
+    
     this.draw=function(renderer, msDuration){
-        var pos=this.body.GetWorldPoint(new box2d.b2Vec2(0, this.height/2));
+        //var pos=this.body.GetWorldPoint(new box2d.b2Vec2(0, this.height/2));
         //console.log(pos.x+' '+pos.y);
-        renderer.drawLine(this.color, this.body.GetWorldPoint(new box2d.b2Vec2(0, -(this.height/2))), this.body.GetWorldPoint(new box2d.b2Vec2(0, this.height/2)), 2);
+      //  renderer.drawLine(this.color, this.body.GetWorldPoint(new box2d.b2Vec2(0, -(this.height/2))), this.body.GetWorldPoint(new box2d.b2Vec2(0, this.height/2)), 2);
+        renderer.drawCar('bullet.png', utils.vectorToList(this.body.GetPosition()), utils.degrees(this.body.GetAngle()));
     };
     
     this.destroy=function(){
@@ -268,8 +315,6 @@ var MineLauncher=exports.MineLauncher=function(pars){
     pars.fire_rate=500;
     this.type='minelauncher';
     
-   
-    
     MineLauncher.superConstructor.apply(this, [pars]);
 
     this.fire=function(){
@@ -286,5 +331,30 @@ var MineLauncher=exports.MineLauncher=function(pars){
     
     return this;
 };
-
 gamejs.utils.objects.extend(MineLauncher, Weapon);
+
+var MissileLauncher=exports.MissileLauncher=function(pars){
+    if(!pars)pars={'car':null};
+    pars.missile=Missile;
+    pars.ammo_capacity=14;
+    pars.fire_rate=300;
+    this.type='missilelauncher';
+    
+    MineLauncher.superConstructor.apply(this, [pars]);
+
+    this.fire=function(){
+        if(this.ammo&&this.cooldown<=0){
+            var pos =utils.vectorToList(this.car.body.GetWorldPoint(new box2d.b2Vec2(0, -(this.car.height/2+2))));
+            this.car.world.event('create', {'type':'weapon', 'obj_name':'Missile', 'pars':{'position':pos,
+                                                                                         'angle':this.car.getAngle(),
+                                                                                         'car':this.car.id}});
+
+            this.ammo--;
+            this.cooldown=this.fire_rate;
+        }
+        
+    };
+    
+    return this;
+};
+gamejs.utils.objects.extend(MissileLauncher, Weapon);

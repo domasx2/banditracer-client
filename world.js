@@ -49,6 +49,7 @@ var ContactListener=exports.ContactListener=function(world){
 var MODE_CLIENT=exports.MODE_CLIENT=1;
 var MODE_SERVER=exports.MODE_SERVER=2;
 var MODE_STANDALONE=exports.MODE_STANDALONE=3;
+var UPDATE_AS_CLIENT={'animation':true}; //update these object types even when running client mode
 
 var World=exports.World=function(width, height, width_px, height_px, ai_waypoints, checkpoints, start_positions, mode){
     this.next_object_id=1;
@@ -254,13 +255,16 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
         } 
     };
     
+    
+    
     this.update=function(msDuration){
-        if(this.mode!=MODE_CLIENT){
-            var type;
-            for(type in this.objects){
-                this.updList(msDuration, this.objects[type]);
-            }
+
+        var type;
+        for(type in this.objects){
+            if ((this.mode!=MODE_CLIENT)||(UPDATE_AS_CLIENT[type]))
+            this.updList(msDuration, this.objects[type]);
         }
+        
         this.destroyQueued();
     };
     

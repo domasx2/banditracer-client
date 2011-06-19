@@ -2,6 +2,7 @@ var gamejs = require('gamejs');
 var ui=require('./ui');
 var utils=require('./utils');
 var levels=require('./levels');
+var car_descriptions=require('./car_descriptions');
 
 var LobbyScene=exports.LobbyScene=function(game, cache, lobby_id){
     LobbyScene.superConstructor.apply(this, [game, cache]);
@@ -26,6 +27,10 @@ var LobbyScene=exports.LobbyScene=function(game, cache, lobby_id){
     
     this.start=function(){
         this.game.getCommunicator().queueMessage('START_GAME');
+    };
+    
+    this.selectCar=function(){
+          this.game.getCommunicator().queueMessage('SELECT_CAR', {'car':this.car_selector.selected});
     };
     
     this.handleMessage=function(cmd, payload){
@@ -80,7 +85,20 @@ var LobbyScene=exports.LobbyScene=function(game, cache, lobby_id){
                                 'position':[220, 400],
                                 'text':'Start game',
                                 'enabled':false,
-                                'onclick':this.start})
+                                'onclick':this.start});
+
+    new ui.Label({'scene':this,
+                 'position':[590, 30],
+                 'text':'Select a car'});
+    
+    this.car_selector=new ui.CarSelector({'scene':this,
+                                    'position':[590, 70],
+                                    'onselect':this.selectCar,
+                                    'scope':this});
+    
+    this.car_selector.select(null, 'Racer');
+    
+    
     
     this.trackdisplay=new ui.TrackInfoDisplay({'scene':this,
                                                'position':[340, 70]});
@@ -310,6 +328,10 @@ var TitleScene=exports.TitleScene=function(game, cache){
                  'position':[10, 10],
                  'scene':this});
     
+    new ui.Image({'filename':'controls.png',
+                 'position':[300, 300],
+                 'scene':this});
+    
     new ui.Image({'filename':'guncar.png',
                  'position':[280, 130],
                  'scene':this});
@@ -355,14 +377,19 @@ var TitleScene=exports.TitleScene=function(game, cache){
 
 gamejs.utils.objects.extend(TitleScene, ui.UIScene);
 
+
+
 var PlayAgainstBotsScene=exports.PlayAgainstBotsScene=function(game, cache){
     PlayAgainstBotsScene.superConstructor.apply(this, [game, cache]);
     
     this.play=function(){
         if(!this.selector.selected){
             this.alert('You must select a track first!');
+        }
+        else if(!this.car_selector.selected){
+            this.alert('You must select a car first!');
         }else{
-            this.game.playLevel(levels.levels[this.selector.selected]);
+            this.game.playLevel(levels.levels[this.selector.selected], this.car_selector.selected);
         }
     };
     
@@ -383,6 +410,16 @@ var PlayAgainstBotsScene=exports.PlayAgainstBotsScene=function(game, cache){
     
     this.selector=new ui.LevelSelector({'scene':this,
                          'position':[10, 90]});
+    
+
+    
+    new ui.Label({'scene':this,
+                 'position':[430, 90],
+                 'text':'Select a car'});
+    
+    this.car_selector=new ui.CarSelector({'scene':this,
+                                    'position':[430, 130]});
+    
     
     return this;
     
