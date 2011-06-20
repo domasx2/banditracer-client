@@ -5,15 +5,28 @@ exports.alert_box_border='black';
 exports.alert_box_background='#FFE566';
 
 //fonts name:[css description, color]
+/*
 exports.fonts={'hud':['30px "Showcard Gothic"', 'red'],         //in game hud
                'header':['40px Aharoni', '#351A15'],            //ui scene headers
                'default':['20px Aharoni', '#351A15'],           //labels, default if not specified
                'small_header':['bold 16px Arial', 'black'],     //table headers
                'small':['bold 14px Arial', 'black'],             //table cells
                'alias':['bold 14px Arial', '#4CFF00'],  //ingame multiplayer player alias
-               'button':['20px Aharoni', '#351A15']
+               'button':['20px Aharoni', '#351A15'],
+               'loading':['40px Stencil', '#351A15']
                }; 
-               
+*/
+
+exports.fonts={'hud':['30px Stencil', 'red'],         //in game hud
+               'header':['40px Stencil', '#351A15'],            //ui scene headers
+               'default':['20px Stencil', '#351A15'],           //labels, default if not specified
+               'small_header':['bold 16px Arial', 'black'],     //table headers
+               'small':['bold 14px Arial', 'black'],             //table cells
+               'alias':['bold 14px Arial', '#4CFF00'],  //ingame multiplayer player alias
+               'button':['20px Aharoni', '#351A15'],
+               'loading':['40px Stencil', '#351A15'],
+               'textbox':['20px Arial', '#351A15']
+               }; 
 
 //ui button
 exports.button={'border':'#282828',              //button border
@@ -26,7 +39,7 @@ exports.button={'border':'#282828',              //button border
 exports.label={'font':'default'}; 
 
 //textbox
-exports.textbox={'font':'default',
+exports.textbox={'font':'textbox',
                  'border':'#282828',
                  'background':'#FFEFAA'};
                 

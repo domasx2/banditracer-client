@@ -120,7 +120,7 @@ var Communicator=exports.Communicator=function(game){
     };
     
     this.connect=function(){
-       console.log('connecting');
+      // console.log('connecting');
         this.socket = new WebSocket(settings.get('SERVER'));
         this.status='connecting';
         var self=this;
@@ -132,7 +132,7 @@ var Communicator=exports.Communicator=function(game){
     
     this.onopen=function(){
         this.status='open';
-        console.log('socket open!');
+        //console.log('socket open!');
         this.send();
     };
     
