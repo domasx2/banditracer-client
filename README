@@ -10,7 +10,9 @@ Deploy client
 
 To improve the loading behaviour, pack all Js files into one and only load that one. see gamejs/docs/deployment for more info.
 
+    gamejs/wrap-directory.sh ../banditracer-client/javascript/
 
+.. than fix banitracer's index.html to use the single, big file.
 
 Server
 ========
