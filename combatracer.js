@@ -163,7 +163,6 @@ var Communicator=exports.Communicator=function(game){
 };
 
 exports.Game=function(){
-    settings.init();
     this.director=null;
     this.cache=new renderer.ImageCache();
     this.socket=null;

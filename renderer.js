@@ -415,25 +415,26 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
                 this.drawText('BFS: ' +bfs, 'hud', [10, 140]);
             }
         }
-        
-        if(time_to_start){
-            if(time_to_start>3000){
-                this.drawText('WAITING FOR OTHER PLAYERS', 'hud', [size[0]/2-150, size[1]/2], 0.75);
-            }
-            else if(time_to_start>2000){
-              this.drawText('GET READY 3...', 'hud', [size[0]/2-150, size[1]/2], 0.75);
-            }else if(time_to_start>1000){
-              this.drawText('GET READY 2...', 'hud', [size[0]/2-150, size[1]/2], 0.75);
-            }else if(time_to_start>0){
-              this.drawText('GET READY 1...', 'hud', [size[0]/2-150, size[1]/2], 0.75);
-            }else if(time_to_start> -1000){
-              this.drawText('GO!!!', 'hud', [size[0]/2-150, size[1]/2], 0.75);
-            }
-        }
-        
         if(paused){
-            this.renderer.drawText('PAUSED', 'hud', [size[0]/2-150, size[1]/2], 0.75);
+            this.drawText('PAUSED', 'hud', [size[0]/2-100, size[1]/2], 0.75);
+        }else{
+            if(time_to_start){
+                if(time_to_start>3000){
+                    this.drawText('WAITING FOR OTHERS', 'hud', [size[0]/2-150, size[1]/2]);
+                }
+                else if(time_to_start>2000){
+                  this.drawText('GET READY 3...', 'hud', [size[0]/2-150, size[1]/2], 0.75);
+                }else if(time_to_start>1000){
+                  this.drawText('GET READY 2...', 'hud', [size[0]/2-150, size[1]/2], 0.75);
+                }else if(time_to_start>0){
+                  this.drawText('GET READY 1...', 'hud', [size[0]/2-150, size[1]/2], 0.75);
+                }else if(time_to_start> -1000){
+                  this.drawText('GO!!!', 'hud', [size[0]/2-150, size[1]/2], 0.75);
+                }
+            }
         }
+        
+        
     };
     
     

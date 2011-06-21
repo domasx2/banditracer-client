@@ -273,7 +273,7 @@ var Car = exports.Car = function(pars){
             if(!(c===this)){
                 if(this.lap>c.lap){
                     pos--;
-                }else if(this.lap==c.lap && this.next_checkpoint_no>c.next_checkpoint_no){
+                }else if(this.lap==c.lap && ((this.next_checkpoint_no>c.next_checkpoint_no) || (this.next_checkpoint_no==1 && c.next_checkpoint_no!=1))){
                     pos--;
                 }else if((this.lap==c.lap)&&
                          (this.next_checkpoint_no==c.next_checkpoint_no) &&
