@@ -130,14 +130,12 @@ var Rect = exports.Rect = function() {
 
    /**
     * Left, X coordinate
-    * @name Rect.prototype.left
     * @type Number
     */
    this.left = args.left;
 
    /**
     * Top, Y coordinate
-    * @name Rect.prototype.top
     * @type Number
     */
    this.top = args.top;
@@ -160,6 +158,7 @@ var Rect = exports.Rect = function() {
 objects.accessors(Rect.prototype, {
    /**
     * Bottom, Y coordinate
+    * @name Rect.prototype.bottom
     * @type Number
     */
    'bottom': {
@@ -173,6 +172,7 @@ objects.accessors(Rect.prototype, {
    },
    /**
     * Right, X coordinate
+    * @name Rect.prototype.right
     * @type Number
     */
    'right': {
@@ -185,6 +185,7 @@ objects.accessors(Rect.prototype, {
    },
    /**
     * Center Position. You can assign a rectangle form.
+    * @name Rect.prototype.center
     * @type Array
     */
    'center': {
@@ -593,6 +594,7 @@ exports.pathfinding = {
 // preloading stuff
 var gamejs = exports;
 var RESOURCES = {};
+var PROGRESS_FN = null;
 
 /**
  * ReadyFn is called once all modules and assets are loaded.
@@ -634,14 +636,15 @@ exports.ready = function(readyFn) {
       readyFn();
    }
 
-   function getLoadProgress() {
+   PROGRESS_FN = function() {
       if (getImageProgress) {
          return (0.5 * getImageProgress()) + (0.5 * getMixerProgress());
       }
       return 0.1;
    };
 
-   return getLoadProgress;
+   // NOTE undocumented behaviour: return progess fn
+   return PROGRESS_FN;
 };
 
 function resourceBaseHref() {
@@ -659,6 +662,33 @@ var preload = exports.preload = function(resources) {
       // normalize slashses
       RESOURCES[res] = (resourceBaseHref() + '/' + res).replace(/\/+/g, '/');
    }, this);
+   return;
+};
+
+var PRELOAD_DRAW_FN = null;
+/**
+ * experimental
+ * calls the passed `drawFn` argument @ 30 fps with two argument:
+ *
+ *     drawFn(display, progress float 0 to 1);
+ *
+ * @ignore
+ */
+exports.setPreloadDraw = function(drawFn) {
+   PRELOAD_DRAW_FN = drawFn;
+   if (!PRELOAD_DRAW_FN) return;
+
+   var display = gamejs.display.getSurface();
+   function drawWrapperFn() {
+      var progress = PROGRESS_FN && PROGRESS_FN() || 0;
+      drawFn(display, progress);
+      console.log(progress);
+      if (progress >= 1) {
+         gamejs.time.deleteCallback(drawWrapperFn, 30);
+      }
+      return;
+   }
+   gamejs.time.fpsCallback(drawWrapperFn, this, 30);
    return;
 };
 

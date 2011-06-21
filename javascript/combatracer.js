@@ -36,9 +36,10 @@ exports.getPreloadList=function(){
     return retv;
 };
 
-var Director=exports.Director= function Director () {
+var Director=exports.Director= function Director (display) {
    var onAir = false;
    var activeScene = null;
+   this.display=display;
    
    function tick(msDuration){
         tick_logic(msDuration);
@@ -61,6 +62,7 @@ var Director=exports.Director= function Director () {
    }
    
    function tick_render(msDuration){
+        //console.log(display);
         if(activeScene.draw) activeScene.draw(display, msDuration);
    }
 
@@ -80,7 +82,6 @@ var Director=exports.Director= function Director () {
    this.getScene = function() {
       return activeScene;
    };
-   var display = gamejs.display.setMode([settings.get('SCREEN_WIDTH'), settings.get('SCREEN_HEIGHT')]);
    //gamejs.time.fpsCallback(tick_logic, this, logic_fps);
    gamejs.time.fpsCallback(tick, this, settings.get('RENDER_FPS'));
    return this;
@@ -120,7 +121,7 @@ var Communicator=exports.Communicator=function(game){
     };
     
     this.connect=function(){
-       console.log('connecting');
+      // console.log('connecting');
         this.socket = new WebSocket(settings.get('SERVER'));
         this.status='connecting';
         var self=this;
@@ -132,7 +133,7 @@ var Communicator=exports.Communicator=function(game){
     
     this.onopen=function(){
         this.status='open';
-        console.log('socket open!');
+        //console.log('socket open!');
         this.send();
     };
     
@@ -177,14 +178,14 @@ exports.Game=function(){
          return this.communicator;
     };
     
-    this.start=function(){
-       this.director=new Director();
+    this.start=function(display){
+       this.director=new Director(display);
        
       // this.playLevel(levels.levels['level1']);
        //this.director.start(this.level_scene);
        
        this.title_scene=new uiscenes.TitleScene(this, this.cache);
-       this.director.start(this.title_scene);
+       this.director.start(this.title_scene, this.display);
     
     };
     

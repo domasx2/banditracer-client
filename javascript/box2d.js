@@ -17,6 +17,11 @@
 *
 * Ported to to javascript by Jonas Wagner, 2010
 *
+*
+* ALTERED by Domas Lapinskas on 2011.
+* changes: globals are added to exports variable so this can be used as a common.js module,
+*          a bug with an attempt to instantiate an array of negative size fixed. 
+*
 */
 var a;function extend(b,c){for(var d in c)b[d]=c[d]};var b2Settings=function(){this.__varz();this.__constructor.apply(this,arguments)};b2Settings.prototype.__constructor=function(){};b2Settings.prototype.__varz=function(){};b2Settings.USHRT_MAX=65535;b2Settings.b2_pi=Math.PI;b2Settings.b2_maxManifoldPoints=2;b2Settings.b2_maxPolygonVertices=8;b2Settings.b2_maxProxies=512;b2Settings.b2_maxPairs=8*b2Settings.b2_maxProxies;b2Settings.b2_linearSlop=0.005;b2Settings.b2_angularSlop=2/180*b2Settings.b2_pi;b2Settings.b2_toiSlop=8*b2Settings.b2_linearSlop;
 b2Settings.b2_maxTOIContactsPerIsland=32;b2Settings.b2_velocityThreshold=1;b2Settings.b2_maxLinearCorrection=0.2;b2Settings.b2_maxAngularCorrection=8/180*b2Settings.b2_pi;b2Settings.b2_maxLinearVelocity=200;b2Settings.b2_maxLinearVelocitySquared=b2Settings.b2_maxLinearVelocity*b2Settings.b2_maxLinearVelocity;b2Settings.b2_maxAngularVelocity=250;b2Settings.b2_maxAngularVelocitySquared=b2Settings.b2_maxAngularVelocity*b2Settings.b2_maxAngularVelocity;b2Settings.b2_contactBaumgarte=0.2;

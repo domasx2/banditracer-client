@@ -1,3 +1,21 @@
+Quick start
+============
 
- * Create `javascript/settings.js`, use `javascript/settings-example.js' as template.
- * start server..
+ * create `javascript/settings.js`, use `javascript/settings-example.js' as template.
+ * open `index.html` with firefox/safari
+     (serve over http:// to enable all browsers)
+
+Server
+========
+
+Recommended directory layout for checking out both banditracer and the gamejs
+repo:
+
+    ~/br/
+    ~/br/banditracer-client/
+    ~/br/banditracer-server/
+    ~/br/gamejs/
+
+For the server, you need http://RingoJs.org
+
+ringo ~/br/banditracer-server/ringomain.js
