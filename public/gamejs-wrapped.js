@@ -594,7 +594,6 @@ exports.pathfinding = {
 // preloading stuff
 var gamejs = exports;
 var RESOURCES = {};
-var PROGRESS_FN = null;
 
 /**
  * ReadyFn is called once all modules and assets are loaded.
@@ -636,15 +635,14 @@ exports.ready = function(readyFn) {
       readyFn();
    }
 
-   PROGRESS_FN = function() {
+   function getLoadProgress() {
       if (getImageProgress) {
          return (0.5 * getImageProgress()) + (0.5 * getMixerProgress());
       }
       return 0.1;
    };
 
-   // NOTE undocumented behaviour: return progess fn
-   return PROGRESS_FN;
+   return getLoadProgress;
 };
 
 function resourceBaseHref() {
@@ -662,33 +660,6 @@ var preload = exports.preload = function(resources) {
       // normalize slashses
       RESOURCES[res] = (resourceBaseHref() + '/' + res).replace(/\/+/g, '/');
    }, this);
-   return;
-};
-
-var PRELOAD_DRAW_FN = null;
-/**
- * experimental
- * calls the passed `drawFn` argument @ 30 fps with two argument:
- *
- *     drawFn(display, progress float 0 to 1);
- *
- * @ignore
- */
-exports.setPreloadDraw = function(drawFn) {
-   PRELOAD_DRAW_FN = drawFn;
-   if (!PRELOAD_DRAW_FN) return;
-
-   var display = gamejs.display.getSurface();
-   function drawWrapperFn() {
-      var progress = PROGRESS_FN && PROGRESS_FN() || 0;
-      drawFn(display, progress);
-      console.log(progress);
-      if (progress >= 1) {
-         gamejs.time.deleteCallback(drawWrapperFn, 30);
-      }
-      return;
-   }
-   gamejs.time.fpsCallback(drawWrapperFn, this, 30);
    return;
 };
 

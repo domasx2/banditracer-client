@@ -5,6 +5,13 @@ Quick start
  * open `index.html` with firefox/safari
      (serve over http:// to enable all browsers)
 
+Deploy client
+==============
+
+To improve the loading behaviour, pack all Js files into one and only load that one. see gamejs/docs/deployment for more info.
+
+
+
 Server
 ========
 
