@@ -14,7 +14,6 @@ var loading_img=font.render('Loading...', skin.fonts.loading[1]);
 var loading_img_size=loading_img.getSize();
 
 function loadTick(){
-   console.log('tick');
    var display_size=display.getSize()
    gamejs.draw.rect(display, skin.ui_background, new gamejs.Rect([0, 0], display_size));
    var loading_pt=[display_size[0]/2-loading_img_size[0]/2, display_size[1]/2-loading_img_size[1]/2-100];
@@ -30,10 +29,10 @@ function loadTick(){
 
 
 display=gamejs.display.setMode([settings.get('SCREEN_WIDTH'), settings.get('SCREEN_HEIGHT')]);
-gamejs.time.fpsCallback(loadTick, this, 30);
+gamejs.time.fpsCallback(loadTick, this, 50);
 gamejs.preload(combatracer.getPreloadList());
 progfn=gamejs.ready(function(){
    var game=new combatracer.Game();
-   gamejs.time.deleteCallback(loadTick, 30);
+   gamejs.time.deleteCallback(loadTick, 50);
    game.start(display);
 });

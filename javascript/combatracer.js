@@ -104,14 +104,13 @@ var Communicator=exports.Communicator=function(game){
     };
 
     this.send=function(){
-        gamejs.log('trying send');
         if(this.status=='open'){
             for(var i=0;i<this.messages.length;i++){
                 var msg={'cmd':this.messages[i][0],
                          'uid':this.game.player.uid,
                          'payload':this.messages[i][1]};
                 msg=JSON.stringify(msg);
-                gamejs.log('sending ', msg);
+                //gamejs.log('sending ', msg);
                 this.socket.send(msg);
               //  console.log('sent '+msg);
             }
