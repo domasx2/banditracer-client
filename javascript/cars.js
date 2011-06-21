@@ -1,7 +1,7 @@
 var gamejs = require('gamejs');
 var box2d = require('./box2d');
 var utils = require('./utils');
-var vectors = gamejs.utils.vectors;
+var vectors = require('gamejs/utils/vectors');
 var animation=require('./animation');
 
 var STEER_NONE=exports.STEER_NONE=0;
@@ -35,7 +35,7 @@ var Wheel = exports.Wheel = function(car, x, y, width, length, world, revolving,
     this.respawn_angle=0;
     this.powered=powered;
     this.filename=filename;
-    
+
     var def=new box2d.b2BodyDef();
     def.position=this.car.body.GetWorldPoint(utils.listToVector(this.position));
 
@@ -64,44 +64,44 @@ var Wheel = exports.Wheel = function(car, x, y, width, length, world, revolving,
         jointdef.lowerTranslation=jointdef.upperTranslation=0;
     }
     this.joint=this.world.b2world.CreateJoint(jointdef);
-    
+
     this.getLocalPosition=function(){
         return this.position;
     };
-    
+
     this.resetAngle=function(){
         this.body.SetXForm(this.body.GetPosition(), this.car.body.GetAngle());
     };
-    
+
     this.setAngle=function(angle){
         this.body.SetXForm(this.body.GetPosition(), this.car.body.GetAngle()+utils.radians(angle));
     };
-    
+
     this.getWorldPosition=function(){
         return this.car.body.GetWorldPoint(utils.listToVector(this.position));
     };
-    
+
     this.draw=function(renderer){
        renderer.drawCar(this.filename, this.car.body.GetWorldPoint(new box2d.b2Vec2(this.x, this.y)), utils.degrees(this.body.GetAngle()));
     };
-    
+
     this.getLocalVelocity=function(){
         return this.car.body.GetLocalVector(this.car.body.GetLinearVelocityFromLocalPoint(utils.listToVector(this.position)));
     };
-    
+
     this.getDirectionVector=function(){
-        return utils.rotateVector( (this.getLocalVelocity().y>0) ? [0, 1]:[0, -1] , utils.degrees(this.body.GetAngle())) ;     
+        return utils.rotateVector( (this.getLocalVelocity().y>0) ? [0, 1]:[0, -1] , utils.degrees(this.body.GetAngle())) ;
     };
-    
+
     this.getFrictionVector=function(){
         var want_vect=utils.rotateVector( (this.getLocalVelocity().y>0) ? [0, 1]:[0, -1] , utils.degrees(this.body.GetAngle()));
         return vectors.unit(vectors.substract(want_vect, velocity));
     };
-    
+
     this.getSidewaysVector=function(){
         return utils.vectorToList(this.body.GetWorldVector(utils.listToVector([-1, 0])));
     };
-    
+
     this.getKillVelocityVector=function(){
         var velocity=this.body.GetLinearVelocity();
         var sideways_axis=this.getDirectionVector();
@@ -109,7 +109,7 @@ var Wheel = exports.Wheel = function(car, x, y, width, length, world, revolving,
 
         return [sideways_axis[0]*dotprod, sideways_axis[1]*dotprod];
     };
-    
+
     this.killSidewaysVelocity=function(){
 
         var kv=this.getKillVelocityVector();
@@ -117,34 +117,34 @@ var Wheel = exports.Wheel = function(car, x, y, width, length, world, revolving,
         this.body.SetLinearVelocity(utils.listToVector(kv));
 
     };
-    
+
     this.die=function(){
         this.alive=false;
         this.body.SetLinearVelocity(new box2d.b2Vec2(0, 0));
         this.body.PutToSleep();
     };
-    
+
     this.respawn=function(){
         this.alive=true;
         this.body.WakeUp();
     };
-    
+
     this.teleport=function(position){
         //angle radians
         this.body.SetXForm(utils.listToVector(position),  this.body.GetAngle());
     };
-    
+
     return this;
 }
 
 var Car = exports.Car = function(pars){
     /*
     pars is object with keys:
-    
+
     width             - width in meters
     height            - height in meters
     filename          - sprite file name
-    world             - world object 
+    world             - world object
     position          -[x, y]  position in world
     angle             -start angle in degrees
     power             -engine power in newtons
@@ -155,7 +155,7 @@ var Car = exports.Car = function(pars){
     weapon2           -second weapon
     health            -max health
     alias             -player alias
-     
+
     */
     this.angle= pars.angle ? pars.angle: 0;
     this.world=pars.world;
@@ -164,8 +164,8 @@ var Car = exports.Car = function(pars){
     this.height = pars.height;
     this.filename=pars.filename;
     this.alias=pars.alias ? pars.alias : '';
-    
-    
+
+
     //STATE
     this.max_health=pars.health;
     //this.health=pars.health;
@@ -181,30 +181,30 @@ var Car = exports.Car = function(pars){
     this.kills=0;
     this.deaths=0;
     this.hits=[];
-    
+
     //WEAPONS
     this.weapon1=pars.weapon1;
     this.weapon2=pars.weapon2;
     if(this.weapon1)this.weapon1.car=this;
     if(this.weapon2)this.weapon2.car=this;
-    
+
     //ACTIONS
     this.fire_weapon1=false;
     this.fire_weapon2=false;
     this.accelerate=ACC_NONE;
     this.steer=STEER_NONE;
-    
+
     //PHYSICAL
     this.max_steer_angle=pars.max_steer_angle;
     this.power=pars.power;
     this.max_speed=pars.max_speed;
     this.mod_speed=0;
     this.local_engine_pos=[0, -(pars.height/2)];
-    
+
     //ANIM
     this.smoke_cd=0;
-    
-    
+
+
     var def=new box2d.b2BodyDef();
     def.position=utils.listToVector(this.position);
     def.angle=utils.radians(this.angle)+0.01;
@@ -235,17 +235,17 @@ var Car = exports.Car = function(pars){
         wheeldef=pars.wheels[i];
         this.wheels[this.wheels.length]=new Wheel(this, wheeldef.x, wheeldef.y, wheeldef.width, wheeldef.length, this.world, wheeldef.revolving, wheeldef.powered, wheeldef.filename);
     }
-    
-    
 
-    
-    
-    
+
+
+
+
+
     this.crossFinishLine=function(){
         if(this.weapon1)this.weapon1.reload();
         if(this.weapon2)this.weapon2.reload();
     }
-    
+
     this.updateCheckpoint=function(){
           var cp=this.world.checkpoints[this.next_checkpoint_no];
           var pos=this.body.GetPosition();
@@ -254,17 +254,17 @@ var Car = exports.Car = function(pars){
                  this.lap++;
                  this.crossFinishLine();
               }
-            
+
               if(this.next_checkpoint_no==this.world.max_checkpoint){
                  this.next_checkpoint_no=1;
               }
               else{
                  this.next_checkpoint_no++;
               }
-              
+
           }
     };
-    
+
     this.getRacePosition=function(){
         var pos=this.world.objects['car'].length;
         var i, c;
@@ -279,13 +279,13 @@ var Car = exports.Car = function(pars){
                          (this.next_checkpoint_no==c.next_checkpoint_no) &&
                          (vectors.distance(utils.vectorToList(this.alive ? this.body.GetPosition() : this.respawn_location), this.world.checkpoints[this.next_checkpoint_no].center) <
                           vectors.distance(utils.vectorToList(c.alive ? c.body.GetPosition() : c.respawn_location), this.world.checkpoints[c.next_checkpoint_no].center)) ){
-                    pos--;   
+                    pos--;
                 }
             }
         }
         return pos;
     };
-    
+
     this.getPoweredWheels=function(){
         var retv=[];
         for(var i=0;i<this.wheels.length;i++){
@@ -295,7 +295,7 @@ var Car = exports.Car = function(pars){
         }
         return retv;
     };
-    
+
     this.getRevolvingWheels=function(){
         var retv=[];
         for(var i=0;i<this.wheels.length;i++){
@@ -303,23 +303,23 @@ var Car = exports.Car = function(pars){
                 retv[retv.length]=this.wheels[i];
             }
         }
-        return retv; 
+        return retv;
     };
-    
+
     this.getDirectionVector=function(){
         return utils.rotateVector([0, -1], utils.degrees(this.front_left_wheel.body.GetAngle()));
     };
-    
+
     this.getBackwardDirectionVector=function(){
-        return utils.rotateVector([0, 1], utils.degrees(this.back_left_wheel.body.GetAngle()));  
+        return utils.rotateVector([0, 1], utils.degrees(this.back_left_wheel.body.GetAngle()));
     };
-    
-    
-    
+
+
+
     this.getWheels=function(){
         return this.wheels;
     };
-    
+
     this.getState=function(){
         var state={'p':utils.vectorToList(this.body.GetPosition()),
                    'a':utils.degrees(this.body.GetAngle()),
@@ -341,9 +341,9 @@ var Car = exports.Car = function(pars){
         if(!this.alive){
             state.rl=this.respawn_location;
         }
-        return state;   
+        return state;
     };
-    
+
     this.interpolate=function(state1, state2, q){
         var w=[];
         for(var i=0;i<state1.w.length;i++){
@@ -357,7 +357,7 @@ var Car = exports.Car = function(pars){
         }
         return state;
     };
-    
+
     this.setState=function(state){
         this.health=state.h;
         this.alive=state.al;
@@ -376,26 +376,26 @@ var Car = exports.Car = function(pars){
         if(state.rl)this.respawn_location=state.rl;
         if(this.weapon1 && state.w1) this.weapon1.setState(state.w1);
         if(this.weapon2 && state.w2) this.weapon2.setState(state.w2);
-        
+
     };
-    
+
     this.getSpeedKMH=function(){
         var velocity=this.body.GetLinearVelocity();
         var len=utils.vectorLength(velocity);
         return (len/1000)*3600;
     };
-    
 
-    
+
+
     this.getAngle=function(){
-        return utils.degrees(this.body.GetAngle());  
+        return utils.degrees(this.body.GetAngle());
     };
-    
+
     this.getSpeed=function(){
         var speed_ms=this.body.GetLinearVelocity().Length();
         return (speed_ms/1000.0)*3600.0;
     };
-    
+
     this.setSpeed=function(speed){
         var velocity=this.body.GetLinearVelocity();
 
@@ -408,7 +408,7 @@ var Car = exports.Car = function(pars){
 
     };
 
-    
+
     this.draw=function(renderer){
         if(this.alive&&this.active){
             var wheels=this.getWheels();
@@ -418,15 +418,15 @@ var Car = exports.Car = function(pars){
             }
             var bp=this.body.GetPosition()
             renderer.drawCar(this.filename, bp, this.getAngle());
-            
+
             //only draw alias on multiplayer games
             if(this.alias && (this.world.mode==1)){
                 renderer.drawText(this.alias, 'alias', renderer.getScreenPoint([bp.x-this.width, bp.y-this.height]));
             }
         }
-        
+
     };
-    
+
     this.teleport=function(position, angle){
         angle=angle ? utils.radians(angle) : this.body.GetAngle();
         this.body.SetXForm(utils.listToVector(position), angle);
@@ -435,10 +435,10 @@ var Car = exports.Car = function(pars){
             wheel=this.wheels[i];
             wheel.teleport(this.body.GetWorldPoint(utils.listToVector(wheel.position)));
         }
-        
-        
+
+
     };
-    
+
     this.die=function(){
         this.alive=false;
         this.deaths+=1;
@@ -447,39 +447,39 @@ var Car = exports.Car = function(pars){
         this.world.event('create', {'type':'animation', 'obj_name':'explosion', 'pars':{'position':utils.vectorToList(this.body.GetPosition())}});
         this.respawn_angle=utils.degrees(this.body.GetAngle());
         this.teleport([0, 0]);
-        
+
         this.body.SetLinearVelocity(new box2d.b2Vec2(0, 0));
         this.body.PutToSleep();
-        
+
         var wheels=this.getWheels();
         for(var i=0;i<wheels.length;i++){
             wheels[i].die();
         }
     };
-    
+
     this.respawn=function(){
         this.alive=true;
-        
-        
+
+
         var wheels=this.getWheels();
         for(var i=0;i<wheels.length;i++){
             wheels[i].respawn();
-        }  
+        }
         this.teleport(this.respawn_location, this.respawn_angle);
         this.body.WakeUp();
         this.health=this.max_health;
-       
+
     };
-    
+
     this.kill=function(car){
         this.kills+=1;
     };
-    
+
     this.hit=function(damage, owner){
       // owner - car that hit this car
         this.hits[this.hits.length]=[damage, owner];
     };
-    
+
     this.processHits=function(){
         var i;
         for(i=0;i<this.hits.length;i++){
@@ -492,7 +492,7 @@ var Car = exports.Car = function(pars){
         };
         this.hits=[];
     };
-    
+
     this.update=function(msDuration){
         if(this.active){
             if(this.alive){
@@ -507,11 +507,11 @@ var Car = exports.Car = function(pars){
             }
         }
     };
-    
+
     this.updateAlive=function(msDuration){
-        
+
         this.updateCheckpoint();
-        
+
         var steer=this.steer;
         var acceleration=this.accelerate;
 
@@ -523,43 +523,43 @@ var Car = exports.Car = function(pars){
         if(acceleration==ACC_ACCELERATE) base_vect=[0, -1];
         else if(acceleration==ACC_BRAKE) base_vect=[0, 0.8];
         else base_vect=[0, 0];
-        
+
         var vect_x=base_vect[0];
         var vect_y=base_vect[1];
-        
+
         //for now, traction does not slip
         this.has_traction=true;
         var wheels=this.getWheels();
         var i, wheel;
-        
-            
+
+
         for(i=0;i<wheels.length;i++){
             wheels[i].killSidewaysVelocity();
         }
-      
-        
+
+
         //apply engine force to front wheels
         var fvect=[this.power*vect_x, this.power*vect_y];
-        
- 
+
+
         wheels=this.getPoweredWheels();
         for(i=0;i<wheels.length;i++){
            var position=wheels[i].body.GetWorldCenter();
            wheels[i].body.ApplyForce(wheels[i].body.GetWorldVector(utils.listToVector(fvect)), position );
         }
-        
+
 
         //set steer
         var wheel_angle=this.max_steer_angle;
         var kmh=this.getSpeedKMH();
         if(kmh<100){
-            wheel_angle=wheel_angle+ (40-wheel_angle)*(1-kmh/100);        
+            wheel_angle=wheel_angle+ (40-wheel_angle)*(1-kmh/100);
         }
-        
+
         if(steer==STEER_LEFT) wheel_angle= -1*wheel_angle;
         else if (steer==STEER_RIGHT) {}
         else wheel_angle=0;
-        
+
         var wheels=this.getRevolvingWheels();
         for(i=0;i<wheels.length;i++){
             wheel=wheels[i];
@@ -569,33 +569,33 @@ var Car = exports.Car = function(pars){
                 wheel.resetAngle();
             }
         }
-        
-        
-        
+
+
+
         var local_velocity=this.body.GetLocalVector(this.body.GetLinearVelocity());
         //max speed is half when going backwards
         var max_speed=(local_velocity.y>0 ? 0.5*this.max_speed : this.max_speed)+this.mod_speed;
-       
+
         //limit to max speed
         if(this.getSpeed()>max_speed){
                this.setSpeed(max_speed);
         }
         //if going very slow, stop - to prevend sliding
-       
+
         else if( (this.getSpeed()<4) &&(acceleration==ACC_NONE)){
             this.setSpeed(0);
         }
-        
+
         if(this.weapon1){
             this.weapon1.update(msDuration);
             if(this.fire_weapon1)this.weapon1.fire();
         }
-        
+
         if(this.weapon2){
             this.weapon2.update(msDuration);
             if(this.fire_weapon2)this.weapon2.fire();
         }
-        
+
         //spawn smoke if health <40
         if(this.health<=40){
             if(this.smoke_cd<=0){
@@ -609,6 +609,6 @@ var Car = exports.Car = function(pars){
         }else this.smoke_cd=0;
 
     };
-    
+
     return this;
 };

@@ -8,7 +8,7 @@ step is angles to rotate by
 
 var gamejs=require('gamejs');
 var settings=require('./settings');
-var vectors = gamejs.utils.vectors;
+var vectors = require('gamejs/utils/vectors');
 
 
 exports.renderBackgroundFromTiles=function(width, height, tiles, cache){
@@ -24,8 +24,8 @@ exports.renderBackgroundFromTiles=function(width, height, tiles, cache){
                     background.blit(img, [x*tile_scale, y*tile_scale]);
                 }
             }
-    } 
-    return background;  
+    }
+    return background;
 };
 
 exports.interpolatePoints=function(pt1, pt2, q){
@@ -108,13 +108,13 @@ var normaliseVector=exports.normaliseVector=function(vect){
 exports.angleBetweenVectors=function(vect1, vect2){
     vect1=vectors.unit(vectorToList(vect1));
     vect2=vectors.unit(vectorToList(vect2));
-    
+
     var len1=vectorLength(vect1);
     var len2=vectorLength(vect2);
     if(len1&&len2){
         var cosan=(vect1[0]*vect2[0]+vect1[1]*vect2[1])/(len1*len2);
     }else return 0;
-    
+
     try{
         return degrees(Math.acos(cosan));
     }catch(e){
