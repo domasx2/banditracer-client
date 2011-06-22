@@ -1159,7 +1159,7 @@ class EditorApp(wx.App):
                                   'pt1':p.pt1,
                                   'pt2':p.pt2} for p in self.level.checkpoints]}
             retv['dict']=dict
-            out='exports.data=%s;\n' % simplejson.dumps(retv)
+            out='exports.data=%s;\n' % simplejson.dumps(retv, sort_keys=True, indent=4 * ' ')
             f=open(path, 'w')
             f.write(out);
             f.close()
