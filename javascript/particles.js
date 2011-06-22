@@ -18,15 +18,15 @@ var Particle=exports.Particle=function(world, color, life, position,direction, s
     def.angle=0;
     def.linearDamping=0;
     def.angularDamping=0;
-    
+
     this.body=this.world.CreateBody(def);
-    
+
     var shapedef=new box2d.b2PolygonDef();
     shapedef.SetAsBox(this.width/2, this.height/2);
     shapedef.density=1;
     shapedef.friction=0.3;
     shapedef.restitution=1;
-    
+
     this.type='particle';
     this.body.CreateShape(shapedef);
     this.body.SetMassFromShapes();
@@ -39,20 +39,20 @@ var Particle=exports.Particle=function(world, color, life, position,direction, s
             this.world.destroy(this);
         }
     };
-    
-    this.draw=function(renderer){    
+
+    this.draw=function(renderer){
         gamejs.draw.line(renderer, this.color, renderer.getScreenPoint(this.body.GetWorldPoint(new box2d.b2Vec2(0, -0.1))),
                                                renderer.getScreenPoint(this.body.GetWorldPoint(new box2d.b2Vec2(0, 0.1))), 2);
-     
+
     };
-    
-    this.setSpeed=function(speed){    
+
+    this.setSpeed=function(speed){
         var velocity={x:this.direction[0]* ((speed*1000.0)/3600.0),
                   y:this.direction[1]* ((speed*1000.0)/3600.0)};
         this.body.SetLinearVelocity(velocity);
     };
     this.setSpeed(speed);
-    return this;   
+    return this;
 }
 
 exports.burst=function(pars){
@@ -71,8 +71,8 @@ exports.burst=function(pars){
     var i;
     var step=80/pars.count;
     for(i=0;i<pars.count;i++){
-        
+
         new Particle(pars.world, pars.color, pars.life, pars.position, utils.rotateVector(pars.direction, -40+step*(i+1)), 100);
     }
-    
+
 };

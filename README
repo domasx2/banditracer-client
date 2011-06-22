@@ -14,6 +14,22 @@ To improve the loading behaviour, pack all Js files into one and only load that 
 
 .. than fix banitracer's index.html to use the single, big file.
 
+Map Editor
+===============
+
+requires:
+
+  * python 2.5+
+  * wxPython
+  * PIL
+  * simple json
+
+    $ python editor.py
+
+You can select objects with left mouse button and delete them with
+delete key, use mousewheel to rotate props / car starting positions
+before placing them. Tiles are not rotatable. 
+
 Server
 ========
 
