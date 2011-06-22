@@ -20,9 +20,9 @@ function loadTick(){
    display.blit(loading_img, loading_pt);
    if(progfn){
       var progress=progfn();
+      progress=Math.max(progress-0.5, 0)*2;
       gamejs.draw.rect(display, 'black', new gamejs.Rect([loading_pt[0]-100, loading_pt[1]+50], [loading_img_size[0]+200, 40]), 2);
       gamejs.draw.rect(display, 'black', new gamejs.Rect([loading_pt[0]-100, loading_pt[1]+50], [(loading_img_size[0]+200)*progress, 40]), 0);
-
    }
 
 };

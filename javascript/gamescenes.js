@@ -15,7 +15,6 @@ var LevelScene=exports.LevelScene=function(game, level, cache){
     this.time_to_start=3000;
     this.controllers=[];
     this.keys_down={};
-    this.paused=false;
     this.started=false;
     
     
@@ -155,7 +154,7 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
     this.update=function(msDuration){
         this.time+=msDuration;
         this.handleWorldUpdate();
-        
+        this.paused=false;
         this.updateZoom(msDuration);
         
         if(this.time_to_start<0)this.started=true;
