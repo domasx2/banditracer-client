@@ -219,12 +219,12 @@ exports.Game=function(){
     };
 
     this.playMultiplayer=function(level){
-        this.level_scene=new gamescenes.MultiplayerLevelScene(this, level.data, this.cache);
+        this.level_scene=new gamescenes.MultiplayerLevelScene(this, level, this.cache);
         this.director.replaceScene(this.level_scene);
     };
 
     this.playLevel=function(level, car){
-         this.level_scene=new gamescenes.SingleplayerLevelScene(this, level.data, this.cache, car);
+         this.level_scene=new gamescenes.SingleplayerLevelScene(this, level, this.cache, car);
          this.director.replaceScene(this.level_scene);
     };
 };

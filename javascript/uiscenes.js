@@ -51,7 +51,7 @@ var LobbyScene=exports.LobbyScene=function(game, cache, lobby_id){
             this.game.showTitle();
             if(payload.text)this.game.title_scene.alert(payload.text);
         }else if(cmd=='START_GAME'){
-            this.game.playMultiplayer(levels.levels[payload.track]);
+            this.game.playMultiplayer(levels[payload.track]);
         }else{
             this.handleMessageDefault(cmd, payload);
         }
@@ -162,7 +162,7 @@ var JoinLobbyScene=exports.JoinLobbyScene=function(game, cache){
             var row;
             for(var i=0;i<data.length;i++){
                 row=data[i];
-                row.track=levels.levels[row.track].data.name;
+                row.track=levels[row.track].name;
                 row.players=row.playercount;
             }
             this.lobby_table.setData(data);
@@ -341,7 +341,7 @@ var TitleScene=exports.TitleScene=function(game, cache){
                  'text':'Single player'});
 
     new ui.Button({'scene':this,
-                  'position':[20, 130],
+                  'position':[20, 110],
                   'text':'Play a single race',
                   'onclick':this.playAgainstBots});
 
@@ -354,22 +354,22 @@ var TitleScene=exports.TitleScene=function(game, cache){
 
 
     new ui.Button({'scene':this,
-                  'position':[20, 230],
+                  'position':[20, 210],
                   'text':'Create lobby',
                   'onclick':this.createLobby});
 
     new ui.Button({'scene':this,
-                  'position':[20,270],
+                  'position':[20,250],
                   'text':'Join a lobby',
                   'onclick':this.joinLobby});
 
     new ui.Label({'scene':this,
                  'position':[20, 320],
-                 'text':'Nickname:'})
+                 'text':'Nickname'})
 
     this.alias=new ui.TextBox({'scene':this,
                                 'text':'Guest',
-                                'position':[20, 350],
+                                'position':[20, 340],
                                 'size':[150, 25]});
 
     return this;
@@ -389,7 +389,7 @@ var PlayAgainstBotsScene=exports.PlayAgainstBotsScene=function(game, cache){
         else if(!this.car_selector.selected){
             this.alert('You must select a car first!');
         }else{
-            this.game.playLevel(levels.levels[this.selector.selected], this.car_selector.selected);
+            this.game.playLevel(levels[this.selector.selected], this.car_selector.selected);
         }
     };
 

@@ -8,7 +8,7 @@ step is angles to rotate by
 
 var gamejs=require('gamejs');
 var settings=require('./settings');
-var vectors = require('gamejs/utils/vectors');
+var vectors = gamejs.utils.vectors;
 
 
 exports.renderBackgroundFromTiles=function(width, height, tiles, cache){

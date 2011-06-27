@@ -5,6 +5,7 @@ var utils=require('./utils');
 var skin=require('./skin');
 var settings=require('./settings');
 var car_descriptions=require('./car_descriptions');
+var resources=require('./resources');
 
 var UIElement=exports.UIElement=function(pars){
     /*
@@ -171,7 +172,7 @@ var Table=exports.Table=function(pars){
         //draw labels
         for(i=0;i<this.columns.length;i++){
             col=this.columns[i];
-            renderer.drawText(col.label, skin.table.header_font, [x+2, y+2]);
+            renderer.drawText(col.label, skin.table.header_font, [x+2, y+12]);
             x+=col.width;
         }
         y+=this.row_height;
@@ -190,7 +191,7 @@ var Table=exports.Table=function(pars){
                 for(var k=0;k<this.columns.length;k++){
                     col=this.columns[k];
                     if(row[col.key]==undefined)console.log('undefined:'+col.key+' for id '+row.id);
-                    renderer.drawText(row[col.key], skin.table.data_font, [x+2, y+2]);
+                    renderer.drawText(row[col.key], skin.table.data_font, [x+2, y+12]);
                     x+=col.width;
                 }
                 y+=this.row_height;
@@ -230,7 +231,7 @@ var TrackInfoDisplay=exports.TrackInfoDisplay=function(pars){
         if(this.track){
             //track is set, draw label and thumbnail
             renderer.surface.blit(this.trackimg, this.position);
-            renderer.drawText(levels.levels[this.track].data.name, skin.trackinfodisplay.header_font, [this.position[0], this.position[1]+this.trackimg.getSize()[1]+10])
+            renderer.drawText(levels[this.track].name, skin.trackinfodisplay.header_font, [this.position[0], this.position[1]+this.trackimg.getSize()[1]+10])
             
         }
         else{
@@ -244,12 +245,12 @@ var TrackInfoDisplay=exports.TrackInfoDisplay=function(pars){
     this.setTrack=function(track){
         this.track=track;
         if(track){
-            var level=levels.levels[track];
+            var level=levels[track];
             var tiles=[];
-            for(var i=0;i<level.data.tiles.length;i++){
-                tiles[i]=level.data.dict[level.data.tiles[i]+''];
+            for(var i=0;i<level.tiles.length;i++){
+                tiles[i]=level.dict[level.tiles[i]+''];
             }
-            var img=utils.renderBackgroundFromTiles(level.data.width_t, level.data.height_t, tiles,  this.scene.game.cache);
+            var img=utils.renderBackgroundFromTiles(level.width_t, level.height_t, tiles,  this.scene.game.cache);
             var sz=img.getSize();
             if(sz[0]>sz[1]){
                 var q=sz[0]/200;        
@@ -380,11 +381,13 @@ var LevelSelector=exports.LevelSelector=function(pars){
     this.trackdisplay= new TrackInfoDisplay({'scene':this.scene,
                                              'position':[this.position[0]+210, this.position[1]+40]});
     
-    for(var levelkey in levels.levels){
-        level=levels.levels[levelkey];
+    var levelkey, i;
+    for(i=0;i<resources.levels.length;i++){
+        levelkey=resources.levels[i];
+        level=levels[levelkey];
         this.btns[levelkey]=new Button({'scene':this.scene,
                                         'position':[this.position[0], this.position[1]+p],
-                                        'text':level.data.name,
+                                        'text':level.name,
                                         'size':[200, 25],
                                         'onclick':this.select,
                                         'scope':this,
@@ -544,7 +547,7 @@ var TextBox=exports.TextBox=function(pars){
         if(this.text){
             //console.log(ofst)
             var s=new gamejs.Surface(origlen, this.tbsize[1]);
-            renderer.drawText(this.text, this.font, [0, 0], 1, s);
+            renderer.drawText(this.text, this.font, [0, 10], 1, s);
             
             //renderer.surface.blit(s, [0, 0]);
            // renderer.surface.blit(s, new gamejs.Rect([0, 0], this.size), new gamejs.Rect([ofst, 0], [Math.min(this.size[0], tlen-ofst), this.size[1]] ));
@@ -552,7 +555,7 @@ var TextBox=exports.TextBox=function(pars){
             
         }
         if(this.blip){
-            renderer.drawText('|', this.font, [this.tbposition[0]+tlen-ofst-1, this.tbposition[1]]);
+            renderer.drawText('|', this.font, [this.tbposition[0]+tlen-ofst-1, this.tbposition[1]+10]);
         }
         
     };
@@ -623,7 +626,7 @@ var Button=exports.Button=function(pars){
         
         var sz=renderer.cache.getTextSize(this.text, this.font);
        
-        renderer.drawText(this.text, this.font, [this.position[0]+8, this.position[1]+(this.size[1]-sz[1])/2-2 ]);
+        renderer.drawText(this.text, this.font, [this.position[0]+8, this.position[1]+(this.size[1]-sz[1])/2+8 ]);
         // FF6A00
     };
     

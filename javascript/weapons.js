@@ -2,7 +2,7 @@ var gamejs = require('gamejs');
 var box2d = require('./box2d');
 var utils = require('./utils');
 var animation = require('./animation');
-var vectors=require('gamejs/utils/vectors');
+var vectors=gamejs.utils.vectors;
 
 var Projectile=exports.Projectile=function(pars){
     /*

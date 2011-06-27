@@ -824,9 +824,6 @@ class LevelFrame(wx.Frame):
         menu_item_compile_resources=toolsmenu.Append(-1, 'Compile resources.js', 'Compile resources.js')
         self.Bind(wx.EVT_MENU, self.CompileResources, menu_item_compile_resources)
 
-        menu_item_compile_levels=toolsmenu.Append(-1, 'Compile levels.js', 'Compile levels.js');
-        self.Bind(wx.EVT_MENU, self.CompileLevels, menu_item_compile_levels);
-
         menu_item_fill=toolsmenu.Append(-1, 'Fill w. selected tile', 'Fill bg with selected tile')
         self.Bind(wx.EVT_MENU, self.FillTile, menu_item_fill)
         #menubar
@@ -864,13 +861,6 @@ class LevelFrame(wx.Frame):
             app.level.tiles=[app.selected.filename for x in range(len(app.level.tiles))]
             app.refresh()
 
-    def CompileLevels(self, e):
-        levels=os.listdir('javascript/levels');
-        out="""exports.levels={%s};""" % ','.join(["'%s':require('./levels/%s')" % (x[:-3], x[:-3]) for x in levels]);
-        f=open('javascript/levels.js', 'w')
-        f.write(out)
-        f.close()
-
     def CompileResources(self, e):
         props=os.listdir('images/props')
         cars=os.listdir('images/cars')
@@ -878,12 +868,15 @@ class LevelFrame(wx.Frame):
         animations=os.listdir('images/animations')
         ui=os.listdir('images/ui')
         static=os.listdir('images/static')
+        levels=[x.replace('.json', '') for x in os.listdir('levels')]
         out="""exports.props=%s;
         exports.cars=%s;
         exports.tiles=%s;
         exports.animations=%s;
         exports.ui=%s;
-        exports.static=%s;""" % (props, cars, tiles, animations, ui, static)
+        exports.static=%s;
+        exports.levels=%s;""" % (props, cars, tiles, animations, ui, static, levels)
+        
         f=open('javascript/resources.js', 'w')
         f.write(out.replace('\t', '').replace(' ', ''))
         f.close()
@@ -907,7 +900,7 @@ class LevelFrame(wx.Frame):
 
     def OnSave(self, e):
         dirname=''
-        dialog=wx.FileDialog(self, "Choose a file", dirname, "", "*.js", wx.FD_SAVE)
+        dialog=wx.FileDialog(self, "Choose a file", dirname, "", "*.json", wx.FD_SAVE)
         if dialog.ShowModal() == wx.ID_OK:
             filename = dialog.GetFilename()
             dirname = dialog.GetDirectory()
@@ -918,12 +911,13 @@ class LevelFrame(wx.Frame):
 
     def OnOpen(self, e):
         dirname=''
-        dialog=wx.FileDialog(self, "Choose a file", dirname, "", "*.js", wx.OPEN)
+        dialog=wx.FileDialog(self, "Choose a file", dirname, "", "*.json", wx.OPEN)
         if dialog.ShowModal() == wx.ID_OK:
             filename = dialog.GetFilename()
             dirname = dialog.GetDirectory()
             app=wx.GetApp()
             app.load(os.path.join(dirname, filename))
+            app.refresh()
         dialog.Destroy()
 
     def ViewTileset(self, e):
@@ -966,6 +960,7 @@ class NewLevelDialog(wx.Dialog):
         tiles=['grass.png' for x in range(width*height)]
         level=Level((width, height), tiles)
         app.loadLevel(level)
+        app.refresh()
         self.Destroy()
 
     def cancel(self, e):
@@ -1159,16 +1154,15 @@ class EditorApp(wx.App):
                                   'pt1':p.pt1,
                                   'pt2':p.pt2} for p in self.level.checkpoints]}
             retv['dict']=dict
-            out='exports.data=%s;\n' % simplejson.dumps(retv, sort_keys=True, indent=4 * ' ')
+            out=simplejson.dumps(retv, sort_keys=True)
             f=open(path, 'w')
             f.write(out);
             f.close()
 
     def load(self, path):
         f=open(path, 'r');
-        lvl=f.read()
+        lvl=simplejson.loads(f.read())
         f.close()
-        lvl=simplejson.loads(lvl[13:-2])
         dict=lvl['dict']
         tiles=[]
         for x in lvl['tiles']:
@@ -1227,6 +1221,7 @@ class EditorApp(wx.App):
         self.levelframe.panel_left.car_pos_no.SetValue(str(pos))
         self.levelframe.panel_left.ai_waypoint_no.SetValue(str(no))
         self.levelframe.panel_left.checkpoint_no.SetValue(str(cno))
+        
 
     def select(self, obj):
         if self.selected and hasattr(self.selected, 'unselect'):

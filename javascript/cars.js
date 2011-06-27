@@ -1,7 +1,7 @@
 var gamejs = require('gamejs');
 var box2d = require('./box2d');
 var utils = require('./utils');
-var vectors = require('gamejs/utils/vectors');
+var vectors = gamejs.utils.vectors;
 var animation=require('./animation');
 
 var STEER_NONE=exports.STEER_NONE=0;

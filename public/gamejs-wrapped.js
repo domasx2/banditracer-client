@@ -581,7 +581,8 @@ exports.transform = require('./gamejs/transform');
 exports.utils = {
    arrays: require('./gamejs/utils/arrays'),
    objects: require('./gamejs/utils/objects'),
-   matrix: require('./gamejs/utils/matrix')
+   matrix: require('./gamejs/utils/matrix'),
+   vectors: require('./gamejs/utils/vectors')
 };
 
 /**
@@ -2245,6 +2246,7 @@ var Font = exports.Font = function(fontSettings, backgroundColor) {
    this.sampleSurface = new Surface([10,10]);
    this.sampleSurface.context.font = fontSettings;
    this.sampleSurface.context.textAlign = 'start';
+   // http://diveintohtml5.org/canvas.html#text
    this.sampleSurface.context.textBaseline = 'bottom';
    return this;
 };
@@ -2261,7 +2263,7 @@ Font.prototype.render = function(text, color) {
    var ctx = surface.context;
    ctx.save();
    ctx.font = this.sampleSurface.context.font;
-   //ctx.textBaseline = this.sampleSurface.context.textBaseline;
+   ctx.textBaseline = this.sampleSurface.context.textBaseline;
    ctx.textAlign = this.sampleSurface.context.textAlign;
    ctx.fillStyle = ctx.strokeStyle = color || "#000000";
    ctx.fillText(text, 0, surface.rect.height, surface.rect.width);

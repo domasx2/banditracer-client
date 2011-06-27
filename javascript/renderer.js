@@ -213,7 +213,7 @@ var Renderer=exports.Renderer=function(width, height, cache){
             else{
                 s=this.cache.getLetter(font, c);
                 if(zoom==1){
-                    r1=[ofst, position[1]];
+                    r1=[ofst, position[1]-10];
                 }
                 else{
                     size=s.getSize();

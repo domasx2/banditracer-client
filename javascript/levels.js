@@ -1,1 +1,10 @@
-exports.levels={'level1':require('./levels/level1'),'level3':require('./levels/level3'),'level2':require('./levels/level2'),'level4':require('./levels/level4')};
+var resources=require('resources');
+var gamejs=require('gamejs');
+
+exports.init=function(){
+    var lname='';
+    for(var i=0; i<resources.levels.length;i++){
+        lname=resources.levels[i];
+        exports[lname]=gamejs.http.load('./levels/'+lname+'.json');
+    }
+}
