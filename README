@@ -1,18 +1,25 @@
 Quick start
 ============
 
- * create `javascript/settings.js`, use `javascript/settings-example.js' as template.
- * open `index.html` with firefox/safari
-     (serve over http:// to enable all browsers)
+Create `javascript/settings.js` by copying `javascript/settings-example.js'
+(no change to file necessary for single player).
 
-Deploy client
-==============
+Open `index.html` with Firefox or Safar (other browsers can only play the game
+if this directory is served via http://).
 
-To improve the loading behaviour, pack all Js files into one and only load that one. see gamejs/docs/deployment for more info.
+Or: Install banditracer-client with RingoJs
+-----------------------------------------------------------------
 
-    gamejs/wrap-directory.sh ../banditracer-client/javascript/
+Install RingoJs <http://ringojs.org/getting_started>
 
-.. than fix banitracer's index.html to use the single, big file.
+   $ ringo-admin install domasx2/banditracer-client
+   $ ringo-admin install hns/stick
+
+Start the banditracer-client webserver:
+
+   $ ringo -e "require('banditracer-client').startUp()"
+
+Access the game at: <http://localhost:8080/>
 
 Map Editor
 ===============
@@ -28,19 +35,30 @@ requires:
 
 You can select objects with left mouse button and delete them with
 delete key, use mousewheel to rotate props / car starting positions
-before placing them. Tiles are not rotatable. 
+before placing them. Tiles are not rotatable.
 
-Server
-========
+Your own dedicated multiplayer server
+=======================================
 
-Recommended directory layout for checking out both banditracer and the gamejs
-repo:
+see https://github.com/domasx2/banditracer-server
 
-    ~/br/
-    ~/br/banditracer-client/
-    ~/br/banditracer-server/
-    ~/br/gamejs/
 
-For the server, you need http://RingoJs.org
+Pack Js files
+==============
 
-ringo ~/br/banditracer-server/ringomain.js
+To improve the loading behaviour, use GameJs to wrap your app and the library
+into `gjs-app-wrapped.js` and load that file.
+
+    $ gamejs/wrap-directory.sh ../banditracer-client/javascript/
+
+...then fix banditracer's index.html to use `gjs-app-wrapped.js`.
+
+See gamejs/docs/deployment in the gamejs distribution for more info.
+
+Repack GameJs
+==============
+
+To update the gamejs version used, re-wrap GameJs and copy it into the `banditracer-client/public` directory:
+
+    $ ~/gamejs/wrap-gamejs.sh
+    $ cp ~/gamejs/examples/skeleton/public/gamejs-wrapped.js ~/banditracer-client/public/
