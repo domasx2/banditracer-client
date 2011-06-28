@@ -1,0 +1,11 @@
+{
+    "name": "banditracer-client",
+    "version": "0.1.0",
+    "description": "Banditracer, stand-alone client-side game",
+    "keywords": ["game", "racing"],
+    "author": ["Domas Lapinskas <domasx2@gmail.com>"],
+    "main": "./main.js",
+    "directories": {
+        "lib": "javascript"
+    }
+}

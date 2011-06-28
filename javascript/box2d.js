@@ -20,7 +20,7 @@
 *
 * ALTERED by Domas Lapinskas on 2011.
 * changes: globals are added to exports variable so this can be used as a common.js module,
-*          a bug with an attempt to instantiate an array of negative size fixed. 
+*          a bug with an attempt to instantiate an array of negative size fixed.
 *
 */
 var a;function extend(b,c){for(var d in c)b[d]=c[d]};var b2Settings=function(){this.__varz();this.__constructor.apply(this,arguments)};b2Settings.prototype.__constructor=function(){};b2Settings.prototype.__varz=function(){};b2Settings.USHRT_MAX=65535;b2Settings.b2_pi=Math.PI;b2Settings.b2_maxManifoldPoints=2;b2Settings.b2_maxPolygonVertices=8;b2Settings.b2_maxProxies=512;b2Settings.b2_maxPairs=8*b2Settings.b2_maxProxies;b2Settings.b2_linearSlop=0.005;b2Settings.b2_angularSlop=2/180*b2Settings.b2_pi;b2Settings.b2_toiSlop=8*b2Settings.b2_linearSlop;

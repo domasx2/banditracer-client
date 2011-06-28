@@ -10,7 +10,7 @@ var settings=require('./settings');
 exports.Object=function(width, height, image){
     this.width=width;
     this.height=height;
-    this.image=image;   
+    this.image=image;
 }
 
 
@@ -23,27 +23,27 @@ var ContactListener=exports.ContactListener=function(world){
         var data1=body1.GetUserData();
         var data2=body2.GetUserData();
         if(data1&&data2){
-            
+
             if(data1.obj.impact) data1.obj.impact(data2.obj, cpoint, utils.vectorToList(cpoint.normal));
             if(data2.obj.impact) data2.obj.impact(data1.obj, cpoint, utils.rotateVector(cpoint.normal, 180));
         }
-       
-    };
-    
-    this.Remove=function(cpoint){
-        
-        
-    };
-    
-    this.Persist=function(cpoint){
-        
-    };
-    
-    this.Result=function(cpoint){
-        
+
     };
 
-    return this;   
+    this.Remove=function(cpoint){
+
+
+    };
+
+    this.Persist=function(cpoint){
+
+    };
+
+    this.Result=function(cpoint){
+
+    };
+
+    return this;
 }
 
 var MODE_CLIENT=exports.MODE_CLIENT=1;
@@ -70,32 +70,32 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
     this.ai_waypoints=ai_waypoints
     this.max_waypoint=0;
     for(var no in ai_waypoints) this.max_waypoint=Math.max(this.max_waypoint, no);
-    
+
     this.checkpoints=checkpoints;
     this.max_checkpoint=0;
     for(var no in checkpoints) this.max_checkpoint=Math.max(this.max_checkpoint, no);
-    
+
     this.pending_particle_bursts=[];
-    
+
     this.objects={};
     this.object_by_id={};
     this.destroy_queue=[];
-    
+
     this.b2world.SetContactListener(new ContactListener(this));
-    
+
     this.next_event_no=1;
     this.events={};
-    
-    
+
+
     this.destroy=function(id){
         /*
         queues object to be destroyed.
         queue is needed, because physical objects cannot be destroyed during physics calculations.
-        
+
         */
         this.destroy_queue[this.destroy_queue.length]=this.object_by_id[id];
     };
-    
+
     this.destroyQueued=function(){
         var i, obj;
         for(i=0;i<this.destroy_queue.length;i++){
@@ -106,10 +106,10 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
         }
         this.destroy_queue=[];
     };
-    
 
 
-    
+
+
     this.addObject=function(obj){
         //use event
         obj.id=this.next_object_id++;
@@ -117,7 +117,7 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
         else this.objects[obj.type][this.objects[obj.type].length]=obj;
         this.object_by_id[obj.id]=obj;
     };
-    
+
     this.recordEvent=function(type, descr){
         if(type=='create' && descr.type=='prop')return;
         var no=this.next_event_no++
@@ -126,11 +126,11 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
                 'descr':descr};
         this.events[no]=evt;
     };
-    
+
     this.event=function(type, descr){
         /*
          type: 'create' / 'destroy'
-        
+
         use this to create/destroy objects
         */
         if(this.mode==MODE_SERVER){
@@ -142,7 +142,7 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
         }
         return null;
     };
-    
+
     this.handleEvent=function(type, descr){
         if(type=='create'){
             return this.create(descr)
@@ -151,14 +151,14 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
         }
         return null;
     };
-  
+
     this.create=function(descr){
         /*
          use event.
-         
+
          descr:
          {obj_type,  -- car, prop, weapon, animation
-         obj_name,  
+         obj_name,
          pars}
         */
         var obj=null;
@@ -225,38 +225,38 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
             utils.copy(animation.animations[descr.obj_name], pars);
             obj=new animation.Animation(pars);
         }
-        
+
         if(obj) this.addObject(obj);
-        
+
         return obj;
     };
-   
+
     this.getObjectById=function(id){
-        return this.object_by_id[id];  
+        return this.object_by_id[id];
     };
-    
+
     this.updList=function(msDuration, list){
         var i;
         for(i=0;i<list.length;i++){
             if(list[i].update){
                 list[i].update(msDuration);
             }
-        }  
+        }
     };
-    
-    
-    
+
+
+
     this.drawList=function(renderer, list){
         var i;
         for(i=0;i<list.length;i++){
             if(list[i].draw){
                 list[i].draw(renderer);
             }
-        } 
+        }
     };
-    
-    
-    
+
+
+
     this.update=function(msDuration){
 
         var type;
@@ -264,25 +264,25 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
             if ((this.mode!=MODE_CLIENT)||(UPDATE_AS_CLIENT[type]))
             this.updList(msDuration, this.objects[type]);
         }
-        
+
         this.destroyQueued();
     };
-    
+
     this.draw=function(renderer, msDuration){
         var type;
         for(type in this.objects){
             this.drawList(renderer, this.objects[type]);
         }
     };
-    
+
     this.CreateBody=function(definition){
         return this.b2world.CreateBody(definition);
     };
-    
+
     this.addParticleBurst=function(pars){
         this.pending_particle_bursts[this.pending_particle_bursts.length]=pars;
     };
-    
+
     this.burstParticles=function(){
         var i;
         for(i=0;i<this.pending_particle_bursts.length;i++){
@@ -290,26 +290,26 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
         }
         this.pending_particle_bursts=[];
     };
-    
+
     return this;
 
 }
 
 exports.buildWorld=function(level, mode){
     //level - data property of level module
-    
+
     var phys_scale=settings.get('PHYS_SCALE');
     var tile_scale=settings.get('TILE_SCALE');
-    
+
     var dict=level.dict;
-    
+
      //CAR POSITIONS
     var start_positions={}, pos;
     for(var i=0;i<level.car_positions.length;i++){
        pos=level.car_positions[i];
        start_positions[pos.pos]={'x':pos.x/phys_scale, 'y':pos.y/phys_scale, 'angle':pos.angle}
     }
-    
+
     //WAYPOINTS
     var ai_waypoints={}, wp;
     for(i=0;i<level.ai_waypoints.length;i++){
@@ -317,7 +317,7 @@ exports.buildWorld=function(level, mode){
        pos=[wp.x/phys_scale, wp.y/phys_scale];
        ai_waypoints[wp.no]={'x':pos[0]+1.5, 'y':pos[1]+1.5}
     }
-    
+
     //CHECKPOINTS
     var checkpoints={}, c, pt1, pt2;
     for(i=0;i<level.checkpoints.length;i++){
@@ -330,14 +330,14 @@ exports.buildWorld=function(level, mode){
                             'height':pt2[1]-pt1[1],
                             'center':[(pt1[0]+pt2[0])/2, (pt1[1]+pt2[1])/2]};
     }
-    
+
     //BUILD WORLD
     var width=level.width_t*5;
     var height=level.height_t*5;
     var width_px=level.width_t*tile_scale;
-    var height_px=level.height_t*tile_scale;   
+    var height_px=level.height_t*tile_scale;
     var world= new World(width, height, width_px, height_px, ai_waypoints, checkpoints, start_positions, mode);
-    
+
     //BUILD PROPS
     var prop, position, prop2, angle;
     for(i=0;i<level.props.length;i++){

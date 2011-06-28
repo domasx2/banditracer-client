@@ -1,12 +1,12 @@
 /*car:
- 
+
     width             - width in meters
     height            - height in meters
     filenames          - sprite file name
     power             -engine power in newtons
     max_steer_angle   -max steering angle, degrees
     max_speed         -max speed, km/h
-    wheels      -front wheel definitions: [[-1, -1.2], [1, -1.2]] 
+    wheels      -front wheel definitions: [[-1, -1.2], [1, -1.2]]
     weapon1           -first weapon
     weapon2           -second weapon
     health            -max health
@@ -35,7 +35,7 @@
                                     'weapon1':new weapons.Machinegun({}),
                                     'weapon2':new weapons.MineLauncher({}),
                                     'health':100});
- 
+
 */
 
 exports.Bandit={'width':1.6,
@@ -65,7 +65,7 @@ exports.Racer={'width':2,
                           {'x':1, 'y':-1.2, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
                           {'x':-1, 'y':1.2, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'},
                           {'x':1, 'y':1.2, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'}]
-                
+
             };
 exports.Brawler={'width':3,
                 'height':6,
