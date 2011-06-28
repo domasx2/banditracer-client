@@ -112,7 +112,7 @@ var Communicator=exports.Communicator=function(game){
                 msg=JSON.stringify(msg);
                 //gamejs.log('sending ', msg);
                 this.socket.send(msg);
-              //  console.log('sent '+msg);
+               // console.log('sent '+msg);
             }
             this.messages=[];
         }else if (this.status=='closed'){
@@ -140,7 +140,7 @@ var Communicator=exports.Communicator=function(game){
     };
 
     this.onmessage=function(m){
-        gamejs.debug('Received ', m);
+       // console.log('recv '+m.data);
         m=JSON.parse(m.data);
         this.game.director.getScene().handleMessage(m.cmd, m.payload);
 
@@ -181,13 +181,13 @@ exports.Game=function(){
 
     this.start=function(display){
        this.director=new Director(display);
-
-      // this.playLevel(levels.levels['level1']);
-       //this.director.start(this.level_scene);
-
+       
        this.title_scene=new uiscenes.TitleScene(this, this.cache);
-       this.director.start(this.title_scene, this.display);
+       this.director.start(this.title_scene);
 
+      // this.playLevel(levels['level3'], 'Brawler', true);
+       //this.director.start(this.level_scene);
+       
     };
 
     this.showEndGameScene=function(position){
@@ -213,7 +213,7 @@ exports.Game=function(){
     this.joinLobby=function(lobby_id){
         this.director.replaceScene(new uiscenes.LobbyScene(this, this.cache, lobby_id));
     };
-
+    
     this.playAgainstBots=function(){
          this.director.replaceScene(new uiscenes.PlayAgainstBotsScene(this, this.cache));
     };
@@ -223,8 +223,8 @@ exports.Game=function(){
         this.director.replaceScene(this.level_scene);
     };
 
-    this.playLevel=function(level, car){
-         this.level_scene=new gamescenes.SingleplayerLevelScene(this, level, this.cache, car);
+    this.playLevel=function(level, car, ai_test){
+         this.level_scene=new gamescenes.SingleplayerLevelScene(this, level, this.cache, car, ai_test);
          this.director.replaceScene(this.level_scene);
     };
 };

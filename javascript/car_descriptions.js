@@ -1,12 +1,12 @@
 /*car:
-
+ 
     width             - width in meters
     height            - height in meters
     filenames          - sprite file name
     power             -engine power in newtons
     max_steer_angle   -max steering angle, degrees
     max_speed         -max speed, km/h
-    wheels      -front wheel definitions: [[-1, -1.2], [1, -1.2]]
+    wheels      -front wheel definitions: [[-1, -1.2], [1, -1.2]] 
     weapon1           -first weapon
     weapon2           -second weapon
     health            -max health
@@ -35,7 +35,7 @@
                                     'weapon1':new weapons.Machinegun({}),
                                     'weapon2':new weapons.MineLauncher({}),
                                     'health':100});
-
+ 
 */
 
 exports.Bandit={'width':1.6,
@@ -44,7 +44,7 @@ exports.Bandit={'width':1.6,
                 'filenames':['bandit.png'],
                 'power':100,
                 'max_speed':135,
-                'max_steer_angle':20,
+                'max_steer_angle':17,
                 'health':80,
                 'main_weapon':'Machinegun',
                 'wheels':[{'x':-1, 'y':-1, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
@@ -57,7 +57,7 @@ exports.Racer={'width':2,
                'height':4,
                'filenames':['yellow_car.png', 'blue_car.png', 'green_car.png', 'pink_car.png'],
                 'power':90,
-                'max_steer_angle':18,
+                'max_steer_angle':16,
                 'max_speed':145,
                 'health':100,
                 'main_weapon':'Machinegun',
@@ -65,14 +65,14 @@ exports.Racer={'width':2,
                           {'x':1, 'y':-1.2, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
                           {'x':-1, 'y':1.2, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'},
                           {'x':1, 'y':1.2, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'}]
-
+                
             };
 exports.Brawler={'width':3,
                 'height':6,
                 'name':'Brawler',
                 'filenames':['brawler_yellow.png', 'brawler_green.png', 'brawler_blue.png', 'brawler_red.png'],
                 'power':150,
-                'max_steer_angle':17,
+                'max_steer_angle':16,
                 'max_speed':140,
                 'health':160,
                 'main_weapon':'MissileLauncher',

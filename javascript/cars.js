@@ -133,6 +133,17 @@ var Wheel = exports.Wheel = function(car, x, y, width, length, world, revolving,
         //angle radians
         this.body.SetXForm(utils.listToVector(position),  this.body.GetAngle());
     };
+    
+    this.getAngle=function(){
+        return utils.degrees(this.body.GetAngle());
+    };
+    
+    this.getLocalAngle=function(){   
+        var retv= utils.normaliseAngle(utils.degrees(this.body.GetAngle()-this.car.body.GetAngle()));
+        if(retv>180)retv-=360;
+        if(retv<-180)retv+=360;
+        return retv;
+    };
 
     return this;
 }
@@ -198,8 +209,10 @@ var Car = exports.Car = function(pars){
     this.max_steer_angle=pars.max_steer_angle;
     this.power=pars.power;
     this.max_speed=pars.max_speed;
+    this.turn_msec=pars.turn_msec ? pars.turn_msec : 200;//in how many miliseconds wheel angle is maxed out when turning
     this.mod_speed=0;
     this.local_engine_pos=[0, -(pars.height/2)];
+    this.cur_wheel_angle=0;
 
     //ANIM
     this.smoke_cd=0;
@@ -239,7 +252,9 @@ var Car = exports.Car = function(pars){
 
 
 
-
+    this.getLocalVelocity=function(){
+        return this.body.GetLocalVector(this.body.GetLinearVelocityFromLocalPoint(utils.listToVector([0, 0])));
+    };
 
     this.crossFinishLine=function(){
         if(this.weapon1)this.weapon1.reload();
@@ -521,7 +536,12 @@ var Car = exports.Car = function(pars){
 
         var base_vect;
         if(acceleration==ACC_ACCELERATE) base_vect=[0, -1];
-        else if(acceleration==ACC_BRAKE) base_vect=[0, 0.8];
+        else if(acceleration==ACC_BRAKE){
+            //braking, lotsa force
+            if(this.getLocalVelocity()[1]<0)base_vect=[0, 1.2];
+            //reversing, less force
+            else base_vect=[0, 0.7];
+        }
         else base_vect=[0, 0];
 
         var vect_x=base_vect[0];
@@ -549,25 +569,34 @@ var Car = exports.Car = function(pars){
         }
 
 
-        //set steer
-        var wheel_angle=this.max_steer_angle;
+        //SET STEER
+        //need to calculate maximum allowed steer angle first
+        var max_wheel_angle=this.max_steer_angle;
+        
+        //for speed < 100 it is increased, up to 40. This enables the car to make tighter turns at lower speeds
         var kmh=this.getSpeedKMH();
         if(kmh<100){
-            wheel_angle=wheel_angle+ (40-wheel_angle)*(1-kmh/100);
+            max_wheel_angle=max_wheel_angle+ (40-max_wheel_angle)*(1-kmh/100);
         }
-
-        if(steer==STEER_LEFT) wheel_angle= -1*wheel_angle;
-        else if (steer==STEER_RIGHT) {}
-        else wheel_angle=0;
+        
+   
+        var incr=(this.max_steer_angle/this.turn_msec) * msDuration
 
         var wheels=this.getRevolvingWheels();
+        var angle;
         for(i=0;i<wheels.length;i++){
             wheel=wheels[i];
-            if(wheel_angle){
-                wheel.setAngle(wheel_angle);
+            if(steer==STEER_RIGHT){
+                this.cur_wheel_angle=Math.min(Math.max(this.cur_wheel_angle, 0)+incr, max_wheel_angle)
+                wheel.setAngle(this.cur_wheel_angle);
+            }else if(steer==STEER_LEFT){
+                this.cur_wheel_angle=Math.max(Math.min(this.cur_wheel_angle, 0)-incr, -max_wheel_angle)
+                wheel.setAngle(this.cur_wheel_angle);
             }else{
+                this.cur_wheel_angle=0;
                 wheel.resetAngle();
-            }
+            }        
+            
         }
 
 
