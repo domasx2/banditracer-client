@@ -14,7 +14,7 @@ exports.fonts={'hud':['30px "Showcard Gothic"', 'red'],         //in game hud
                'alias':['bold 14px Arial', '#4CFF00'],  //ingame multiplayer player alias
                'button':['20px Aharoni', '#351A15'],
                'loading':['40px Stencil', '#351A15']
-               }; 
+               };
 */
 
 exports.fonts={'hud':['30px Stencil', 'red'],         //in game hud
@@ -26,7 +26,7 @@ exports.fonts={'hud':['30px Stencil', 'red'],         //in game hud
                'button':['20px Aharoni', '#351A15'],
                'loading':['40px Stencil', '#351A15'],
                'textbox':['20px Arial', '#351A15']
-               }; 
+               };
 
 //ui button
 exports.button={'border':'#282828',              //button border
@@ -36,13 +36,13 @@ exports.button={'border':'#282828',              //button border
                 'selected_fill':'#FF6A00'};       //fill when selected
 
 //label
-exports.label={'font':'default'}; 
+exports.label={'font':'default'};
 
 //textbox
 exports.textbox={'font':'textbox',
                  'border':'#282828',
                  'background':'#FFEFAA'};
-                
+
 
 //table
 exports.table={'header_font':'small_header',
@@ -52,7 +52,7 @@ exports.table={'header_font':'small_header',
                 'hover_fill':'#FFBE00',          //fill on row hover
                 'selected_fill':'#FF6A00',       //fill on row selected
                 'row_line':'#FFD000'};           //my english fails me. its the line between rows
-                
+
 //track info display
 exports.trackinfodisplay={'header_font':'default',
                           'outline_color':'#808080'};

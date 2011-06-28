@@ -36,44 +36,44 @@ var ImageCache=exports.ImageCache = function(){
     this.alphabet='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.,:\/!?"|()';
     this['static']={};
     var i, f;
-    
-    //load tiles    
+
+    //load tiles
     for(i=0;i<resources.tiles.length;i++){
       f=resources.tiles[i];
       this.tiles[f]=gamejs.image.load('images/tiles/'+f);
     }
-    
+
     //load cars
     for(i=0;i<resources.cars.length;i++){
         f=resources.cars[i];
         this.cars[f]=sprite2rotarray(gamejs.image.load('images/cars/'+f), 2);
     };
-    
+
     //cache props
     for(i=0;i<resources.props.length;i++){
         f=resources.props[i];
         this.props[f]=sprite2rotarray(gamejs.image.load('images/props/'+f), 5);
     };
-    
+
     //cache animations
     for(i=0;i<resources.animations.length;i++){
         f=resources.animations[i];
         this.animations[f]=gamejs.image.load('images/animations/'+f);
     };
-    
+
     //cache ui
     for(i=0;i<resources.ui.length;i++){
         f=resources.ui[i];
         this.ui[f]=gamejs.image.load('images/ui/'+f);
     };
-    
+
     //cache static
     for(i=0;i<resources['static'].length;i++){
         f=resources['static'][i];
         this['static'][f]=gamejs.image.load('images/static/'+f);
     };
-    
-    
+
+
     //cache fonts
     var font, letter;
     for(font in resources.fonts){
@@ -83,9 +83,9 @@ var ImageCache=exports.ImageCache = function(){
             letter=f.split('.')[0];
             this.fonts[font][letter]=gamejs.image.load('images/fonts/'+font+'/'+f);
         }
-            
+
     };
-    
+
     this.initFont=function(name, fontSettings, color){
         this.fonts[name]={};
         var font=new gamejs.font.Font(fontSettings);
@@ -94,29 +94,29 @@ var ImageCache=exports.ImageCache = function(){
             c=this.alphabet[i];
             this.fonts[name][c]=font.render(c, color)
         }
-        
+
     };
-    
+
     this.getPropSprite=function(filename, angle){
         return this.getSpriteFromRotarray(this.props[filename], angle);
     };
-    
+
     this.getCarSprite=function(filename, angle){
-        return this.getSpriteFromRotarray(this.cars[filename], angle);  
+        return this.getSpriteFromRotarray(this.cars[filename], angle);
     };
-    
+
     this.getTile=function(filename){
         return this.tiles[filename];
     };
-    
-   
+
+
     this.getLetter=function(font, letter){
-        return this.fonts[font][letter];  
+        return this.fonts[font][letter];
     };
-    
+
     this.getTextSize=function(text, font){
         var w=0, h=0, c, l, sz;
-        if(text){ 
+        if(text){
             for(var i=0;i<text.length;i++){
                 c=text[i];
                 if(c==' ')w+=8;
@@ -132,44 +132,44 @@ var ImageCache=exports.ImageCache = function(){
             return [w, h];
         }else return [0, 0];
     };
-    
+
     this.getAnimationFrameCount=function(filename){
         var sz= this.animations[filename].getSize();
         return sz[0]/sz[1];
     };
-    
+
     this.getAnimationSheet=function(filename){
-        return this.animations[filename];    
+        return this.animations[filename];
     };
-    
+
     this.getUIImage=function(filename){
-        return this.ui[filename];  
+        return this.ui[filename];
     };
     this.getStaticSprite=function(filename){
         return this['static'][filename];
     };
-    
+
     this.getSpriteFromRotarray=function(rotarray, angle){
         if((angle % rotarray['step'])!=0) angle=utils.normaliseAngle(parseInt(angle/rotarray['step'])*rotarray['step']);
         return rotarray[angle];
     };
-    
+
     //init fonts
     for(var font in skin.fonts){
         this.initFont(font, skin.fonts[font][0], skin.fonts[font][1]);
     }
-    
+
     return this;
 };
 
 
 var Renderer=exports.Renderer=function(width, height, cache){
-    
+
     this.width=width;
     this.height=height;
     this.cache=cache;
     this.surface=null;
-    
+
     this.textLength=function(text, font){
         var c;
         var len=0;
@@ -184,21 +184,21 @@ var Renderer=exports.Renderer=function(width, height, cache){
         }
         return len;
     };
-    
+
     this.fillBackground=function(color){
         gamejs.draw.rect(this.surface, color, new gamejs.Rect([0, 0], this.surface.getSize()));
     };
-    
+
     this.drawRect=function(color, pos, size, w){
         w = (w || w===0) ? w : 1;
         gamejs.draw.rect(this.surface, color, new gamejs.Rect(pos, size), w);
     };
-    
+
     this.drawLine=function(color, pos1, pos2, w){
         w = (w || w===0) ? w : 1;
         gamejs.draw.line(this.surface, color, pos1, pos2, w);
     }
-    
+
     this.drawText=function(text, font, position, zoom, draw_on){
         /*
         font - font name
@@ -218,15 +218,15 @@ var Renderer=exports.Renderer=function(width, height, cache){
                 else{
                     size=s.getSize();
                     r1=new gamejs.Rect([ofst, position[1]], [parseInt(size[0]/zoom), parseInt(size[1]/zoom)]);
-                
+
                 }
                 (draw_on ? draw_on: this.surface).blit(s, r1);
                 ofst+=s.getSize()[0]/zoom;
             }
         }
-        
+
     };
-    return this;  
+    return this;
 };
 
 
@@ -234,18 +234,18 @@ var UIRenderer=exports.UIRenderer=function(width, height, cache){
     UIRenderer.superConstructor.apply(this, [width, height, cache]);
     this.cache=cache;
     this.surface=null;
-    
+
     this.setSurface=function(surface){
         this.surface=surface;
     };
-    
+
     this.drawUIImage=function(filename, pos){
         this.surface.blit(this.cache.getUIImage(filename), pos);
     };
-    
-    
-    
- 
+
+
+
+
 };
 
 gamejs.utils.objects.extend(UIRenderer, Renderer);
@@ -267,13 +267,13 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
     this.zoom=1;
     this.r1=new gamejs.Rect([0, 0], [this.display_width, this.display_height]);
     this.r2=new gamejs.Rect([0, 0], [this.width, this.height]);
-    
-    
+
+
     this.follow=function(obj){
-        this.follow_object=obj;  
+        this.follow_object=obj;
     };
-    
-    
+
+
     //update camera offset
     this.updateOffset=function(){
         if(this.follow_object){
@@ -283,22 +283,22 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
         }
         return false;
     };
-    
-    
+
+
     //world point 2 screen point
     this.getScreenPoint=function(world_point){
         world_point=utils.vectorToList(world_point);
         return [world_point[0]*this.world.phys_scale-this.offset_x, world_point[1]*this.world.phys_scale-this.offset_y];
     };
-    
+
 
     this.drawBackground=function(){
       //  this.blit(this.background, [0, 0], new gamejs.Rect(-this.offset_x, -this.offset_y, this.width, this.height));
       this.surface.blit(this.background, new gamejs.Rect([0, 0], [this.width, this.height]), new gamejs.Rect([this.offset_x, this.offset_y], [this.width, this.height]));
     };
-    
 
-    
+
+
     //zoom
     this.setZoom=function(zoom){
         var new_width=parseInt(this.display_width/zoom);
@@ -310,17 +310,17 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
             this.r2=new gamejs.Rect([0, 0], [this.width, this.height]);
             this.st=new gamejs.Surface(this.width, this.height);
         }
-        
+
     };
-    
+
     this.increaseZoom=function(){
         if(this.zoom<1)this.setZoom(this.zoom+0.01);
     };
-    
+
     this.decreaseZoom=function(){
         if(this.zoom>0.5)this.setZoom(this.zoom-0.01);
     };
-    
+
     //render
     this.render=function(display){
         if(this.zoom==1)this.surface=display;
@@ -333,9 +333,9 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
             display.blit(this.surface, this.r1, this.r2);
         }
     };
-    
+
     //DRAW FUNCTIONS
-    
+
     this.drawLine=function(color, pt1, pt2, width){
         /*
          pt1, pt2 - points in world coordinates
@@ -344,7 +344,7 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
         gamejs.draw.line(this.surface, color, this.getScreenPoint(pt1),
                                                this.getScreenPoint(pt2), 2);
     };
-    
+
     this.drawProp=function(filename, pos, angle){
         /*
         pos - position in world coordinates
@@ -353,9 +353,9 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
         var sprite=this.cache.getPropSprite(filename, angle ? angle : 0)
         var ofst=sprite.getSize()[0]/2;
         pos=this.getScreenPoint(pos);
-        this.surface.blit(sprite, [pos[0]-ofst, pos[1]-ofst]);  
+        this.surface.blit(sprite, [pos[0]-ofst, pos[1]-ofst]);
     };
-    
+
     this.drawCar=function(filename, pos, angle){
         /*
         pos - position in world coordinates
@@ -367,33 +367,33 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
         this.surface.blit(sprite, [pos[0]-ofst, pos[1]-ofst]);
 
     };
-    
+
     this.drawStatic=function(filename, pos){
         var sprite=this.cache.getStaticSprite(filename);
         var sz=sprite.getSize();
         pos=this.getScreenPoint(pos);
         this.surface.blit(sprite, [pos[0]-sz[0]/2, pos[1]-sz[1]/2]);
     };
-    
+
     this.drawAnimation=function(filename, pos, frame){
         /*
         pos - position in world coordinates
-        frame - frame number (starts with 0 ) 
+        frame - frame number (starts with 0 )
         */
         var sheet=this.cache.getAnimationSheet(filename)
         var w=sheet.getSize()[1];
         pos=this.getScreenPoint(pos);
         this.surface.blit(sheet, new gamejs.Rect([pos[0]-w/2, pos[1]-w/2], [w, w]), new gamejs.Rect([frame*w, 0], [w, w]))
     };
-    
-   
-    
+
+
+
     this.renderHUD=function(display, car, msDuration, max_laps, time_to_start, paused, delta, bfs){
         this.surface=display;
         this.drawText('FPS: ' + parseInt(1000/msDuration), 'hud', [10, 10]);
         var size=display.getSize();
-        
-        if(car){        
+
+        if(car){
             this.drawText('POS: '+car.getRacePosition()+ '/'+this.world.objects['car'].length, 'hud',[size[0]/2-140,  10]);
             //lap
             this.drawText('LAP: '+car.lap+'/'+max_laps, 'hud', [size[0]/2+20,  10]);
@@ -404,13 +404,13 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
             //mines
             this.drawText('MINES: '+parseInt(car.weapon2.ammo), 'hud', [450, display.getSize()[1]-40]);
         }
-        
+
         if(settings.get('DEBUG')){
             if(delta){
                  this.drawText('D: ' + Math.abs(delta), 'hud', [10, 80]);
-                 
+
             }
-    
+
             if(bfs){
                 this.drawText('BFS: ' +bfs, 'hud', [10, 140]);
             }
@@ -433,11 +433,11 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
                 }
             }
         }
-        
-        
+
+
     };
-    
-    
+
+
     return this;
 }
 gamejs.utils.objects.extend(RaceRenderer, Renderer);

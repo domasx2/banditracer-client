@@ -17,19 +17,19 @@ exports.AIController=function(car, world, scene){
     this.world=world;
     this.cur_wp=1;
     this.stationary=0; //how many seconds is this car stationary?
-    
+
     this.update=function(keys_down, ms){
         if(!this.car.alive)return;
          this.car.accelerate=ACC_ACCELERATE;
         var wp=this.world.ai_waypoints[this.cur_wp];
         var nwp=this.world.ai_waypoints[this.cur_wp<this.world.max_waypoint ? this.cur_wp+1 : 1];
-        
+
         var speed=this.car.getSpeedKMH();
-        
+
         //cheats
         var player_pos=this.scene.player_car.getRacePosition();
         var mypos=this.car.getRacePosition();
-        
+
         //if player is ahead, gradually increase speed to up to extra 20 km/h
         if(player_pos<mypos){
             if(car.mod_speed<30){
@@ -41,7 +41,7 @@ exports.AIController=function(car, world, scene){
                 car.mod_speed-=5*(ms/1000);
             }
         }
-        
+
         //if car speed is below 6 km/h for 3 seconds, most likely it is stuck. teleport it to next waypoint
         if(speed<6){
             if(this.car.alive){
@@ -51,20 +51,20 @@ exports.AIController=function(car, world, scene){
                     this.stationary=0;
                 }
             }else {this.stationary=0;}
-            
+
         }
         else this.stationary=0;
-        
-        
-  
+
+
+
         var carpos=utils.vectorToList(this.car.body.GetPosition());
         var lp=this.car.body.GetLocalPoint({'x':wp.x, 'y':wp.y});
         var len=vectors.distance(carpos, [wp.x, wp.y]);
         var len2=vectors.distance(carpos, [nwp.x, nwp.y]);
-        
-        
-        
-        
+
+
+
+
         /*switch to next waypont if :
           1)closer than 5 meters to it
           2)it is behind the car, but closer than 35 meters
@@ -72,15 +72,15 @@ exports.AIController=function(car, world, scene){
         var angle=utils.angleBetweenVectors([0, -1], lp);
         if(len<5 || (lp.y>0 && len <35)){
             if(this.cur_wp<this.world.max_waypoint)this.cur_wp++;
-            else this.cur_wp=1;          
+            else this.cur_wp=1;
             wp=this.world.ai_waypoints[this.cur_wp];
         }
         if(angle>10){
             if(lp.x>0)this.car.steer=STEER_RIGHT;
             else this.car.steer=STEER_LEFT;
         }else this.car.steer=STEER_NONE;
-        
-        
+
+
         //try and fire machinegun if something is in front
         if(this.car.weapon1 && ( this.car.weapon1.type=='machinegun' || this.car.weapon1.type=='missilelauncher')){
             this.car.fire_weapon1=false;
@@ -94,13 +94,13 @@ exports.AIController=function(car, world, scene){
                         this.car.fire_weapon1=true;
                         break;
                     }
-                    
+
                 }
             }
         }
-        
+
     }
-    
+
     return this;
 }
 
@@ -111,16 +111,16 @@ exports.MultiplayerController=function(){
                    steer_right:39, //right
                    fire_weapon1:gamejs.event.K_x, //fire weapon 1
                    fire_weapon2:gamejs.event.K_c}; //fire weapkn 2
-    
+
     this.actions={'accelerate':ACC_NONE,
                   'steer':STEER_NONE,
                   'fire_weapon1':false,
                   'fire_weapon2':false};
-                   
-    
+
+
     this.update=function(keys_down, ms){
         var changed=false;
-        
+
         var accelerate, steer, fire_weapon1, fire_weapon2;
 
         if(keys_down[this.bindings.accelerate]){
@@ -130,7 +130,7 @@ exports.MultiplayerController=function(){
         }else{
             accelerate=ACC_NONE;
         }
-        
+
         if(keys_down[this.bindings.steer_right]){
             steer=STEER_RIGHT;
         }else if(keys_down[this.bindings.steer_left]){
@@ -138,13 +138,13 @@ exports.MultiplayerController=function(){
         }else{
             steer=STEER_NONE;
         }
-        
+
         if(keys_down[this.bindings.fire_weapon1]) fire_weapon1=true;
         else fire_weapon1=false;
-        
+
         if(keys_down[this.bindings.fire_weapon2]) fire_weapon2=true;
         else fire_weapon2=false;
-        
+
         if(!(accelerate===this.actions.accelerate)){
             this.actions.accelerate=accelerate;
             changed=true;
@@ -162,11 +162,11 @@ exports.MultiplayerController=function(){
             changed=true;
         }
         return changed;
-        
+
     };
-    
-    return this; 
-    
+
+    return this;
+
 };
 
 exports.PlayerCarController=function(car){
@@ -177,7 +177,7 @@ exports.PlayerCarController=function(car){
                    steer_right:39, //right
                    fire_weapon1:gamejs.event.K_x, //fire weapon 1
                    fire_weapon2:gamejs.event.K_c}; //fire weapkn 2
-                   
+
     this.update=function(keys_down, ms){
         if(!this.car.alive)return;
         if(keys_down[this.bindings.accelerate]){
@@ -187,7 +187,7 @@ exports.PlayerCarController=function(car){
         }else{
             this.car.accelerate=ACC_NONE;
         }
-        
+
         if(keys_down[this.bindings.steer_right]){
             this.car.steer=STEER_RIGHT;
         }else if(keys_down[this.bindings.steer_left]){
@@ -195,14 +195,14 @@ exports.PlayerCarController=function(car){
         }else{
             this.car.steer=STEER_NONE;
         }
-        
+
         if(keys_down[this.bindings.fire_weapon1]) this.car.fire_weapon1=true;
         else this.car.fire_weapon1=false;
-        
+
         if(keys_down[this.bindings.fire_weapon2]) this.car.fire_weapon2=true;
         else this.car.fire_weapon2=false;
-        
+
     };
-    
+
     return this;
 };
