@@ -38,19 +38,19 @@
  
 */
 
-exports.Bandit={'width':1.6,
+exports.Bandit={'width':1.7,
                 'height':3.5,
                 'name':'Bandit',
-                'filenames':['bandit.png'],
-                'power':100,
+                'filenames':['bandit_yellow.png', 'bandit_green.png', 'bandit_blue.png', 'bandit_red.png'],
+                'power':105,
                 'max_speed':135,
                 'max_steer_angle':17,
                 'health':80,
                 'main_weapon':'Machinegun',
-                'wheels':[{'x':-1, 'y':-1, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
-                          {'x':1, 'y':-1, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
-                          {'x':-1, 'y':1.1, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'},
-                          {'x':1, 'y':1.1, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'}]
+                'wheels':[{'x':-0.85, 'y':-1, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
+                          {'x':0.85, 'y':-1, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
+                          {'x':-0.85, 'y':1.1, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'},
+                          {'x':0.85, 'y':1.1, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'}]
                 };
 exports.Racer={'width':2,
                 'name':'Racer',
