@@ -15,9 +15,10 @@ if (IS_RINGO) {
         levels[levelname]=JSON.parse(content);
     });
 } else {
-    fs.readdirSync(LEVELS_PATH).forEach(function(fname) {
+    var dirName = __dirname +'/' + LEVELS_PATH;
+    fs.readdirSync(dirName).forEach(function(fname) {
        var levelname=fname.split('.')[0];
-       var content=fs.readFileSync(LEVELS_PATH+fname, 'utf-8');
+       var content=fs.readFileSync(dirName+fname, 'utf-8');
        levels[levelname]=JSON.parse(content);
     });
 };
