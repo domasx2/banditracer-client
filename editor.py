@@ -874,7 +874,7 @@ class LevelFrame(wx.Frame):
         exports.tiles=%s;
         exports.animations=%s;
         exports.ui=%s;
-        exports.static=%s;
+        exports.statics=%s;
         exports.levels=%s;""" % (props, cars, tiles, animations, ui, static, levels)
         
         f=open('javascript/resources.js', 'w')
@@ -957,7 +957,7 @@ class NewLevelDialog(wx.Dialog):
         app=wx.GetApp()
         width=int(self.txt_width.GetValue())
         height=int(self.txt_height.GetValue())
-        tiles=['grass.png' for x in range(width*height)]
+        tiles=['sand.png' for x in range(width*height)]
         level=Level((width, height), tiles)
         app.loadLevel(level)
         app.refresh()
@@ -1235,7 +1235,7 @@ class EditorApp(wx.App):
         self.minimapframe.mappanel.Refresh()
 
     def loadInitLevel(self):
-        tiles=['grass.png' for x in range(20*20)]
+        tiles=['sand.png' for x in range(20*20)]
         self.loadLevel(Level((20, 20), tiles))
 
     def deleteSelected(self):

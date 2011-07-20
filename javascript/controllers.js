@@ -1,6 +1,13 @@
 var gamejs=require('gamejs');
 var vectors=require('gamejs/utils/vectors');
 var utils=require('./utils');
+var vec=utils.vec;
+var arr=utils.arr;
+
+var vectors = gamejs.utils.vectors;
+var math = gamejs.utils.math;
+radians=math.radians;
+degrees=math.degrees;
 
 var STEER_NONE=exports.STEER_NONE=0;
 var STEER_RIGHT=exports.STEER_RIGHT=1;
@@ -51,35 +58,28 @@ exports.AIController=function(car, world, scene){
                     this.stationary=0;
                 }
             }else {this.stationary=0;}
-
         }
         else this.stationary=0;
 
-
-
-        var carpos=utils.vectorToList(this.car.body.GetPosition());
-        var lp=this.car.body.GetLocalPoint({'x':wp.x, 'y':wp.y});
+        var carpos=arr(this.car.body.GetPosition());
+        var lp=arr(this.car.body.GetLocalPoint(vec(wp.x, wp.y)));
         var len=vectors.distance(carpos, [wp.x, wp.y]);
         var len2=vectors.distance(carpos, [nwp.x, nwp.y]);
-
-
-
 
         /*switch to next waypont if :
           1)closer than 5 meters to it
           2)it is behind the car, but closer than 35 meters
         */
-        var angle=utils.angleBetweenVectors([0, -1], lp);
+        var angle=degrees(vectors.angle([0, -1], lp));
         if(len<5 || (lp.y>0 && len <35)){
             if(this.cur_wp<this.world.max_waypoint)this.cur_wp++;
             else this.cur_wp=1;
             wp=this.world.ai_waypoints[this.cur_wp];
         }
         if(angle>10){
-            if(lp.x>0)this.car.steer=STEER_RIGHT;
+            if(lp[0]>0)this.car.steer=STEER_RIGHT;
             else this.car.steer=STEER_LEFT;
         }else this.car.steer=STEER_NONE;
-
 
         //try and fire machinegun if something is in front
         if(this.car.weapon1 && ( this.car.weapon1.type=='machinegun' || this.car.weapon1.type=='missilelauncher')){
@@ -88,27 +88,25 @@ exports.AIController=function(car, world, scene){
             for(i=0;i<this.world.objects['car'].length;i++){
                 c=this.world.objects['car'][i];
                 if(c!=this.car){
-                    len=vectors.distance(utils.vectorToList(this.car.body.GetPosition()), utils.vectorToList(c.body.GetPosition()));
-                    angle=utils.angleBetweenVectors([0, -1], this.car.body.GetLocalPoint(c.body.GetPosition()));
+                    len=vectors.distance(arr(this.car.body.GetPosition()), arr(c.body.GetPosition()));
+                    angle=vectors.angle([0, -1], arr(this.car.body.GetLocalPoint(c.body.GetPosition())));
                     if(len<50 && angle<15){
                         this.car.fire_weapon1=true;
                         break;
                     }
-
                 }
             }
         }
-
     }
 
     return this;
 }
 
 exports.MultiplayerController=function(){
-    this.bindings={accelerate:38, //up
-                   brake:40,      //down
-                   steer_left:37, //left
-                   steer_right:39, //right
+    this.bindings={accelerate:gamejs.event.K_UP, //up
+                   brake:gamejs.event.K_DOWN,      //down
+                   steer_left:gamejs.event.K_LEFT, //left
+                   steer_right:gamejs.event.K_RIGHT, //right
                    fire_weapon1:gamejs.event.K_x, //fire weapon 1
                    fire_weapon2:gamejs.event.K_c}; //fire weapkn 2
 
@@ -171,10 +169,10 @@ exports.MultiplayerController=function(){
 
 exports.PlayerCarController=function(car){
     this.car=car;
-    this.bindings={accelerate:38, //up
-                   brake:40,      //down
-                   steer_left:37, //left
-                   steer_right:39, //right
+    this.bindings={accelerate:gamejs.event.K_UP, //up
+                   brake:gamejs.event.K_DOWN,      //down
+                   steer_left:gamejs.event.K_LEFT, //left
+                   steer_right:gamejs.event.K_RIGHT, //right
                    fire_weapon1:gamejs.event.K_x, //fire weapon 1
                    fire_weapon2:gamejs.event.K_c}; //fire weapkn 2
 

@@ -1,8 +1,15 @@
 var gamejs = require('gamejs');
 var box2d = require('./box2d');
 var utils = require('./utils');
+var vec=utils.vec;
+var arr=utils.arr;
+
+var vectors = gamejs.utils.vectors;
+var math = gamejs.utils.math;
+radians=math.radians;
+degrees=math.degrees;
+
 var animation = require('./animation');
-var vectors=gamejs.utils.vectors;
 
 var Projectile=exports.Projectile=function(pars){
     /*
@@ -22,29 +29,35 @@ var Projectile=exports.Projectile=function(pars){
     this.speed    = pars.speed;
     this.damage   = pars.damage;
     this.car      = pars.car;
-
-    var def=new box2d.b2BodyDef();
-    def.position=utils.listToVector(this.position);
-    def.angle=utils.radians(this.angle);
-    def.linearDamping=0;
-    def.angularDamping=0;
-    def.bullet=true;
-    this.body=this.car.world.CreateBody(def);
-    var shapedef=new box2d.b2PolygonDef();
-    shapedef.SetAsBox(this.width/2, this.height/2);
-    shapedef.density=1;
-    shapedef.friction=0.3;
-    shapedef.restitution=1;
-
+    this.world=this.car.world;
     this.type='projectile';
-    this.body.CreateShape(shapedef);
-    this.body.SetMassFromShapes();
-    this.body.SetUserData({'obj':this, 'type':'projectile'});
+    
+    //initialize body
+    var bdef=new box2d.b2BodyDef();
+    bdef.position=vec(this.position);
+    bdef.type = box2d.b2Body.b2_dynamicBody;
+    bdef.angle=radians(this.angle);
+    bdef.linearDamping=0;
+    bdef.angularDamping=0;
+    bdef.bullet=true;
+    bdef.fixedRotation=true;
+    this.body=this.world.CreateBody(bdef);
+    this.body.SetUserData(this);
+    
+    //initialize shape
+    var fixdef=new box2d.b2FixtureDef;
+    fixdef.shape=new box2d.b2PolygonShape();
+    fixdef.shape.SetAsBox(this.width/2, this.height/2);
+    fixdef.restitution=1; //positively bouncy!
+    fixdef.density=0.00001;
+    fixdef.friction=0;
+   // fixdef.isSensor=true;
+    this.body.CreateFixture(fixdef);
 
     this.getState=function(){
-        return {'p':utils.vectorToList(this.body.GetPosition()),
-                'a':utils.degrees(this.body.GetAngle()),
-                'lv':this.body.GetLinearVelocity()}
+        return {'p':arr(this.body.GetPosition()),
+                'a':degrees(this.body.GetAngle()),
+                'lv':arr(this.body.GetLinearVelocity())}
     };
 
     this.interpolate=function(s1, s2, q){
@@ -54,30 +67,27 @@ var Projectile=exports.Projectile=function(pars){
     };
 
     this.setState=function(state){
-        this.body.SetXForm(utils.listToVector(state.p), utils.radians(state.a));
-        this.body.SetLinearVelocity(utils.listToVector(state.lv));
+        this.body.SetPositionAndAngle(vec(state.p), radians(state.a));
+        this.body.SetLinearVelocity(vec(state.lv));
+    };
+    
+    this.getSpeedKMH=function(){
+        var velocity=arr(this.body.GetLinearVelocity());
+        var len=vectors.len(velocity);
+        return (len/1000)*3600;
     };
 
-
     this.setSpeed=function(speed){
-        /*var velocity=this.body.GetLinearVelocity();
-
-        velocity=utils.normaliseVector(velocity);*/
-
-        var velocity=this.car.body.GetWorldVector(new box2d.b2Vec2(0, -1));
-
-        velocity={x:velocity.x* ((speed*1000.0)/3600.0),
-                  y:velocity.y* ((speed*1000.0)/3600.0)};
-        this.body.SetLinearVelocity(velocity);
-
-        //this.body.ApplyImpulse(velocity, this.body.GetPosition())
-
+        if(this.getSpeedKMH()<1) var velocity=arr(this.car.body.GetWorldVector(vec(0, -1)));
+        else var velocity=arr(this.body.GetWorldVector(vec(0, -1))); //crude hax: with this version of box2d, some projectiles slow down (apparently due to collision with other bullets)
+                                                                     //despite being sensor mode. Might be box2d bug. Could not find resolution in acceptable time, resetting speed every frame.
+        velocity=vectors.multiply(velocity, ((speed*1000)/3600));
+        this.body.SetLinearVelocity(vec(velocity));
     };
 
     this.impact=function(obj, cpoint, direction){
         if(obj.type=='car' || obj.type=='prop'){
             this.car.world.event('destroy', this.id);
-
             if(obj.type=='car'){
                 obj.hit(this.damage, this.car);
             }
@@ -91,11 +101,7 @@ var Projectile=exports.Projectile=function(pars){
         console.log('draw not implemented for projectile');
     };
 
-    this.update=function(msDuration){
-
-    };
-
-
+    this.update=function(msDuration){this.setSpeed(this.speed);};
 
     return this;
 }
@@ -112,22 +118,24 @@ var Mine=exports.Mine=function(pars){
     this.height=2;
     this.type='mine';
     this.damage=40;
-
-    var def=new box2d.b2BodyDef();
-    def.position=utils.listToVector(this.position);
-    def.angle=0;
-    def.linearDamping=0;
-    def.angularDamping=0;
-    this.body=this.car.world.CreateBody(def);
-    var shapedef=new box2d.b2PolygonDef();
-    shapedef.SetAsBox(this.width/2, this.height/2);
-    shapedef.density=1;
-    shapedef.friction=0.3;
-    shapedef.restitution=1;
-    shapedef.isSensor=true;
-    this.body.CreateShape(shapedef);
-    this.body.SetMassFromShapes();
-    this.body.SetUserData({'obj':this, 'type':'mine'});
+    this.world=this.car.world;
+    
+    //initialize body
+    var bdef=new box2d.b2BodyDef();
+    bdef.position=vec(this.position);
+    bdef.angle=0;
+    bdef.fixedRotation=true;
+    bdef.linearDamping=0;
+    bdef.angularDamping=0;
+    this.body=this.world.CreateBody(bdef);
+    this.body.SetUserData(this);
+    
+    //initialize shape
+    var fixdef=new box2d.b2FixtureDef;
+    fixdef.shape=new box2d.b2PolygonShape();
+    fixdef.shape.SetAsBox(this.width/2, this.height/2);
+    fixdef.isSensor=true;    
+    this.body.CreateFixture(fixdef);
 
     this.getState=function(){
         return null;
@@ -138,18 +146,14 @@ var Mine=exports.Mine=function(pars){
     this.impact=function(obj, cpoint, direction){
         if((obj.type=='car')){
             var i, c;
-            for(i=0;i<this.car.world.objects['car'].length; i++){
-                c=this.car.world.objects['car'][i];
-                if((c==obj) || (vectors.distance(utils.vectorToList(this.position), utils.vectorToList(c.body.GetPosition()))<=8)){
+            this.car.world.objects['car'].forEach(function(c){
+                if((c==obj) || (vectors.distance(this.position, arr(c.body.GetPosition()))<=8)){
                     c.hit(this.damage, this.car);
                     if(this.onimpact) this.onimpact();
-
                 }
-            }
-
+            }, this);
             this.car.world.event('destroy', this.id);
             this.car.world.event('create', {'type':'animation', 'obj_name':'explosion', 'pars':{'position':this.position}});
-
         }
     };
 
@@ -160,8 +164,6 @@ var Mine=exports.Mine=function(pars){
     this.destroy=function(){
         this.car.world.event('destroy', this.id);
     };
-
-
 
     return this;
 };
@@ -186,17 +188,18 @@ var Missile=exports.Missile=function(pars){
     };
 
      this.onimpact=function(){
-        this.car.world.event('create', {'type':'animation', 'obj_name':'explosion', 'pars':{'position':utils.vectorToList(this.body.GetPosition())}});
+        this.car.world.event('create', {'type':'animation', 'obj_name':'explosion', 'pars':{'position':arr(this.body.GetPosition())}});
     };
 
     this.draw=function(renderer, msDuration){
-        renderer.drawCar('missile.png', utils.vectorToList(this.body.GetPosition()), utils.degrees(this.body.GetAngle()));
+        renderer.drawCar('missile.png', arr(this.body.GetPosition()), degrees(this.body.GetAngle()));
     };
 
-     this.update=function(msDuration){
+    this.update=function(msDuration){
+        this.setSpeed(this.speed);
         this.tts-=msDuration;
         if(this.tts<0){
-            this.car.world.event('create', {'type':'animation', 'obj_name':'smoke', 'pars':{'position':this.body.GetWorldPoint(utils.listToVector([0, 1.25]))}});
+            this.car.world.event('create', {'type':'animation', 'obj_name':'smoke', 'pars':{'position':arr(this.body.GetWorldPoint(vec([0, 1.25])))}});
             this.tts=50;
         }
     };
@@ -221,14 +224,11 @@ var Bullet=exports.Bullet=function(pars){
 
 
     this.onimpact=function(){
-        this.car.world.event('create', {'type':'animation', 'obj_name':'small_explosion', 'pars':{'position':utils.vectorToList(this.body.GetPosition())}});
+        this.car.world.event('create', {'type':'animation', 'obj_name':'small_explosion', 'pars':{'position':arr(this.body.GetPosition())}});
     };
 
     this.draw=function(renderer, msDuration){
-        //var pos=this.body.GetWorldPoint(new box2d.b2Vec2(0, this.height/2));
-        //console.log(pos.x+' '+pos.y);
-      //  renderer.drawLine(this.color, this.body.GetWorldPoint(new box2d.b2Vec2(0, -(this.height/2))), this.body.GetWorldPoint(new box2d.b2Vec2(0, this.height/2)), 2);
-        renderer.drawCar('bullet.png', utils.vectorToList(this.body.GetPosition()), utils.degrees(this.body.GetAngle()));
+        renderer.drawCar('bullet.png', arr(this.body.GetPosition()), degrees(this.body.GetAngle()));
     };
 
     this.destroy=function(){
@@ -286,23 +286,20 @@ var Machinegun=exports.Machinegun=function(pars){
     this.ofst_x=-0.5;
     this.fire=function(){
         if(this.ammo&&this.cooldown<=0){
-            var pos =utils.vectorToList(this.car.body.GetWorldPoint(new box2d.b2Vec2(this.ofst_x, -(this.car.height/2+0.81))));
+            var pos =arr(this.car.body.GetWorldPoint(vec(this.ofst_x, -(this.car.height/2+0.8))));
             this.car.world.event('create', {'type':'weapon', 'obj_name':'Bullet', 'pars':{'position':pos,
                                                                                           'angle':this.car.getAngle(),
                                                                                                'car':this.car.id}});
-
             this.ammo--;
             this.cooldown=this.fire_rate;
             this.ofst_x=this.ofst_x* -1;
         }
-
     };
 
     return this;
 };
 
 gamejs.utils.objects.extend(Machinegun, Weapon);
-
 
 var MineLauncher=exports.MineLauncher=function(pars){
     /*
@@ -319,16 +316,13 @@ var MineLauncher=exports.MineLauncher=function(pars){
 
     this.fire=function(){
         if(this.ammo&&this.cooldown<=0){
-            var pos =utils.vectorToList(this.car.body.GetWorldPoint(new box2d.b2Vec2(0, (this.car.height/2+3))));
+            var pos = arr(this.car.body.GetWorldPoint(new box2d.b2Vec2(0, (this.car.height/2+3))));
             this.car.world.event('create', {'type':'weapon', 'obj_name':'Mine', 'pars':{'position':pos,
                                                                                          'car':this.car.id}});
-
             this.ammo--;
             this.cooldown=this.fire_rate;
         }
-
     };
-
     return this;
 };
 gamejs.utils.objects.extend(MineLauncher, Weapon);
@@ -344,15 +338,13 @@ var MissileLauncher=exports.MissileLauncher=function(pars){
 
     this.fire=function(){
         if(this.ammo&&this.cooldown<=0){
-            var pos =utils.vectorToList(this.car.body.GetWorldPoint(new box2d.b2Vec2(0, -(this.car.height/2+2))));
+            var pos = arr(this.car.body.GetWorldPoint(vec(0, -(this.car.height/2+2))));
             this.car.world.event('create', {'type':'weapon', 'obj_name':'Missile', 'pars':{'position':pos,
                                                                                          'angle':this.car.getAngle(),
                                                                                          'car':this.car.id}});
-
             this.ammo--;
             this.cooldown=this.fire_rate;
         }
-
     };
 
     return this;

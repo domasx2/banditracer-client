@@ -1,5 +1,13 @@
 var gamejs=require('gamejs');
 var utils=require('./utils');
+var vec=utils.vec;
+var arr=utils.arr;
+
+var vectors = gamejs.utils.vectors;
+var math = gamejs.utils.math;
+radians=math.radians;
+degrees=math.degrees;
+
 var world=require('./world');
 var renderer=require('./renderer');
 var settings=require('./settings');
@@ -16,40 +24,33 @@ var LevelScene=exports.LevelScene=function(game, level, cache){
     this.controllers=[];
     this.keys_down={};
     this.started=false;
-
-
     this.max_laps=3;
     var i;
     //BUILD BACKGROUND FROM TILES
     var tiles=[];
-    for(i=0;i<level.tiles.length;i++)tiles[tiles.length]=level.dict[level.tiles[i]+''];
+    level.tiles.forEach(function(tile){
+        tiles.push(level.dict[tile+'']);
+    });
     this.background=utils.renderBackgroundFromTiles(level.width_t, level.width_t, tiles,  this.cache);
-
 
     this.world=world.buildWorld(level,  world.MODE_STANDALONE);
 
     //RENDER PROPS INTO BACKGROUND
-    var prop, position, prop2, angle;
-    for(i=0;i<level.props.length;i++){
-        prop=level.props[i];
-        angle=utils.normaliseAngle(-prop.a);
+    var position, angle;
+    level.props.forEach(function(prop){
+        angle=math.normaliseDegrees(-prop.a);
         //render props into background
         this.background.blit(this.cache.getPropSprite(level.dict[prop['f']+''], angle), [prop.x, prop.y])
-
-    }
+    }, this);
 
     this.renderer=new renderer.RaceRenderer(settings.get('SCREEN_WIDTH'), settings.get('SCREEN_HEIGHT'), this.world, this.background, this.cache);
-
-
 
     this.handleEvent=function(event){
         if (event.type === gamejs.event.KEY_DOWN) {
             this.keys_down[event.key] = true;
-
             if(event.key===gamejs.event.K_SPACE){
                this.paused=(!this.paused);
             };
-
         } else if (event.type === gamejs.event.KEY_UP) {
             this.keys_down[event.key] = false;
         };
@@ -60,10 +61,7 @@ var LevelScene=exports.LevelScene=function(game, level, cache){
         if(this.keys_down[gamejs.event.K_p]) this.renderer.increaseZoom();
         else if(this.keys_down[gamejs.event.K_l]) this.renderer.decreaseZoom();
     };
-
-
 };
-
 
 var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, cache){
     MultiplayerLevelScene.superConstructor.apply(this, [game, level, cache]);
@@ -78,6 +76,7 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
     this.upds_stacked=0;
     this.time=0;
     this.delta=0;
+    this.last_t=null;;
     this.deltas=[];
     this.delta_q=0;
     this.states={};
@@ -109,7 +108,7 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
             if(t<target_time && t > mint)mint=t;
             else if(t>target_time && (t<maxt || maxt===0))maxt=t;
         }
-
+        
         if(mint||maxt){
             var minst=this.states[mint];
             var maxst=maxt ? this.states[maxt] : null;
@@ -135,15 +134,6 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
                         this.bfs++;
                         state=minst[objid];
                         this.last_upd_time=mint;
-                       /* if(!(mint==target_time)){
-                            var tarray=[];
-                            var min=100000000000,max=0;
-                            for(t in this.states){
-                                min=Math.min(min, t);
-                                max=Math.max(max, t);
-                            }
-                            console.log('old state... '+target_time+' '+(target_time-mint)+'('+min, max+')');
-                        }*/
                     }
                     obj.setState(state);
                 }
@@ -162,43 +152,31 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
         if(this.time_to_start<0)this.started=true;
 
         var target_time=this.time+this.delta-10;
-        //console.log(this.time+' '+target_time);
         this.processEvents(target_time);
 
-        if( this.started){
+        if(this.started){
             //set object state
-
             this.setState(target_time);
 
             if(target_time>this.last_upd_time){
                 var d=target_time-this.last_upd_time
                 this.world.b2world.Step(d/1000, 10, 8);
-                //console.log('simulating for '+d+' '+this.last_upd_time+' '+target_time);
+                this.world.b2world.ClearForces();
                 this.last_upd_time=target_time;
-
             }
-
 
             //update controllers
             this.controllers.forEach(function(c) {
-                var didUpdate = c.update(this.keys_down, msDuration);
-                if (didUpdate) {
-                    this.send_update = true;
-                }
+                if(c.update(this.keys_down, msDuration)) this.send_update = true;
             }, this);
             //update world
             this.world.update(msDuration);
-
         }
 
         this.time_since_last_update_sent+=msDuration;
         if(this.time_since_last_update_sent>1000 && (!this.send_update))this.send_update=true;
-
         this.sendInfo();
      };
-
-    //this.render_r_1= new gamejs.Rect([0, 0], [500, 400]);
-    //this.render_r_2=new gamejs.Rect([0, 0], [1000, 800]);
 
     this.sendInfo=function(){
         //if(this.upds_stacked<5){
@@ -217,7 +195,6 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
             this.last_event_no=event.no;
            // this.send_update=true;
             delete this.queued_events[event.no];
-
             if((!this.player_car) && this.carid){
                 obj=this.world.getObjectById(this.carid);
                 if(obj){
@@ -227,8 +204,6 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
                 }
             }
         }
-
-
     };
 
     this.handleWorldUpdate=function(){
@@ -240,22 +215,18 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
                     event.t=update.t;
                     this.queued_events[event.no]=event;
                     this.last_known_event_no=event.no;
-
                 }
             }, this);
-
             this.carid=update.carid;
-
             //put this state in states array
             this.states[update.t]=update.states;
-
+            this.last_t=update.t;
             this.upds_stacked=0;
-
         }, this);
 
         //remove old states, taking care to leave at least one
         Object.keys(this.states).forEach(function(t) {
-            if(t < (this.time+this.delta-300)){
+            if((t < (this.time+this.delta-300)) &&(t!=this.last_t)){
                 delete this.states[t];
             }
         }, this);
@@ -271,7 +242,6 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
                 dlen=60;
             }
             this.delta=parseInt(this.delta_q/dlen);
-            //console.log(this.delta);
         }
         this.queued_updates=[];
     };
@@ -284,13 +254,12 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
         if(this.state==2){
             if(this.renderer.follow_object.active==false){
                 this.world.objects.car.some(function(car) {
-                    car=this.world.objects['car'][i];
                     if(car.active){
                         this.renderer.follow_object=car;
                         return true;
                     }
                     return false;
-                });
+                }, this);
             }
         }
 
@@ -323,9 +292,7 @@ gamejs.utils.objects.extend(MultiplayerLevelScene, LevelScene);
 var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, cache, car, ai_test){
     SingleplayerLevelScene.superConstructor.apply(this, [game, level, cache]);
 
-
     this.test_ai=ai_test;
-
 
     //PLAYER CAR
     var ct=car ? car : 'Racer';
@@ -333,63 +300,60 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, 
                                                                                                'angle':this.world.start_positions[1].angle,
                                                                                                'alias':this.game.title_scene.alias.getText(),
                                                                                                'weapon1':car_descriptions[ct].main_weapon,
-                                                                                               'weapon2':'MineLauncher'}})
+                                                                                               'weapon2':'MineLauncher'}});
 
-    if(!this.test_ai) this.controllers[this.controllers.length]=new controllers.PlayerCarController(this.player_car);
-    else this.controllers[this.controllers.length]=new controllers.AIController(this.player_car, this.world, this);
+    if(!this.test_ai) this.controllers.push(new controllers.PlayerCarController(this.player_car));
+    else this.controllers.push(new controllers.AIController(this.player_car, this.world, this));
 
     if(!this.test_ai){
     //BUILD AI CARS
-     var cartypes=Object.keys(car_descriptions);
-     for(i=1;i<4;i++){
-        if(this.world.start_positions[i+1]){
-           var ct=cartypes[Math.floor(Math.random()*(cartypes.length))];
-           var aicar=this.world.event('create', {'type':'car', 'obj_name':ct, 'pars':{'position':[this.world.start_positions[i+1].x+1, this.world.start_positions[i+1].y+2],
-                                                                                               'angle':this.world.start_positions[i+1].angle,
-                                                                                               'alias':'Bot '+i,
-                                                                                               'weapon1':car_descriptions[ct].main_weapon,
-                                                                                               'weapon2':'MineLauncher'}})
-
-           this.controllers[this.controllers.length]=new controllers.AIController(aicar, this.world, this);
+        var cartypes=Object.keys(car_descriptions);
+        for(i=1;i<4;i++){
+            if(this.world.start_positions[i+1]){
+                var ct=cartypes[Math.floor(Math.random()*(cartypes.length))];
+                var aicar=this.world.event('create', {'type':'car', 'obj_name':ct, 'pars':{'position':[this.world.start_positions[i+1].x+1, this.world.start_positions[i+1].y+2],
+                                                                                                   'angle':this.world.start_positions[i+1].angle,
+                                                                                                   'alias':'Bot '+i,
+                                                                                                   'weapon1':car_descriptions[ct].main_weapon,
+                                                                                                   'weapon2':'MineLauncher'}});
+                this.controllers.push(new controllers.AIController(aicar, this.world, this));
+            }
         }
-     }
     }
 
     this.renderer.follow(this.player_car);
 
     this.update=function(msDuration){
-
         this.updateZoom(msDuration);
-
         if(this.time_to_start>-1000){
             this.time_to_start-=msDuration;
             if(this.time_to_start<0)this.started=true;
         }
-
-
-
+        
         if(!this.paused && this.started){
-            //update physics
-            this.world.b2world.Step(msDuration/1000, 10, 8);
-
             //update controllers
             this.controllers.forEach(function(c) {
                c.update(this.keys_down, msDuration);
-            });
+            }, this);
+            
             //update world
             this.world.update(msDuration);
+        
+            //update physics
+            this.world.b2world.Step(msDuration/1000, 10, 8);
+            this.world.b2world.ClearForces();     
         }
 
         //if we reached max laps, end race
         if(this.player_car.lap > this.max_laps){
-             var table = this.world.objects.car.map(function(car, idx) {
+            var table = this.world.objects.car.map(function(car, idx) {
                 return {'place':car.getRacePosition(),
                        'id':idx,
                        'player':car.alias,
                        'kills':car.kills,
                        'deaths': car.deaths
                    }
-             });
+            });
             table.sort(function(a, b){
                if(a.place>b.place) return 1;
                else if(a.place<b.place) return -1;
@@ -399,15 +363,12 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, 
         };
     };
 
-  // this.render_r_1= new gamejs.Rect([0, 0], [500, 400]);
-   //this.render_r_2=new gamejs.Rect([0, 0], [1000, 800]);
-
-   this.draw=function(display, msDuration){
-      //render world
-      this.renderer.render(display);
-
-      //render HUD
-      this.renderer.renderHUD(display, {'car':this.player_car,
+    this.draw=function(display, msDuration){
+        //render world
+        this.renderer.render(display);
+  
+        //render HUD
+        this.renderer.renderHUD(display, {'car':this.player_car,
                                         'max_laps':this.max_laps,
                                         'msDuration':msDuration,
                                         'time_to_start':this.time_to_start,

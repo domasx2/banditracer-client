@@ -1,5 +1,13 @@
 var gamejs = require('gamejs');
 var utils=require('./utils');
+var vec=utils.vec;
+var arr=utils.arr;
+
+var vectors = gamejs.utils.vectors;
+var math = gamejs.utils.math;
+radians=math.radians;
+degrees=math.degrees;
+
 var resources=require('./resources');
 var skin=require('./skin');
 var settings=require('./settings');
@@ -24,8 +32,6 @@ var sprite2rotarray=exports.sprite2rotarray=function(surface, step){
     return retv;
 };
 
-
-
 var ImageCache=exports.ImageCache = function(){
     this.cars={};
     this.props={};
@@ -35,55 +41,45 @@ var ImageCache=exports.ImageCache = function(){
     this.ui={};
     this.alphabet='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.,:\/!?"|()';
     this['static']={};
-    var i, f;
     
     //load tiles    
-    for(i=0;i<resources.tiles.length;i++){
-      f=resources.tiles[i];
+    resources.tiles.forEach(function(f){
       this.tiles[f]=gamejs.image.load('images/tiles/'+f);
-    }
+    }, this);
     
     //load cars
-    for(i=0;i<resources.cars.length;i++){
-        f=resources.cars[i];
+    resources.cars.forEach(function(f){
         this.cars[f]=sprite2rotarray(gamejs.image.load('images/cars/'+f), 2);
-    };
+    }, this);
     
     //cache props
-    for(i=0;i<resources.props.length;i++){
-        f=resources.props[i];
+    resources.props.forEach(function(f){
         this.props[f]=sprite2rotarray(gamejs.image.load('images/props/'+f), 5);
-    };
+    }, this);
     
     //cache animations
-    for(i=0;i<resources.animations.length;i++){
-        f=resources.animations[i];
+    resources.animations.forEach(function(f){
         this.animations[f]=gamejs.image.load('images/animations/'+f);
-    };
+    }, this);
     
     //cache ui
-    for(i=0;i<resources.ui.length;i++){
-        f=resources.ui[i];
+    resources.ui.forEach(function(f){
         this.ui[f]=gamejs.image.load('images/ui/'+f);
-    };
+    }, this);
     
     //cache static
-    for(i=0;i<resources['static'].length;i++){
-        f=resources['static'][i];
+    resources['statics'].forEach(function(f){
         this['static'][f]=gamejs.image.load('images/static/'+f);
-    };
-    
+    }, this); 
     
     //cache fonts
     var font, letter;
     for(font in resources.fonts){
         this.fonts[font]={};
-        for(i=0;i<resources.fonts[font].length;i++){
-            f=resources.fonts[font][i];
+        resources.fonts[font].forEach(function(f){
             letter=f.split('.')[0];
             this.fonts[font][letter]=gamejs.image.load('images/fonts/'+font+'/'+f);
-        }
-            
+        }, this);           
     };
     
     this.initFont=function(name, fontSettings, color){
@@ -150,7 +146,7 @@ var ImageCache=exports.ImageCache = function(){
     };
     
     this.getSpriteFromRotarray=function(rotarray, angle){
-        if((angle % rotarray['step'])!=0) angle=utils.normaliseAngle(parseInt(angle/rotarray['step'])*rotarray['step']);
+        if((angle % rotarray['step'])!=0) angle=math.normaliseDegrees(parseInt(angle/rotarray['step'])*rotarray['step']);
         return rotarray[angle];
     };
     
@@ -223,12 +219,10 @@ var Renderer=exports.Renderer=function(width, height, cache){
                 (draw_on ? draw_on: this.surface).blit(s, r1);
                 ofst+=s.getSize()[0]/zoom;
             }
-        }
-        
+        }        
     };
     return this;  
 };
-
 
 var UIRenderer=exports.UIRenderer=function(width, height, cache){
     UIRenderer.superConstructor.apply(this, [width, height, cache]);
@@ -243,13 +237,9 @@ var UIRenderer=exports.UIRenderer=function(width, height, cache){
         this.surface.blit(this.cache.getUIImage(filename), pos);
     };
     
-    
-    
- 
 };
 
 gamejs.utils.objects.extend(UIRenderer, Renderer);
-
 
 var RaceRenderer = exports.RaceRenderer = function(width, height, world, background, cache, follow_object){
     RaceRenderer.superConstructor.apply(this, [width, height, cache]);
@@ -268,36 +258,30 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
     this.r1=new gamejs.Rect([0, 0], [this.display_width, this.display_height]);
     this.r2=new gamejs.Rect([0, 0], [this.width, this.height]);
     
-    
     this.follow=function(obj){
         this.follow_object=obj;  
     };
     
-    
     //update camera offset
     this.updateOffset=function(){
         if(this.follow_object){
-            var pos=this.follow_object.alive ? utils.vectorToList(this.follow_object.body.GetPosition()) : this.follow_object.respawn_location;
+            var pos=this.follow_object.alive ? arr(this.follow_object.body.GetPosition()) : this.follow_object.respawn_location;
             this.offset_x=Math.min(Math.max(0, pos[0]*world.phys_scale-parseInt(this.width/2)), world.width_px-this.width);
             this.offset_y=Math.min(Math.max(0, pos[1]*world.phys_scale-parseInt(this.height/2)), world.height_px-this.height);
         }
         return false;
     };
-    
-    
+       
     //world point 2 screen point
     this.getScreenPoint=function(world_point){
-        world_point=utils.vectorToList(world_point);
+        world_point=arr(world_point);
         return [world_point[0]*this.world.phys_scale-this.offset_x, world_point[1]*this.world.phys_scale-this.offset_y];
     };
     
-
     this.drawBackground=function(){
       //  this.blit(this.background, [0, 0], new gamejs.Rect(-this.offset_x, -this.offset_y, this.width, this.height));
       this.surface.blit(this.background, new gamejs.Rect([0, 0], [this.width, this.height]), new gamejs.Rect([this.offset_x, this.offset_y], [this.width, this.height]));
     };
-    
-
     
     //zoom
     this.setZoom=function(zoom){
@@ -325,7 +309,6 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
     this.render=function(display){
         if(this.zoom==1)this.surface=display;
         else this.surface=this.st;
-
         this.updateOffset();
         this.drawBackground();
         this.world.draw(this);
@@ -386,8 +369,6 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
         this.surface.blit(sheet, new gamejs.Rect([pos[0]-w/2, pos[1]-w/2], [w, w]), new gamejs.Rect([frame*w, 0], [w, w]))
     };
     
-   
-    
     this.renderHUD=function(display,  pars){
         /*
          pars:
@@ -400,7 +381,6 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
          message - a message to display onscreen
         */
 
-      
         this.surface=display;
         this.drawText('FPS: ' + parseInt(1000/pars.msDuration), 'hud', [10, 10]);
         var size=display.getSize();
@@ -420,10 +400,8 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
         
         if(settings.get('DEBUG')){
             if(pars.delta){
-                 this.drawText('D: ' + Math.abs(pars.delta), 'hud', [10, 80]);
-                 
+                 this.drawText('D: ' + Math.abs(pars.delta), 'hud', [10, 80]);          
             }
-    
             if(pars.bfs){
                 this.drawText('BFS: ' +pars.bfs, 'hud', [10, 140]);
             }
@@ -448,11 +426,8 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
                   this.drawText('GO!!!', 'hud', [size[0]/2-150, size[1]/2], 0.75);
                 }
             }
-        }
-        
-        
-    };
-    
+        }   
+    };  
     
     return this;
 }

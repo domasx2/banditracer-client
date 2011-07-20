@@ -25,27 +25,26 @@ exports.getPreloadList=function(){
     for(i=0;i<resources.animations.length;i++){
         retv[retv.length]='images/animations/'+resources.animations[i];
     }
-    for(i=0;i<resources['static'].length;i++){
-        retv[retv.length]='images/static/'+resources['static'][i];
+    for(i=0;i<resources['statics'].length;i++){
+        retv[retv.length]='images/static/'+resources['statics'][i];
     }
     for(i=0;i<resources.ui.length;i++){
         retv[retv.length]='images/ui/'+resources.ui[i];
     }
-
     return retv;
 };
 
 var Director=exports.Director= function Director (display) {
-   var onAir = false;
-   var activeScene = null;
-   this.display=display;
-
-   function tick(msDuration){
+    var onAir = false;
+    var activeScene = null;
+    this.display=display;
+ 
+    function tick(msDuration){
         tick_logic(msDuration);
         tick_render(msDuration);
-   }
-
-   function tick_logic(msDuration){
+    }
+ 
+    function tick_logic(msDuration){
         if (!onAir) return;
         if (activeScene.handleEvent) {
             var evts=gamejs.event.get();
@@ -58,32 +57,29 @@ var Director=exports.Director= function Director (display) {
            gamejs.event.get();
         }
         if (activeScene.update) activeScene.update(msDuration);
-   }
-
-   function tick_render(msDuration){
+    }
+ 
+    function tick_render(msDuration){
         //console.log(display);
         if(activeScene.draw) activeScene.draw(display, msDuration);
-   }
-
-
-
-
-   this.start = function(scene) {
-      onAir = true;
-      this.replaceScene(scene);
-      return;
-   };
-
-   this.replaceScene = function(scene) {
-      activeScene = scene;
-   };
-
-   this.getScene = function() {
-      return activeScene;
-   };
-   //gamejs.time.fpsCallback(tick_logic, this, logic_fps);
-   gamejs.time.fpsCallback(tick, this, settings.get('RENDER_FPS'));
-   return this;
+    }
+ 
+    this.start = function(scene) {
+       onAir = true;
+       this.replaceScene(scene);
+       return;
+    };
+ 
+    this.replaceScene = function(scene) {
+       activeScene = scene;
+    };
+ 
+    this.getScene = function() {
+       return activeScene;
+    };
+    //gamejs.time.fpsCallback(tick_logic, this, logic_fps);
+    gamejs.time.fpsCallback(tick, this, settings.get('FPS'));
+    return this;
 };
 
 
@@ -143,7 +139,6 @@ var Communicator=exports.Communicator=function(game){
        // console.log('recv '+m.data);
         m=JSON.parse(m.data);
         this.game.director.getScene().handleMessage(m.cmd, m.payload);
-
     };
 
     this.onclose=function(){
@@ -181,13 +176,9 @@ exports.Game=function(){
 
     this.start=function(display){
        this.director=new Director(display);
-       
        this.title_scene=new uiscenes.TitleScene(this, this.cache);
        this.director.start(this.title_scene);
-
-      // this.playLevel(levels['level3'], 'Brawler', true);
-       //this.director.start(this.level_scene);
-       
+       //this.playLevel(levels.level1, 'Racer', true);
     };
 
     this.showEndGameScene=function(position){

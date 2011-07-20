@@ -191,7 +191,7 @@ var Table=exports.Table=function(pars){
                 for(var k=0;k<this.columns.length;k++){
                     col=this.columns[k];
                     if(row[col.key]==undefined)console.log('undefined:'+col.key+' for id '+row.id);
-                    renderer.drawText(row[col.key], skin.table.data_font, [x+2, y+12]);
+                    renderer.drawText(String(row[col.key]), skin.table.data_font, [x+2, y+12]);
                     x+=col.width;
                 }
                 y+=this.row_height;
@@ -354,15 +354,11 @@ var LevelSelector=exports.LevelSelector=function(pars){
     this.size=[0, 0];
     var p=0;
     this.btns=[];
-
-
     var level;
 
     this.queueEvent=function(){};
     this.update=function(){this.events=[]};
-    this.draw=function(renderer){
-
-    };
+    this.draw=function(renderer){};
 
     this.select=function(btn, levelkey){
         for(var lk in this.btns){
