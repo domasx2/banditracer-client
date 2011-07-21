@@ -102,7 +102,7 @@ var Projectile=exports.Projectile=function(pars){
     };
 
     this.update=function(msDuration){
-        this.setSpeed(this.speed);
+        //this.setSpeed(this.speed);
     };
 
     return this;
@@ -198,7 +198,7 @@ var Missile=exports.Missile=function(pars){
     };
 
     this.update=function(msDuration){
-        this.setSpeed(this.speed);
+       // this.setSpeed(this.speed);
         this.tts-=msDuration;
         if(this.tts<0){
             this.car.world.event('create', {'type':'animation', 'obj_name':'smoke', 'pars':{'position':arr(this.body.GetWorldPoint(vec([0, 1.25])))}});

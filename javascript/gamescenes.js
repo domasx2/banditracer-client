@@ -225,11 +225,13 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
         }, this);
 
         //remove old states, taking care to leave at least one
-        Object.keys(this.states).forEach(function(t) {
+
+        for(var t in this.states){
             if((t < (this.time+this.delta-300)) &&(t!=this.last_t)){
                 delete this.states[t];
             }
-        }, this);
+        }
+
 
         if(this.queued_updates.length){
             var update = this.queued_updates[0];
@@ -307,7 +309,8 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, 
 
     if(!this.test_ai){
     //BUILD AI CARS
-        var cartypes=Object.keys(car_descriptions);
+        var cartypes=[];
+        for(var key in car_descriptions) cartypes.push(key);
         for(i=1;i<4;i++){
             if(this.world.start_positions[i+1]){
                 var ct=cartypes[Math.floor(Math.random()*(cartypes.length))];
