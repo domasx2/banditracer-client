@@ -89,7 +89,7 @@ exports.AIController=function(car, world, scene){
                 c=this.world.objects['car'][i];
                 if(c!=this.car){
                     len=vectors.distance(arr(this.car.body.GetPosition()), arr(c.body.GetPosition()));
-                    angle=vectors.angle([0, -1], arr(this.car.body.GetLocalPoint(c.body.GetPosition())));
+                    angle=degrees(vectors.angle([0, -1], arr(this.car.body.GetLocalPoint(c.body.GetPosition()))));
                     if(len<50 && angle<15){
                         this.car.fire_weapon1=true;
                         break;

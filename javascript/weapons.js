@@ -101,7 +101,9 @@ var Projectile=exports.Projectile=function(pars){
         console.log('draw not implemented for projectile');
     };
 
-    this.update=function(msDuration){this.setSpeed(this.speed);};
+    this.update=function(msDuration){
+        this.setSpeed(this.speed);
+    };
 
     return this;
 }
