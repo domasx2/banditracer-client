@@ -251,7 +251,7 @@ var TrackInfoDisplay=exports.TrackInfoDisplay=function(pars){
             for(var i=0;i<level.tiles.length;i++){
                 tiles[i]=level.dict[level.tiles[i]+''];
             }
-            var img=utils.renderBackgroundFromTiles(level.width_t, level.height_t, tiles,  this.scene.game.cache);
+            var img=utils.renderBackgroundFromTiles(level.width_t, level.height_t, tiles, level, this.scene.game.cache);
             var sz=img.getSize();
             if(sz[0]>sz[1]){
                 var q=sz[0]/200;

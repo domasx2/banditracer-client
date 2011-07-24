@@ -35,6 +35,7 @@ var sprite2rotarray=exports.sprite2rotarray=function(surface, step){
 var ImageCache=exports.ImageCache = function(){
     this.cars={};
     this.props={};
+    this.decals={};
     this.tiles={};
     this.animations={};
     this.fonts={};
@@ -55,6 +56,11 @@ var ImageCache=exports.ImageCache = function(){
     //cache props
     resources.props.forEach(function(f){
         this.props[f]=sprite2rotarray(gamejs.image.load('images/props/'+f), 5);
+    }, this);
+    
+    //cache decals
+    resources.decals.forEach(function(f){
+        this.decals[f]=sprite2rotarray(gamejs.image.load('images/decals/'+f), 90);
     }, this);
     
     //cache animations
@@ -91,6 +97,10 @@ var ImageCache=exports.ImageCache = function(){
             this.fonts[name][c]=font.render(c, color)
         }
         
+    };
+    
+    this.getDecalSprite=function(filename, angle){
+        return this.getSpriteFromRotarray(this.decals[filename], angle);
     };
     
     this.getPropSprite=function(filename, angle){
@@ -334,6 +344,17 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
         angle - angle, degrees
         */
         var sprite=this.cache.getPropSprite(filename, angle ? angle : 0)
+        var ofst=sprite.getSize()[0]/2;
+        pos=this.getScreenPoint(pos);
+        this.surface.blit(sprite, [pos[0]-ofst, pos[1]-ofst]);  
+    };
+    
+    this.drawDecal=function(filename, pos, angle){
+        /*
+        pos - position in world coordinates
+        angle - angle, degrees
+        */
+        var sprite=this.cache.getDecalSprite(filename, angle ? angle : 0)
         var ofst=sprite.getSize()[0]/2;
         pos=this.getScreenPoint(pos);
         this.surface.blit(sprite, [pos[0]-ofst, pos[1]-ofst]);  

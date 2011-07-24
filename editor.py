@@ -20,11 +20,8 @@ app=None
 levelframe=None
 cur_level=None
 base_tilepath='images/tiles/'
+base_decalpath='images/decals'
 base_proppath='images/props/'
-
-
-
-
 
 def PilImageToWxImage( myPilImage, copyAlpha=True ) :
 
@@ -266,6 +263,39 @@ class CarPosition(Rotatable, Selectable, FollowMouse):
     def __str__(self):
         return 'Car position %s' % self.pos
 
+class DecalInstance(Selectable):
+    
+    def __init__(self, decal, x, y, angle):
+        self.x=x
+        self.y=y
+        self.size=decal.size
+        self.angle=angle
+        self.decal=decal
+    
+    def __str__(self):
+        'Prop instance %s (%s, %s) %s' % (self.prop.filename, self.x, self.y, self.angle)
+
+    def paint(self, dc, x=None, y=None):
+        self.decal.paint(dc, x or self.x, y or self.y, self.angle)
+
+    def paintBox(self, dc):
+        dc.SetPen(wx.Pen("blue", style=wx.SOLID))
+        dc.SetBrush(wx.Brush("blue", style=wx.TRANSPARENT))
+        dc.DrawRectangle(self.x,
+                        self.y,
+                        self.decal.size[0],
+                        self.decal.size[1])
+
+    def set(self, x, y):
+        pass
+
+    def delete(self):
+        app=wx.GetApp()
+        app.level.decals=[decal for decal in app.level.decals if decal!=self]
+        app.select(None)
+        app.refresh()   
+    
+
 class PropInstance(Selectable):
 
     def __init__(self, prop, x, y, angle):
@@ -309,6 +339,69 @@ def getWorldPosition(position, size=None):
                 (float(position[1])+float(size[1])/2)/PHYS_SCALE]
     else:
         return [float(position[0])/PHYS_SCALE, float(position[1])/PHYS_SCALE]
+        
+        
+class Decal(Rotatable, FollowMouse):
+    def __init__(self, filename):
+        Rotatable.__init__(self, 90, 0)
+        self.filename=filename
+
+        path=os.path.join(base_decalpath, filename)
+        if not os.access(path, os.R_OK):
+            raise Exception, 'No decal image: %s' % path
+
+        image=Image.open(path)
+        size=orig_size=image.size
+
+        if size[0]!=size[1]:
+            if size[0]<size[1]:
+                ofst_x=(size[1]-size[0])/2
+                ofst_y=0
+                s=size[1]
+            else:
+                ofst_x=0
+                ofst_y=(size[0]-size[1])/2
+                s=size[0]
+
+            nimg=Image.new('RGBA',(s, s))
+            nimg.paste(image, (ofst_x, ofst_y))
+            image=nimg
+            size=nimg.size
+        self.size=size
+        self.orig_size=orig_size
+        self.thumb=PilImageToWxBitmap(image.resize((TILE_WIDTH_PX, TILE_WIDTH_PX)))
+        
+        self.rotarray={}
+        self.minimap_rotarray={}
+        minimap_image=image.resize((orig_size[0]/10, orig_size[1]/10))
+        for angle in range(0, 360, 90):
+            self.rotarray[angle]=PilImageToWxBitmap(image.rotate(angle))
+            self.minimap_rotarray[angle]=PilImageToWxBitmap(minimap_image.rotate(angle))
+        
+            
+
+    def __str__(self):
+        return 'Decal %s' % self.filename
+
+    def getImage(self, angle=None):
+        if angle==None:
+            angle=self.angle
+        return self.rotarray[angle]
+    
+    def getMinimapImage(self, angle=None):
+        if angle==None:
+            angle=self.angle
+        return self.minimap_rotarray[angle]
+
+    def paint(self, dc, x, y, angle=None):
+        if angle==None:
+            angle=self.angle
+        dc.DrawBitmap(self.getImage(angle), x, y)
+
+    def set(self, x, y):
+        app=wx.GetApp()
+        decal_instance=DecalInstance(self, x-self.size[0]/2, y-self.size[1]/2, self.angle)
+        app.level.decals.append(decal_instance)
 
 class Prop(Rotatable, FollowMouse):
 
@@ -363,9 +456,6 @@ class Prop(Rotatable, FollowMouse):
         prop_instance=PropInstance(self, x-self.size[0]/2, y-self.size[1]/2, self.angle)
         app.level.props.append(prop_instance)
 
-
-
-
 class Tile:
     def __init__(self, filename):
         self.filename=filename
@@ -410,10 +500,11 @@ class Tile:
 
 class Level:
 
-    def __init__(self, size, tiles, props=None, car_positions=None, ai_waypoints=None, checkpoints=None):
+    def __init__(self, size, tiles, props=None,decals=None,car_positions=None, ai_waypoints=None, checkpoints=None):
         self.size=size
         self.tiles=tiles
         self.props=props or []
+        self.decals=decals or []
         self.car_positions=car_positions or []
         self.ai_waypoints=ai_waypoints or []
         self.checkpoints=checkpoints or []
@@ -421,6 +512,7 @@ class Level:
     def getObjects(self):
         retv=[]
         retv.extend(self.props)
+        retv.extend(self.decals)
         retv.extend(self.car_positions)
         retv.extend(self.ai_waypoints)
         return retv
@@ -599,6 +691,8 @@ class MapPanel(wx.Panel):
                     if isinstance(obj, Selectable) and  x>=obj.x and x<=obj.x+obj.size[0] and y>=obj.y and y<=obj.y +obj.size[1]:
                         if not app.levelframe.panel_left.layer_props.GetValue() and isinstance(obj, PropInstance):
                             continue
+                        if not app.levelframe.panel_left.layer_decals.GetValue() and isinstance(obj, DecalInstance):
+                            continue
                         if not app.levelframe.panel_left.layer_ai_waypoints.GetValue() and isinstance(obj, AIWaypoint):
                             continue
                         if not app.levelframe.panel_left.layer_start_positions.GetValue() and isinstance(obj, CarPosition):
@@ -636,7 +730,11 @@ class MapPanel(wx.Panel):
                 #props
                 for prop_instance in level.props:
                     prop_instance.paint(dc)
-
+    
+            if app.levelframe.panel_left.layer_decals.GetValue():
+                #props
+                for decal_instance in level.decals:
+                    decal_instance.paint(dc)
 
 
             if app.levelframe.panel_left.layer_start_positions.GetValue():
@@ -693,6 +791,12 @@ class LeftPanel(wx.Panel):
         self.layer_checkpoints=wx.CheckBox(self, -1, pos=(90, 90 ))
         self.layer_checkpoints.SetValue(True)
         self.Bind(wx.EVT_CHECKBOX, self.OnLayerClick, self.layer_checkpoints)
+        
+        #decals
+        wx.StaticText(self, -1, 'Decals', wx.Point(10, 110))
+        self.layer_decals=wx.CheckBox(self, -1, pos=(90, 110 ))
+        self.layer_decals.SetValue(True)
+        self.Bind(wx.EVT_CHECKBOX, self.OnLayerClick, self.layer_decals)
 
 
         #meta create
@@ -782,6 +886,10 @@ class MiniMapFrame(wx.Frame):
                     tileid=level.tiles[y*level.size[0]+x]
                     tile=app.tiles[tileid]
                     dc.DrawBitmap(tile.minimap_image, x* MINI_MAP_TILE_WIDTH_PX, y*MINI_MAP_TILE_WIDTH_PX)
+            
+            #decals
+            for di in level.decals:
+                dc.DrawBitmap(di.decal.getMinimapImage(di.angle), di.x/10, di.y/10)
 
 
     def __init__(self, parent):
@@ -863,19 +971,25 @@ class LevelFrame(wx.Frame):
 
     def CompileResources(self, e):
         props=os.listdir('images/props')
+        decals=os.listdir('images/decals')
         cars=os.listdir('images/cars')
         tiles=os.listdir('images/tiles')
         animations=os.listdir('images/animations')
         ui=os.listdir('images/ui')
         static=os.listdir('images/static')
         levels=[x.replace('.json', '') for x in os.listdir('levels')]
+        sound_fx=os.listdir('sounds/fx')
+        sound_engine=os.listdir('sounds/engine')
         out="""exports.props=%s;
         exports.cars=%s;
         exports.tiles=%s;
         exports.animations=%s;
         exports.ui=%s;
         exports.statics=%s;
-        exports.levels=%s;""" % (props, cars, tiles, animations, ui, static, levels)
+        exports.levels=%s;
+        exports.decals=%s;
+        exports.sound_fx=%s;
+        exports.sound_engine=%s;""" % (props, cars, tiles, animations, ui, static, levels,decals, sound_fx, sound_engine)
         
         f=open('javascript/resources.js', 'w')
         f.write(out.replace('\t', '').replace(' ', ''))
@@ -966,14 +1080,6 @@ class NewLevelDialog(wx.Dialog):
     def cancel(self, e):
         self.Destroy()
 
-
-
-
-
-
-
-
-
 class PropsetViewPanel(wx.Panel):
 
     def __init__(self, parent, size):
@@ -1033,9 +1139,103 @@ class PropsetViewPanel(wx.Panel):
                     app.refresh()
                     break
         self.Refresh();
+        
+
+class DecalsetViewPanel(wx.Panel):
+
+    def __init__(self, parent, size):
+
+        wx.Panel.__init__(self, parent, size=size)
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
+        self.Bind(wx.EVT_ERASE_BACKGROUND, self.EraseBackground)
+        self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
+
+    def EraseBackground(self, e):
+        pass
+
+    def OnPaint(self, e):
+        app=wx.GetApp()
+        width, height=self.GetSize()
+        dc=wx.AutoBufferedPaintDC(self)
+        dc.SetBrush(wx.Brush(wx.Colour(240,240,240)))
+        dc.SetPen(wx.Pen(wx.Colour(240,240,240)))
+        dc.DrawRectangle(0, 0, self.GetSize()[0], self.GetSize()[1])
+        if app.level:
+            decals=app.getDecals()
+            cols=max(1, width/TILE_WIDTH_PX)
+            lines=int(math.ceil(float(len(decals))/float(cols)))
+            if height<lines*TILE_WIDTH_PX:
+                self.SetSize((width, lines*TILE_WIDTH_PX))
+            i=0
+
+            for line in range(lines):
+                for col in range(cols):
+                    if i<len(decals):
+                        decal=decals[i]
+                        x=col*TILE_WIDTH_PX+col*2
+                        y=line*TILE_WIDTH_PX+line*2
+                        decal.x=x
+                        decal.y=y
+                        dc.DrawBitmap(decal.thumb, x, y)
+                        if(decal==app.selected):
+                            dc.SetPen(wx.Pen('blue', 4))
+                            dc.DrawLine(x, y, x, y+TILE_WIDTH_PX)
+                            dc.DrawLine(x, y, x+TILE_WIDTH_PX, y)
+                            dc.DrawLine(x+TILE_WIDTH_PX, y,  x+TILE_WIDTH_PX, y+TILE_WIDTH_PX)
+                            dc.DrawLine(x, y+TILE_WIDTH_PX, x+TILE_WIDTH_PX, y+TILE_WIDTH_PX)
+                        i+=1
+
+    def OnMouse(self, e):
+        x, y=e.GetPositionTuple()
+        #left click: select tile
+        if e.LeftUp() and app.level:
+            decals=app.getDecals()
+            for decal in decals:
+                if x>=decal.x and x<decal.x+TILE_WIDTH_PX and y>=decal.y and y<decal.y+TILE_WIDTH_PX:
+                    app.select(decal)
+                    app.levelframe.mappanel.SetFocus()
+                    app.levelframe.panel_left.layer_props.SetValue(True)
+                    app.refresh()
+                    break
+        self.Refresh();
 
 
+class DecalSetFrame(wx.Frame):
 
+    def __init__(self, parent, title):
+        wx.Frame.__init__(self, parent, title=title, size=(300, 500))
+        self.SetMinSize((190, 200))
+        self.scrolled_window=wx.ScrolledWindow(self, style=wx.VSCROLL)
+        self.psv_panel=DecalsetViewPanel(self.scrolled_window, size=(300, 450))
+        self.scrolled_window.SetVirtualSize((300, 450))
+        self.scrolled_window.SetScrollRate(10, 10)
+        self.Bind(wx.EVT_SIZE, self.OnResize )
+
+        self.sizer=wx.BoxSizer(wx.VERTICAL)
+        self.sizer.Add(self.scrolled_window,1, wx.EXPAND)
+        self.SetSizer(self.sizer)
+        self.SetAutoLayout(1)
+        self.sizer.Fit(self)
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+        self.Show(True)
+
+    def OnClose(self, e):
+        self.Show(False)
+
+    def OnResize(self, e):
+        app=wx.GetApp()
+        width, height=self.GetSize()
+        w=max(TILE_WIDTH_PX, width-TILE_WIDTH_PX)
+        decalcount=1
+        if app.level:
+            decalcount=len(app.getDecals())
+        rowc=w/TILE_WIDTH_PX
+        min_h=int(math.ceil(float(decalcount)/float(rowc)))*50
+        h=max(min_h, height-150)
+        self.psv_panel.SetSize(( w, h))
+        self.scrolled_window.SetVirtualSize((w, h))
+        e.Skip()
 
 
 
@@ -1094,10 +1294,18 @@ class EditorApp(wx.App):
             if filename.split('.')[-1]=='png':
                 props[filename]=Prop(filename)
         self.props=props
+        
+        #load decals
+        decals={}
+        for filename in os.listdir(base_decalpath):
+            if filename.split('.')[-1]=='png':
+                decals[filename]=Decal(filename)
+        self.decals=decals
 
         self.levelframe=LevelFrame(None, 'Level editor')
         self.tilesetframe=TileSetFrame(None, 'Tiles')
         self.propsetframe=PropSetFrame(None, 'Props')
+        self.decalsetframe=DecalSetFrame(None, 'Decals')
         self.minimapframe=MiniMapFrame(None)
         self.loadInitLevel()
 
@@ -1108,10 +1316,11 @@ class EditorApp(wx.App):
 
     def getProps(self):
         return [self.props[key] for key in self.props]
+    
+    def getDecals(self):
+        return [self.decals[key] for key in self.decals]
 
     def save(self, path):
-
-
         dict={}
         rev_dict={}
         def trans(x):
@@ -1143,6 +1352,12 @@ class EditorApp(wx.App):
                             'a':p.angle,
                             'opx':p.prop.size[0],
                             'ws':getWorldSize(p.prop.orig_size)} for p in self.level.props],
+                  'decals':[{'f':trans(d.decal.filename),
+                            'x':d.x,
+                            'y':d.y,
+                            'a':d.angle,
+                            'opx':d.decal.size[0],
+                            'ws':getWorldSize(d.decal.orig_size)} for d in self.level.decals],
                   'car_positions':[{'pos':p.pos,
                                     'x':p.x,
                                     'y':p.y,
@@ -1174,11 +1389,15 @@ class EditorApp(wx.App):
         size=(lvl['width_t'], lvl['height_t'])
 
         props=[]
+        decals=[]
         car_positions=[]
         ai_waypoints=[]
         checkpoints=[]
         if lvl.has_key('props'):
             props=[PropInstance(app.props[dict[str(p['f'])]], p['x'], p['y'], p['a']) for p in lvl['props']]
+        
+        if lvl.has_key('decals'):
+            decals=[DecalInstance(app.decals[dict[str(d['f'])]], d['x'], d['y'], d['a']) for d in lvl['decals']]
 
         if lvl.has_key('car_positions'):
             car_positions=[CarPosition(x['pos'], x['x'], x['y'], x['angle']) for x in lvl['car_positions']]
@@ -1191,7 +1410,7 @@ class EditorApp(wx.App):
 
         self.levelframe.panel_left.name_box.SetValue(lvl.get('name') or '')
 
-        self.loadLevel(Level(size, tiles, props, car_positions, ai_waypoints, checkpoints))
+        self.loadLevel(Level(size, tiles, props,decals, car_positions, ai_waypoints, checkpoints))
 
 
     def loadLevel(self, level):
@@ -1232,6 +1451,7 @@ class EditorApp(wx.App):
         self.levelframe.mappanel.Refresh()
         self.tilesetframe.tsv_panel.Refresh()
         self.propsetframe.psv_panel.Refresh()
+        self.decalsetframe.psv_panel.Refresh()
         self.minimapframe.mappanel.Refresh()
 
     def loadInitLevel(self):

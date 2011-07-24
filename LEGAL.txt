@@ -39,6 +39,8 @@ Explosions rendered with http://gmc.yoyogames.com/index.php?showtopic=211466, un
 
 Smoke - unknown :(
 
+track_*.png decals by Tranberry (CC-BY 3.0), http://opengameart.org/content/track-tiles
+
 Car sprites (c) Dovilë Lapinskaitë (CC BY 3.0) http://creativecommons.org/licenses/by/3.0/
 
 

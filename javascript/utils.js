@@ -1,9 +1,10 @@
 var gamejs=require('gamejs');
+var math=gamejs.utils.math;
 var box2d=require('./box2d');
 var settings=require('./settings');
 var vectors = gamejs.utils.vectors;
 
-exports.renderBackgroundFromTiles=function(width, height, tiles, cache){
+exports.renderBackgroundFromTiles=function(width, height, tiles, level, cache){
     var tile_scale=settings.get('TILE_SCALE');
     var background=new gamejs.Surface([width*tile_scale, height*tile_scale]);
     var x, y, tile, img;
@@ -16,6 +17,20 @@ exports.renderBackgroundFromTiles=function(width, height, tiles, cache){
                 }
             }
     }
+    
+    //render decals into background
+    var position, angle;
+    level.decals.forEach(function(decal){
+        angle=math.normaliseDegrees(-decal.a);
+        background.blit(cache.getDecalSprite(level.dict[decal['f']+''], angle), [decal.x, decal.y])
+    }, this);
+
+    //RENDER PROPS INTO BACKGROUND
+    level.props.forEach(function(prop){
+        angle=math.normaliseDegrees(-prop.a);
+        background.blit(cache.getPropSprite(level.dict[prop['f']+''], angle), [prop.x, prop.y])
+    }, this);
+    
     return background;
 };
 

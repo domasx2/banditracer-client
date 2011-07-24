@@ -32,18 +32,10 @@ var LevelScene=exports.LevelScene=function(game, level, cache){
     level.tiles.forEach(function(tile){
         tiles.push(level.dict[tile+'']);
     });
-    this.background=utils.renderBackgroundFromTiles(level.width_t, level.width_t, tiles,  this.cache);
+    this.background=utils.renderBackgroundFromTiles(level.width_t, level.width_t, tiles, level,  this.cache);
 
     this.world=world.buildWorld(level,  world.MODE_STANDALONE);
-
-    //RENDER PROPS INTO BACKGROUND
-    var position, angle;
-    level.props.forEach(function(prop){
-        angle=math.normaliseDegrees(-prop.a);
-        //render props into background
-        this.background.blit(this.cache.getPropSprite(level.dict[prop['f']+''], angle), [prop.x, prop.y])
-    }, this);
-
+    
     this.renderer=new renderer.RaceRenderer(settings.get('SCREEN_WIDTH'), settings.get('SCREEN_HEIGHT'), this.world, this.background, this.cache);
 
     this.handleEvent=function(event){

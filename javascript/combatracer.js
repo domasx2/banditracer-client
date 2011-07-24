@@ -33,6 +33,10 @@ exports.getPreloadList=function(){
         retv[retv.length]='images/ui/'+resources.ui[i];
     }
     
+    resources.decals.forEach(function(filename){
+        retv.push('images/decals/'+filename); 
+    });
+    
     if(settings.get('SOUND')){
         resources.sound_fx.forEach(function(filename){
            retv.push('sounds/fx/'+filename); 
@@ -192,7 +196,7 @@ exports.Game=function(){
        this.director=new Director(display);
        this.title_scene=new uiscenes.TitleScene(this, this.cache);
        this.director.start(this.title_scene);
-       //this.playLevel(levels.level1, 'Racer', false);
+       //this.playLevel(levels.trbryraceway, 'Bandit', true);
     };
 
     this.showEndGameScene=function(position){

@@ -71,7 +71,7 @@ exports.AIController=function(car, world, scene){
           2)it is behind the car, but closer than 35 meters
         */
         var angle=degrees(vectors.angle([0, -1], lp));
-        if(len<5 || (lp.y>0 && len <35)){
+        if(len<10 || (lp.y>0 && len <35)){
             if(this.cur_wp<this.world.max_waypoint)this.cur_wp++;
             else this.cur_wp=1;
             wp=this.world.ai_waypoints[this.cur_wp];

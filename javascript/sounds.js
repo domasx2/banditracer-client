@@ -50,7 +50,7 @@ function Engine(){
                     this.audios[p].seek(0);
                 }else{       
                     this.audios[p].play();
-                    this.t=40;
+                    this.t=300;
                     this.playing=this.audios[p];
                 }
             }
@@ -79,7 +79,7 @@ function Engine(){
         if(!(this.playing===null)){
             if(this.t<=0){
                 this.playing.seek(0);
-                this.t=250;
+                this.t=300;
             }
             else{
                 this.t-=msDuration;
@@ -97,6 +97,7 @@ exports.play=function(pars, renderer){
     filename,
     position - world coordinates, optional. if provided, will not play unless position is within camera view.
     */
+    if(!settings.get('SOUND')) return;
     if(pars.position && renderer){
         var lpos=renderer.getScreenPoint(pars.position);
         if((lpos[0]>=0) && (lpos[1]>=0) && (lpos[0]<=renderer.width) && (lpos[1]<=renderer.height)){
