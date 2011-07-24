@@ -1,5 +1,6 @@
 var gamejs=require('gamejs');
 var utils=require('./utils');
+var sounds=require('./sounds');
 var vec=utils.vec;
 var arr=utils.arr;
 
@@ -60,6 +61,10 @@ var LevelScene=exports.LevelScene=function(game, level, cache){
         //upd zoom
         if(this.keys_down[gamejs.event.K_p]) this.renderer.increaseZoom();
         else if(this.keys_down[gamejs.event.K_l]) this.renderer.decreaseZoom();
+    };
+    
+    this.destroy=function(){
+        sounds.engine.stop();  
     };
 };
 
@@ -249,8 +254,16 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
     };
 
     this.draw=function(display, msDuration){
-       //render world
-       this.renderer.render(display);
+        //render world
+        this.renderer.render(display);
+       
+        //play engine sounds
+        if(settings.get('SOUND')){
+            if(this.renderer.follow_object && (this.renderer.follow_object.type=='car'))
+                sounds.engine.play_by_speed(this.renderer.follow_object.getSpeedKMH(), this.renderer.follow_object.max_speed);
+                
+            sounds.engine.update(msDuration);
+        }
 
         //if finished, spectate a live player
         if(this.state==2){
@@ -301,6 +314,7 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, 
     this.player_car=this.world.event('create', {'type':'car', 'obj_name':ct, 'pars':{'position':[this.world.start_positions[1].x+1, this.world.start_positions[1].y+2],
                                                                                                'angle':this.world.start_positions[1].angle,
                                                                                                'alias':this.game.title_scene.alias.getText(),
+                                                                                               'engine_sound':true,
                                                                                                'weapon1':car_descriptions[ct].main_weapon,
                                                                                                'weapon2':'MineLauncher'}});
 
@@ -361,7 +375,7 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, 
                if(a.place>b.place) return 1;
                else if(a.place<b.place) return -1;
                return 0;
-            });
+            });          
             this.game.showGameOver(table);
         };
     };
@@ -369,6 +383,14 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, 
     this.draw=function(display, msDuration){
         //render world
         this.renderer.render(display);
+        
+        //play engine sounds
+        if(settings.get('SOUND')){            
+            if(this.renderer.follow_object && (this.renderer.follow_object.type=='car'))
+                sounds.engine.play_by_speed(this.renderer.follow_object.getSpeedKMH(), this.renderer.follow_object.max_speed);
+                
+            sounds.engine.update(msDuration);
+        }
   
         //render HUD
         this.renderer.renderHUD(display, {'car':this.player_car,

@@ -23,7 +23,7 @@ var Animation=exports.Animation=function(pars){
     this.update=function(msDuration){
         this.age+=msDuration;
         if(this.age>this.duration){
-           this.world.event('destroy', this.id);
+           this.world.destroyObj(this.id);
         }
     };
 

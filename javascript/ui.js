@@ -6,6 +6,7 @@ var skin=require('./skin');
 var settings=require('./settings');
 var car_descriptions=require('./car_descriptions');
 var resources=require('./resources');
+var sounds=require('./sounds');
 
 var UIElement=exports.UIElement=function(pars){
     /*
@@ -632,8 +633,10 @@ var Button=exports.Button=function(pars){
             for(var i=0;i<evts.length;i++){
                 if(evts[i][0]=='click'){
                     var scope=this.scope ? this.scope : this.scene;
+                    sounds.play({'filename':'button_click.wav'});
                     scope._onclick=this.onclick;
                     scope._onclick(this, this.arg);
+                    
                 }
                 if(evts[i][0]=='focus' || evts[i][0]=='blur' || evts[i][0]=='mouseover' || evts[i][0]=='mouseout'){
                     this.scene.refresh=true;
@@ -814,7 +817,7 @@ var UIScene=exports.UIScene=function(game, cache){
         };
   };
 
-  this.draw=function(display){
+  this.draw=function(display){  
         if(!this.refresh)return;
         this.renderer.setSurface(display);
         this.renderer.fillBackground(skin.ui_background);

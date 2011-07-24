@@ -5,3 +5,5 @@ exports.animations=['explosion.png','explosion_small.png','smoke.png'];
 exports.ui=['bandit_descr.png','brawler_descr.png','button.png','button_hover.png','button_selected.png','controls.png','guncar.png','racer_descr.png','title3.png'];
 exports.statics=['mine.png'];
 exports.levels=['level1','level3'];
+exports.sound_fx=['bullet_impact_metal.wav','bullet_impact_soft.wav','button_click.wav','explosion.wav','machinegun_shot.wav','missile_launch.wav','thud.wav'];
+exports.sound_engine=['loop_0.wav','loop_1.wav','loop_2.wav','loop_3.wav','loop_4.wav','loop_5.wav'];

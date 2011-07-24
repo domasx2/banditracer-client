@@ -1,6 +1,7 @@
 var gamejs = require('gamejs');
 var box2d = require('./box2d');
 var utils = require('./utils');
+var sounds = require('./sounds');
 var vec=utils.vec;
 var arr=utils.arr;
 
@@ -247,6 +248,12 @@ var Car = exports.Car = function(pars){
         this.wheels.push(new Wheel(wheeldef));
     }, this);
     
+    this.impact=function(obj, cpoint, direction){
+        if(obj.type=='car'){
+            this.world.playSound('thud.wav', arr(this.body.GetPosition()));
+        }
+    };
+    
     this.getLocalVelocity=function(){
         return arr(this.body.GetLocalVector(this.body.GetLinearVelocityFromLocalPoint(vec([0, 0]))));
     };
@@ -425,7 +432,8 @@ var Car = exports.Car = function(pars){
         this.deaths+=1;
         this.time_to_respawn=this.respawn_time;
         this.respawn_location=arr(this.body.GetPosition());
-        this.world.event('create', {'type':'animation', 'obj_name':'explosion', 'pars':{'position':arr(this.body.GetPosition())}});
+        this.world.spawnAnimation('explosion', arr(this.body.GetPosition()));
+        this.world.playSound('explosion.wav', arr(this.body.GetPosition()));
         this.respawn_angle=degrees(this.body.GetAngle());
         this.teleport([0, 0]);
         this.body.SetLinearVelocity(vec(0, 0));
@@ -549,9 +557,7 @@ var Car = exports.Car = function(pars){
         //spawn smoke if health <40
         if(this.health<=40){
             if(this.smoke_cd<=0){
-                this.world.event('create', {'type':'animation',
-                                            'obj_name':'smoke',
-                                            'pars':{'position':arr(this.body.GetWorldPoint(vec(0, -1.5)))}});
+                this.world.spawnAnimation('smoke', arr(this.body.GetWorldPoint(vec(0, -1.5))));
                 this.smoke_cd=100;
             }else{
                 this.smoke_cd-=msDuration;

@@ -1,6 +1,7 @@
 var gamejs = require('gamejs');
 var box2d = require('./box2d');
 var utils = require('./utils');
+var sounds = require('./sounds');
 var vec=utils.vec;
 var arr=utils.arr;
 
@@ -31,6 +32,7 @@ var Projectile=exports.Projectile=function(pars){
     this.car      = pars.car;
     this.world=this.car.world;
     this.type='projectile';
+    this.spent=false;
     
     //initialize body
     var bdef=new box2d.b2BodyDef();
@@ -86,12 +88,13 @@ var Projectile=exports.Projectile=function(pars){
     };
 
     this.impact=function(obj, cpoint, direction){
-        if(obj.type=='car' || obj.type=='prop'){
+        if((obj.type=='car' || obj.type=='prop') && (!this.spent)){
             this.car.world.event('destroy', this.id);
             if(obj.type=='car'){
                 obj.hit(this.damage, this.car);
             }
-            if(this.onimpact) this.onimpact();
+            if(this.onimpact) this.onimpact(obj);
+            this.spent=true;
         }
     };
 
@@ -154,8 +157,9 @@ var Mine=exports.Mine=function(pars){
                     if(this.onimpact) this.onimpact();
                 }
             }, this);
-            this.car.world.event('destroy', this.id);
-            this.car.world.event('create', {'type':'animation', 'obj_name':'explosion', 'pars':{'position':this.position}});
+            this.car.world.destroyObj(this.id);
+            this.car.world.spawnAnimation('explosion', this.position);
+            this.car.world.playSound('explosion.wav', this.position);
         }
     };
 
@@ -181,16 +185,18 @@ var Missile=exports.Missile=function(pars){
     pars.width=0.5;
     pars.height=2.5;
     pars.damage=25;
-
+    
     this.tts=50;
     Missile.superConstructor.apply(this, [pars]);
-
+    this.car.world.playSound('missile_launch.wav', this.position);
     this.destroy=function(){
         this.car.world.event('destroy', this.id);
     };
 
-     this.onimpact=function(){
-        this.car.world.event('create', {'type':'animation', 'obj_name':'explosion', 'pars':{'position':arr(this.body.GetPosition())}});
+    this.onimpact=function(){
+        var pos=arr(this.body.GetPosition())
+        this.car.world.spawnAnimation('explosion',pos);
+        this.car.world.playSound('explosion.wav', pos);
     };
 
     this.draw=function(renderer, msDuration){
@@ -201,7 +207,7 @@ var Missile=exports.Missile=function(pars){
        // this.setSpeed(this.speed);
         this.tts-=msDuration;
         if(this.tts<0){
-            this.car.world.event('create', {'type':'animation', 'obj_name':'smoke', 'pars':{'position':arr(this.body.GetWorldPoint(vec([0, 1.25])))}});
+            this.car.world.spawnAnimation('smoke',arr(this.body.GetWorldPoint(vec([0, 1.25]))));
             this.tts=50;
         }
     };
@@ -223,18 +229,24 @@ var Bullet=exports.Bullet=function(pars){
     pars.damage=5;
     Bullet.superConstructor.apply(this, [pars]);
     this.color='#FFD800';
+    this.car.world.playSound('machinegun_shot.wav', this.position);
 
-
-    this.onimpact=function(){
-        this.car.world.event('create', {'type':'animation', 'obj_name':'small_explosion', 'pars':{'position':arr(this.body.GetPosition())}});
+    this.onimpact=function(obj){     
+        var pos=arr(this.body.GetPosition());
+        this.car.world.spawnAnimation('small_explosion', pos);
+        if(obj.type=='car'){
+            this.car.world.playSound('bullet_impact_metal.wav', pos);
+        }else if(obj.type=='prop'){
+            this.car.world.playSound('bullet_impact_soft.wav', pos);
+        }
     };
 
     this.draw=function(renderer, msDuration){
-        renderer.drawCar('bullet.png', arr(this.body.GetPosition()), degrees(this.body.GetAngle()));
+        if(!this.spent) renderer.drawCar('bullet.png', arr(this.body.GetPosition()), degrees(this.body.GetAngle()));
     };
 
     this.destroy=function(){
-        this.car.world.event('destroy', this.id);
+        this.car.world.destroyObj(this.id);
     };
     return this;
 };

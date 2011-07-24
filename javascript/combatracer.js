@@ -9,6 +9,7 @@ var ui=require('./ui');
 var uiscenes=require('./uiscenes');
 var settings=require('./settings');
 var gamescenes=require('./gamescenes');
+var sounds=require('./sounds');
 
 exports.getPreloadList=function(){
     var retv=new Array();
@@ -31,6 +32,17 @@ exports.getPreloadList=function(){
     for(i=0;i<resources.ui.length;i++){
         retv[retv.length]='images/ui/'+resources.ui[i];
     }
+    
+    if(settings.get('SOUND')){
+        resources.sound_fx.forEach(function(filename){
+           retv.push('sounds/fx/'+filename); 
+        });
+        
+        resources.sound_engine.forEach(function(filename){
+           retv.push('sounds/engine/'+filename); 
+        });
+    }
+    
     return retv;
 };
 
@@ -71,7 +83,8 @@ var Director=exports.Director= function Director (display) {
     };
  
     this.replaceScene = function(scene) {
-       activeScene = scene;
+        if(activeScene && activeScene.destroy)activeScene.destroy(); 
+        activeScene = scene;
     };
  
     this.getScene = function() {
@@ -162,6 +175,7 @@ var Communicator=exports.Communicator=function(game){
 exports.Game=function(){
     this.director=null;
     this.cache=new renderer.ImageCache();
+    if(settings.get('SOUND')) sounds.init();
     this.socket=null;
     this.player={'alias':'',
                  'uid':null};
@@ -178,7 +192,7 @@ exports.Game=function(){
        this.director=new Director(display);
        this.title_scene=new uiscenes.TitleScene(this, this.cache);
        this.director.start(this.title_scene);
-       //this.playLevel(levels.level1, 'Racer', true);
+       //this.playLevel(levels.level1, 'Racer', false);
     };
 
     this.showEndGameScene=function(position){

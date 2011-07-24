@@ -1,0 +1,75 @@
+SOURCE:
+
+Bandit Racer source (assets and 3d party libs not included)
+
+Copyright (C) 2011 by Domas Lapinskas
+
+MIT license
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+GameJS:
+
+Copyright (C) 2011 by Simon Oberhammer, MIT license also? unsure.
+
+Box2d: see inside box2d.js
+
+ASSETS:
+
+Graphics:
+
+Tiles, UI, weapons (c) Domas Lapinskas, no license, they suck, will be replaced anyway.
+
+Explosions rendered with http://gmc.yoyogames.com/index.php?showtopic=211466, unsure of licensing
+
+Smoke - unknown :(
+
+Car sprites (c) Dovilë Lapinskaitë (CC BY 3.0) http://creativecommons.org/licenses/by/3.0/
+
+
+Sounds:
+
+From freesound.org, licensed with Creative Commons "sampling plus" 1.0, http://www.freesound.org/legal.php
+
+sounds/fx/thud.wav:
+    By buzzbox (http://www.freesound.org/usersViewSingle.php?id=156343)
+    bookslapthud2.aif (http://www.freesound.org/samplesViewSingle.php?id=23989)
+    
+sounds/engine/loop_0.wav made using:
+    By dobroide (http://www.freesound.org/usersViewSingle.php?id=8043)
+    20050821.engine.VWGolf.mp3 (http://www.freesound.org/samplesViewSingle.php?id=18592)
+    
+sounds/egine/loop_[1-5].wav made using:
+    By conny (http://www.freesound.org/usersViewSingle.php?id=156)
+    MOTORUS.wav (http://www.freesound.org/samplesViewSingle.php?id=2939)
+    
+sounds/fx/explosion.wav:
+    By nthompson (http://www.freesound.org/usersViewSingle.php?id=364925)
+    rocketexpl.wav (http://www.freesound.org/samplesViewSingle.php?id=47252)
+    
+sounds/fx/machinegun_shot.wav:
+    By tcpp (http://www.freesound.org/usersViewSingle.php?id=755551)
+    G36 (3).wav (http://www.freesound.org/samplesViewSingle.php?id=77389)
+    
+    
+From http://www.soundsnap.com/, license & terms of use: http://www.soundsnap.com/licence:
+
+sounds/fx/missile_launch.wav
+sounds/fx/bullet_impact_soft.wav
+sounds/fx/bullet_impact_metal.wav
+sounds/fx/button_click.wav

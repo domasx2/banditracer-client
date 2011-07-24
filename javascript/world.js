@@ -12,6 +12,7 @@ var props=require('./props');
 var settings=require('./settings');
 var box2d=require('./box2d');
 var gamejs=require('gamejs');
+var sounds=require('./sounds');
 var vectors = gamejs.utils.vectors;
 var math = gamejs.utils.math;
 radians=math.radians;
@@ -74,6 +75,7 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
     this.objects={};
     this.object_by_id={};
     this.destroy_queue=[];
+    this.sound_queue=[];
     
     this.b2world.SetContactListener(new ContactListener(this));
     
@@ -129,6 +131,18 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
             return retv;
         }
         return null;
+    };
+    
+    this.destroyObj=function(id){
+        this.event('destroy', id);
+    }
+    
+    this.spawnAnimation=function(animation, position){
+        this.event('create', {'type':'animation', 'obj_name':animation, 'pars':{'position':position}});  
+    };
+    
+    this.playSound=function(sound, position){
+        this.event('create', {'type':'sound', 'obj_name':sound, 'pars':{'position':position}})  
     };
     
     this.handleEvent=function(type, descr){
@@ -213,6 +227,12 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
             utils.copy(animation.animations[descr.obj_name], pars);
             obj=new animation.Animation(pars);
         }
+        else if(type=='sound'){
+            if(settings.get('SOUND')){
+                this.sound_queue.push({'filename':descr.obj_name,
+                                       'position':descr.pars.position});
+            }
+        }
         
         if(obj) this.addObject(obj);
         
@@ -252,6 +272,10 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
         for(type in this.objects){
             this.drawList(renderer, this.objects[type]);
         }
+        this.sound_queue.forEach(function(pars){
+            sounds.play(pars, renderer); 
+        });
+        this.sound_queue=[];
     };
     
     this.CreateBody=function(definition){
