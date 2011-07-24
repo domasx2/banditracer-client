@@ -56,7 +56,7 @@ var LevelScene=exports.LevelScene=function(game, level, cache){
     };
     
     this.destroy=function(){
-        sounds.engine.stop();  
+        if(settings.get('SOUND'))sounds.engine.stop();  
     };
 };
 
