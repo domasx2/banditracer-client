@@ -43,6 +43,7 @@ def PilImageToWxImage( myPilImage, copyAlpha=True ) :
         myPilImageRgbData =myPilImageCopyRGB.tostring()
         myWxImage.SetData( myPilImageRgbData )
 
+
     return myWxImage
 
 def WxImageToWxBitmap( myWxImage ) :
@@ -373,10 +374,16 @@ class Decal(Rotatable, FollowMouse):
         
         self.rotarray={}
         self.minimap_rotarray={}
-        minimap_image=image.resize((orig_size[0]/10, orig_size[1]/10))
+        minimap_image=image.resize((size[0]/10, size[1]/10))
+        print(filename)
         for angle in range(0, 360, 90):
-            self.rotarray[angle]=PilImageToWxBitmap(image.rotate(angle))
-            self.minimap_rotarray[angle]=PilImageToWxBitmap(minimap_image.rotate(angle))
+            print(angle)
+            if(angle!=0):
+                self.rotarray[angle]=PilImageToWxBitmap(image.rotate(angle))
+                self.minimap_rotarray[angle]=PilImageToWxBitmap(minimap_image.rotate(angle))
+            else:
+                self.rotarray[angle]=PilImageToWxBitmap(image)
+                self.minimap_rotarray[angle]=PilImageToWxBitmap(minimap_image)
         
             
 
