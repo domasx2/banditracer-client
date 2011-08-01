@@ -375,9 +375,7 @@ class Decal(Rotatable, FollowMouse):
         self.rotarray={}
         self.minimap_rotarray={}
         minimap_image=image.resize((size[0]/10, size[1]/10))
-        print(filename)
         for angle in range(0, 360, 90):
-            print(angle)
             if(angle!=0):
                 self.rotarray[angle]=PilImageToWxBitmap(image.rotate(angle))
                 self.minimap_rotarray[angle]=PilImageToWxBitmap(minimap_image.rotate(angle))
