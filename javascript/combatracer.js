@@ -6,10 +6,26 @@ var levels=require('./levels');
 var resources = require('./resources');
 var weapons=require('./weapons');
 var ui=require('./ui');
+var ui2=require('./ui2');
 var uiscenes=require('./uiscenes');
 var settings=require('./settings');
 var gamescenes=require('./gamescenes');
 var sounds=require('./sounds');
+var editor=require('./editor');
+
+var getDefCarDescr=exports.getDefCarDescr=function(){
+    return {'type':'Racer',
+            'front_weapon':{'type':'Machinegun',
+                            'ammo_upgrades':3,
+                            'dmg_upgrades':3},
+            'util':null,
+            'rear_weapon':{'type':'MineLauncher',
+                            'ammo_upgrades':0,
+                            'dmg_upgrades':0},
+            'acc_upgrades':0,
+            'speed_upgrades':0,
+            'armor_upgrades':0}
+}
 
 exports.getPreloadList=function(){
     var retv=new Array();
@@ -87,7 +103,7 @@ var Director=exports.Director= function Director (display) {
     };
  
     this.replaceScene = function(scene) {
-        if(activeScene && activeScene.destroy)activeScene.destroy(); 
+        if(activeScene && activeScene.destroy) activeScene.destroy(); 
         activeScene = scene;
     };
  
@@ -176,13 +192,24 @@ var Communicator=exports.Communicator=function(game){
     };
 };
 
-exports.Game=function(){
+exports.init=function(){
+    exports.game=new Game();
+    return exports.game;
+};
+
+var Game=exports.Game=function(){
     this.director=null;
-    this.cache=new renderer.ImageCache();
+    this.cache=renderer.init();
     if(settings.get('SOUND')) sounds.init();
+    ui2.init();
     this.socket=null;
-    this.player={'alias':'',
-                 'uid':null};
+    this.player={'alias':'Guest',
+                 'uid':null,
+                 'singleplayer':{
+                    'balance':1000,
+                    'car':getDefCarDescr()
+                    }
+                };
 
     this.communicator=null;
     this.acquainted=false; //receved a player id from server?
@@ -193,10 +220,11 @@ exports.Game=function(){
     };
 
     this.start=function(display){
-       this.director=new Director(display);
-       this.title_scene=new uiscenes.TitleScene(this, this.cache);
-       this.director.start(this.title_scene);
-       //this.playLevel(levels.trbryraceway, 'Bandit', true);
+        this.display=display;
+        this.director=new Director(display);
+        this.title_scene=new uiscenes.TitleScene(this, this.cache);
+        this.director.start(this.title_scene);
+        //this.playLevel(levels.trbryraceway, 'Bandit', true);
     };
 
     this.showEndGameScene=function(position){
@@ -214,17 +242,40 @@ exports.Game=function(){
     this.showLobbyList=function(){
          this.director.replaceScene(new uiscenes.JoinLobbyScene(this, this.cache));
     };
+    
+    this.returnTo=function(){
+        if(this.return_to){
+            if(this.return_to=='editor'){
+                this.return_to='';
+                this.showEditor();
+                return;
+            }
+            else if(this.return_to=='singleplayer'){
+                this.return_to='';
+                this.singleplayer();
+                return;
+            }
+        
+        }
+        this.showTitle();
+        return;
+    };
 
-    this.showGameOver=function(table){
-        this.director.replaceScene(new uiscenes.GameOverScene(this, this.cache, table));
+    this.showGameOver=function(table, win){
+        this.director.replaceScene(new uiscenes.GameOverScene(table, win));
+    };
+    
+    this.showEditor=function(){
+        if(!this.editor_scene)this.editor_scene= new editor.EditorScene()
+        this.director.replaceScene(this.editor_scene);  
     };
 
     this.joinLobby=function(lobby_id){
         this.director.replaceScene(new uiscenes.LobbyScene(this, this.cache, lobby_id));
     };
     
-    this.playAgainstBots=function(){
-         this.director.replaceScene(new uiscenes.PlayAgainstBotsScene(this, this.cache));
+    this.singleplayer=function(){
+         this.director.replaceScene(new uiscenes.SinglePlayerScene(this, this.cache));
     };
 
     this.playMultiplayer=function(level){
@@ -232,8 +283,10 @@ exports.Game=function(){
         this.director.replaceScene(this.level_scene);
     };
 
-    this.playLevel=function(level, car, ai_test){
-         this.level_scene=new gamescenes.SingleplayerLevelScene(this, level, this.cache, car, ai_test);
-         this.director.replaceScene(this.level_scene);
+    this.playLevel=function(level, ai_test, splash, return_to){
+         this.level_scene=new gamescenes.SingleplayerLevelScene(level, ai_test);
+         this.return_to=return_to;
+         if(splash) this.director.replaceScene(new uiscenes.ControlsSplash(this, this.cache, this.level_scene));
+         else this.director.replaceScene(this.level_scene);
     };
 };

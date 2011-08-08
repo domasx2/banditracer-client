@@ -3,33 +3,36 @@ var math=gamejs.utils.math;
 var box2d=require('./box2d');
 var settings=require('./settings');
 var vectors = gamejs.utils.vectors;
+var renderer=require('./renderer');
 
-exports.renderBackgroundFromTiles=function(width, height, tiles, level, cache){
-    var tile_scale=settings.get('TILE_SCALE');
-    var background=new gamejs.Surface([width*tile_scale, height*tile_scale]);
-    var x, y, tile, img;
-    for(y=height-1;y>=0;y--){
-        for(x=width-1;x>=0;x--){
-                tile=tiles[y*width+x];
-                if(tile){
-                    img=cache.getTile(tiles[y*width+x]);
-                    background.blit(img, [x*tile_scale, y*tile_scale]);
-                }
-            }
+exports.renderLevelBackground=function(level, render_props){
+    var cache=renderer.cache;
+    var width=level.size[0];
+    var height=level.size[1];
+    var background=new gamejs.Surface([width, height]);
+    var x, y;
+    var tile=cache.getTile(level.bgtile);
+    var sz=tile.getSize();
+    for(y=0;y<height;y=y+sz[1]){
+        for(x=0;x<width;x=x+sz[0]){
+                background.blit(tile, [x, y]);             
+        }
     }
     
     //render decals into background
     var position, angle;
     level.decals.forEach(function(decal){
-        angle=math.normaliseDegrees(-decal.a);
-        background.blit(cache.getDecalSprite(level.dict[decal['f']+''], angle), [decal.x, decal.y])
+        angle=math.normaliseDegrees(decal.a);
+        background.blit(cache.getDecalSprite(level.dict[decal['f']], angle), decal.p)
     }, this);
 
-    //RENDER PROPS INTO BACKGROUND
-    level.props.forEach(function(prop){
-        angle=math.normaliseDegrees(-prop.a);
-        background.blit(cache.getPropSprite(level.dict[prop['f']+''], angle), [prop.x, prop.y])
-    }, this);
+    if(render_props ||(render_props==undefined)){
+        //RENDER PROPS INTO BACKGROUND
+        level.props.forEach(function(prop){
+            angle=math.normaliseDegrees(prop.a);
+            background.blit(cache.getPropSprite(level.dict[prop['f']], angle), prop.p)
+        }, this);
+    }
     
     return background;
 };

@@ -1,8 +1,14 @@
 var gamejs=require('gamejs');
 var utils=require('./utils');
 var sounds=require('./sounds');
+var combatracer=require('./combatracer');
+var cars=require('./cars');
+var bots=require('./bots');
+var box2d = require('./box2d');
+var GUI = require('./gamejs-gui');
 var vec=utils.vec;
 var arr=utils.arr;
+var ui2=require('./ui2');
 
 var vectors = gamejs.utils.vectors;
 var math = gamejs.utils.math;
@@ -15,10 +21,10 @@ var settings=require('./settings');
 var controllers=require('./controllers');
 var car_descriptions=require('./car_descriptions');
 
-var LevelScene=exports.LevelScene=function(game, level, cache){
-    this.game=game;
+var LevelScene=exports.LevelScene=function(level){
+    this.game=combatracer.game;
     this.level=level;
-    this.cache=cache;
+    this.cache=renderer.cache;
     this.started=false;
     this.paused=false;
     this.time_to_start=3000;
@@ -26,13 +32,10 @@ var LevelScene=exports.LevelScene=function(game, level, cache){
     this.keys_down={};
     this.started=false;
     this.max_laps=3;
+    this.gui=new GUI.GUI(this.game.display);
     var i;
     //BUILD BACKGROUND FROM TILES
-    var tiles=[];
-    level.tiles.forEach(function(tile){
-        tiles.push(level.dict[tile+'']);
-    });
-    this.background=utils.renderBackgroundFromTiles(level.width_t, level.width_t, tiles, level,  this.cache);
+    this.background=utils.renderLevelBackground(level, true);
 
     this.world=world.buildWorld(level,  world.MODE_STANDALONE);
     
@@ -44,9 +47,21 @@ var LevelScene=exports.LevelScene=function(game, level, cache){
             if(event.key===gamejs.event.K_SPACE){
                this.paused=(!this.paused);
             };
+            if(event.key===gamejs.event.K_ESC){
+                if(this.dialog){
+                    if(!this.dialog.visible){
+                        this.paused=true;
+                        this.dialog.show();
+                    }else{
+                        this.paused=false;
+                        this.dialog.hide();
+                    }
+                };
+            };
         } else if (event.type === gamejs.event.KEY_UP) {
             this.keys_down[event.key] = false;
         };
+        this.gui.despatchEvent(event);
     };
 
     this.updateZoom=function(msDuration){
@@ -59,6 +74,7 @@ var LevelScene=exports.LevelScene=function(game, level, cache){
         if(settings.get('SOUND'))sounds.engine.stop();  
     };
 };
+
 
 var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, cache){
     MultiplayerLevelScene.superConstructor.apply(this, [game, level, cache]);
@@ -296,35 +312,36 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
 };
 gamejs.utils.objects.extend(MultiplayerLevelScene, LevelScene);
 
-var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, cache, car, ai_test){
-    SingleplayerLevelScene.superConstructor.apply(this, [game, level, cache]);
+var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(level, ai_test){
+    SingleplayerLevelScene.superConstructor.apply(this, [level]);
+    
+    this.dialog=new SinglePlayerDialog({'gui':this.gui,
+                                       'scene':this});
 
     this.test_ai=ai_test;
 
     //PLAYER CAR
-    var ct=car ? car : 'Racer';
-    this.player_car=this.world.event('create', {'type':'car', 'obj_name':ct, 'pars':{'position':[this.world.start_positions[1].x+1, this.world.start_positions[1].y+2],
-                                                                                               'angle':this.world.start_positions[1].angle,
-                                                                                               'alias':this.game.title_scene.alias.getText(),
-                                                                                               'engine_sound':true,
-                                                                                               'weapon1':car_descriptions[ct].main_weapon,
-                                                                                               'weapon2':'MineLauncher'}});
+    //carEventFromDescription=function(position, carpars, alias, engine_sound){
+    var evdescr=cars.carEventFromDescription([this.world.start_positions[1].x, this.world.start_positions[1].y],this.world.start_positions[1].angle,
+                                                                  combatracer.game.player.singleplayer.car,
+                                                                  combatracer.game.player.alias,
+                                                                  true);
+    this.player_car=this.world.event('create', evdescr);
 
     if(!this.test_ai) this.controllers.push(new controllers.PlayerCarController(this.player_car));
     else this.controllers.push(new controllers.AIController(this.player_car, this.world, this));
 
     if(!this.test_ai){
     //BUILD AI CARS
-        var cartypes=[];
-        for(var key in car_descriptions) cartypes.push(key);
+        var aicar;
         for(i=1;i<4;i++){
             if(this.world.start_positions[i+1]){
-                var ct=cartypes[Math.floor(Math.random()*(cartypes.length))];
-                var aicar=this.world.event('create', {'type':'car', 'obj_name':ct, 'pars':{'position':[this.world.start_positions[i+1].x+1, this.world.start_positions[i+1].y+2],
-                                                                                                   'angle':this.world.start_positions[i+1].angle,
-                                                                                                   'alias':'Bot '+i,
-                                                                                                   'weapon1':car_descriptions[ct].main_weapon,
-                                                                                                   'weapon2':'MineLauncher'}});
+                var descr=bots.generateBotCarDescr();
+                var evdescr=cars.carEventFromDescription([this.world.start_positions[i+1].x, this.world.start_positions[i+1].y],this.world.start_positions[i+1].angle,
+                                                            descr,
+                                                            bots.names[i],
+                                                            false);
+                aicar=this.world.event('create', evdescr);
                 this.controllers.push(new controllers.AIController(aicar, this.world, this));
             }
         }
@@ -354,21 +371,8 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, 
         }
 
         //if we reached max laps, end race
-        if(this.player_car.lap > this.max_laps){
-            var table = this.world.objects.car.map(function(car, idx) {
-                return {'place':car.getRacePosition(),
-                       'id':idx,
-                       'player':car.alias,
-                       'kills':car.kills,
-                       'deaths': car.deaths
-                   }
-            });
-            table.sort(function(a, b){
-               if(a.place>b.place) return 1;
-               else if(a.place<b.place) return -1;
-               return 0;
-            });          
-            this.game.showGameOver(table);
+        if(this.player_car.lap > this.max_laps){        
+            this.game.showGameOver(this.genScoreTable(), this.player_car.getRacePosition()==1, 'singleplayer');
         };
     };
 
@@ -390,6 +394,26 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, 
                                         'msDuration':msDuration,
                                         'time_to_start':this.time_to_start,
                                         'paused':this.paused});
+        
+        if(this.dialog.visible) this.gui.draw(true);
+   };
+   
+   this.genScoreTable=function(){
+        var table= this.world.objects.car.map(function(car, idx) {
+             return {'place':car.getRacePosition(),
+                    'id':idx,
+                    'player':car.alias,
+                    'kills':car.kills,
+                    'deaths': car.deaths
+            }
+         });
+        table.sort(function(a, b){
+           if(a.place>b.place) return 1;
+           else if(a.place<b.place) return -1;
+           return 0;
+        });
+        
+        return table;
    };
 
    this.handleMessage=function(cmd, payload){
@@ -397,3 +421,39 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(game, level, 
     };
 };
 gamejs.utils.objects.extend(SingleplayerLevelScene, LevelScene);
+
+
+
+function SinglePlayerDialog(pars){
+    pars.size=[220, 200];
+    SinglePlayerDialog.superConstructor.apply(this, [pars]);
+    this.scene=pars.scene;
+    
+    this.quitbtn=new ui2.Button({'parent':this,
+                                'text':'Quit',
+                                'size':[180, 40],
+                                'lean':'both',
+                                'position':[20, 20]});
+    
+    this.quitbtn.onClick(function(){
+        this.close();      
+        this.scene.game.showGameOver(this.scene.genScoreTable());
+    }, this);
+    
+    
+    this.continuebtn=new ui2.Button({'parent':this,
+                                'text':'Continue',
+                                'size':[180, 40],
+                                'lean':'both',
+                                'position':[20, 70]});
+    
+    this.continuebtn.onClick(function(){
+        this.close();
+        this.scene.paused=false;
+    }, this);
+    
+    
+    
+};
+
+gamejs.utils.objects.extend(SinglePlayerDialog, GUI.Dialog);

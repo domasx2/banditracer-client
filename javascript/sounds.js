@@ -37,13 +37,12 @@ function Engine(){
     var s;
     for(var i=0;i<=5;i++){
         s=new gamejs.mixer.Sound('sounds/engine/loop_'+i+'.wav');
-        s.setVolume(0.1);
+        s.setVolume(0.15);
         this.audios[i]=s;
     }   
     
     this.play=function(pitch){
         if(this.playing!=pitch){
-            this.playing=pitch;
             for(var p=0;p<=5;p++){
                 if(p!=pitch){
                     this.audios[p].stop();

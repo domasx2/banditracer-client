@@ -2,6 +2,7 @@ var gamejs = require('gamejs');
 var box2d = require('./box2d');
 var utils = require('./utils');
 var sounds = require('./sounds');
+var car_descriptions = require('./car_descriptions');
 var vec=utils.vec;
 var arr=utils.arr;
 
@@ -158,10 +159,15 @@ var Car = exports.Car = function(pars){
     max_steer_angle   -max steering angle, degrees
     max_speed         -max speed, km/h
     wheels            -wheel definitins: {'x', 'y', 'rotart', 'powered'}
-    weapon1           -first weapon
-    weapon2           -second weapon
+    front_weapon           -first weapon
+    rear_weapon           -second weapon
+    util
     health            -max health
     alias             -player alias
+    car_type
+    speed_upgrades
+    armor_upgrades
+    acc_upgrades
 
     */
     this.angle= pars.angle ? pars.angle: 0;
@@ -172,11 +178,13 @@ var Car = exports.Car = function(pars){
     this.filename=pars.filename;
     this.alias=pars.alias ? pars.alias : '';
     this.type='car';
+    this.car_type=pars.type;
+    this.descr=car_descriptions[this.car_type];
 
     //STATE
-    this.max_health=pars.health;
+    this.max_health=pars.health+pars.armor_upgrades * this.descr.armor_upgrade;
     //this.health=pars.health;
-    this.health=pars.health;
+    this.health=this.max_health;
     this.alive=true;
     this.active=true;
     this.next_checkpoint_no=1;
@@ -190,21 +198,24 @@ var Car = exports.Car = function(pars){
     this.hits=[];
 
     //WEAPONS
-    this.weapon1=pars.weapon1;
-    this.weapon2=pars.weapon2;
-    if(this.weapon1)this.weapon1.car=this;
-    if(this.weapon2)this.weapon2.car=this;
+    this.front_weapon=pars.front_weapon;
+    this.rear_weapon=pars.rear_weapon;
+    this.util=pars.util;
+    if(this.front_weapon)this.front_weapon.car=this;
+    if(this.rear_weapon)this.rear_weapon.car=this;
+    if(this.util)this.util.car=this;
 
     //ACTIONS
-    this.fire_weapon1=false;
-    this.fire_weapon2=false;
+    this.fire_front_weapon=false;
+    this.fire_rear_weapon=false;
+    this.fire_util=false;
     this.accelerate=ACC_NONE;
     this.steer=STEER_NONE;
 
     //PHYSICAL
     this.max_steer_angle=pars.max_steer_angle;
-    this.power=pars.power;
-    this.max_speed=pars.max_speed;
+    this.power=pars.power + pars.acc_upgrades * this.descr.power_upgrade;
+    this.max_speed=pars.max_speed + pars.speed_upgrades * this.descr.speed_upgrade;
     this.turn_msec=pars.turn_msec ? pars.turn_msec : 200;//in how many miliseconds wheel angle is maxed out when turning
     this.mod_speed=0;
     this.local_engine_pos=[0, -(pars.height/2)];
@@ -259,8 +270,9 @@ var Car = exports.Car = function(pars){
     };
 
     this.crossFinishLine=function(){
-        if(this.weapon1)this.weapon1.reload();
-        if(this.weapon2)this.weapon2.reload();
+        if(this.front_weapon)this.front_weapon.reload();
+        if(this.rear_weapon)this.rear_weapon.reload();
+        if(this.util)this.util.reload();
     };
 
     this.updateCheckpoint=function(){
@@ -342,8 +354,9 @@ var Car = exports.Car = function(pars){
                    'h':this.health,
                    'al':this.alive,
                    'w':[],
-                   'w1':this.weapon1? this.weapon1.getState() : 0,
-                   'w2':this.weapon2? this.weapon2.getState() : 0};
+                   'wf':this.front_weapon ? this.front_weapon.getState() : 0,
+                   'wr':this.rear_weapon? this.rear_weapon.getState() : 0,
+                   'wu':this.util? this.util.getState():0};
 
         var i;
         this.wheels.forEach(function(wheel){
@@ -384,8 +397,9 @@ var Car = exports.Car = function(pars){
             wheel.body.SetPositionAndAngle(wheel.body.GetPosition(), radians(state.w[i]));
         }
         if(state.rl)this.respawn_location=state.rl;
-        if(this.weapon1 && state.w1) this.weapon1.setState(state.w1);
-        if(this.weapon2 && state.w2) this.weapon2.setState(state.w2);
+        if(this.front_weapon && state.wf) this.front_weapon.setState(state.wf);
+        if(this.rear_weapon && state.wr) this.rear_weapon.setState(state.wr);
+        if(this.util && state.wu) this.util.setState(wu);
     };
 
     this.getSpeedKMH=function(){
@@ -544,14 +558,19 @@ var Car = exports.Car = function(pars){
         }
 
         //fire weapons
-        if(this.weapon1){
-            this.weapon1.update(msDuration);
-            if(this.fire_weapon1)this.weapon1.fire();
+        if(this.front_weapon){
+            this.front_weapon.update(msDuration);
+            if(this.fire_front_weapon)this.front_weapon.fire();
         }
 
-        if(this.weapon2){
-            this.weapon2.update(msDuration);
-            if(this.fire_weapon2)this.weapon2.fire();
+        if(this.rear_weapon){
+            this.rear_weapon.update(msDuration);
+            if(this.fire_rear_weapon)this.rear_weapon.fire();
+        }
+        
+        if(this.util){
+            this.util.update(msDuration);
+            if(this.fire_util)this.util.fire();
         }
 
         //spawn smoke if health <40
@@ -566,4 +585,22 @@ var Car = exports.Car = function(pars){
     };
 
     return this;
+};
+
+exports.carEventFromDescription=function(position, angle, carpars, alias, engine_sound){
+    var retv={'type':'car',
+            'obj_name':carpars.type,
+            'pars':{'position': position,
+                    'angle':angle,
+                  'alias':alias,
+                  'handling_upgrades':carpars.handling_upgrades? carpars.handling_upgrades: 0,
+                  'engine_sound':engine_sound,
+                  'acc_upgrades':carpars.acc_upgrades,
+                  'speed_upgrades':carpars.speed_upgrades,
+                  'armor_upgrades':carpars.armor_upgrades,
+                  'front_weapon':carpars.front_weapon,
+                  'util':carpars.util,
+                  'rear_weapon':carpars.rear_weapon}
+    };
+    return retv;
 };

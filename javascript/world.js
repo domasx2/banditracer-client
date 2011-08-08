@@ -2,6 +2,7 @@ var box2d = require('./box2d');
 var utils = require('./utils');
 var vec=utils.vec;
 var arr=utils.arr;
+var weapon_descriptions=require('./weapon_descriptions');
 
 var car_descriptions=require('./car_descriptions');
 var cars=require('./cars');
@@ -13,6 +14,7 @@ var settings=require('./settings');
 var box2d=require('./box2d');
 var gamejs=require('gamejs');
 var sounds=require('./sounds');
+var renderer=require('./renderer');
 var vectors = gamejs.utils.vectors;
 var math = gamejs.utils.math;
 radians=math.radians;
@@ -163,6 +165,7 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
          obj_name,  
          pars}
         */
+        
         var obj=null;
         var type=descr.type;
         if(type=='car'){
@@ -185,9 +188,18 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
             else{
                 pars['filename']=carpars.filenames[alt];
             }
+            pars.type=descr.obj_name;
             obj=new cars.Car(pars);
-            if(descr.pars.weapon1)obj.weapon1=new weapons[descr.pars.weapon1]({'car':obj});
-            if(descr.pars.weapon2)obj.weapon2=new weapons[descr.pars.weapon2]({'car':obj});
+            
+            for(var weapon_type in {'front_weapon':1, 'rear_weapon':1, 'util':1}){
+                if(descr.pars[weapon_type]){
+                    pars={'car':obj};
+                    utils.copy(descr.pars[weapon_type], pars);
+                    utils.copy(weapon_descriptions[pars.type], pars);
+                    obj[weapon_type]=new weapons[pars.launcher](pars);
+                }
+            }
+
         }else if(type=='prop'){
             /*
             pars:
@@ -302,29 +314,27 @@ exports.buildWorld=function(level, mode){
     //level - data property of level module
     
     var phys_scale=settings.get('PHYS_SCALE');
-    var tile_scale=settings.get('TILE_SCALE');
     
     var dict=level.dict;
     
      //CAR POSITIONS
     var start_positions={};
-    level.car_positions.forEach(function(pos){
-       start_positions[pos.pos]={'x':pos.x/phys_scale, 'y':pos.y/phys_scale, 'angle':pos.angle}
+    level.start_positions.forEach(function(pos){
+        start_positions[pos.n]={'x':(pos.p[0]+30)/phys_scale, 'y':(pos.p[1]+30)/phys_scale, 'angle':pos.a}
     });
     
     //WAYPOINTS
     var ai_waypoints={};
     level.ai_waypoints.forEach(function(wp){
-       pos=[wp.x/phys_scale, wp.y/phys_scale];
-       ai_waypoints[wp.no]={'x':pos[0]+1.5, 'y':pos[1]+1.5}
+        ai_waypoints[wp.n]={'x':(wp.p[0]+20)/phys_scale, 'y':(wp.p[1]+20)/phys_scale};
     });
     
     //CHECKPOINTS
     var checkpoints={}, pt1, pt2;
     level.checkpoints.forEach(function(c){
-        pt1=[c.pt1[0]/phys_scale, c.pt1[1]/phys_scale ];
-        pt2=[c.pt2[0]/phys_scale, c.pt2[1]/phys_scale ];;
-        checkpoints[c.no]={'pt1':pt1,
+        pt1=[c.p[0]/phys_scale, c.p[1]/phys_scale];
+        pt2=[(c.p[0]+280)/phys_scale, (c.p[1]+280)/phys_scale];;
+        checkpoints[c.n]={'pt1':pt1,
                             'pt2':pt2,
                             'width':pt2[0]-pt1[0],
                             'height':pt2[1]-pt1[1],
@@ -332,20 +342,26 @@ exports.buildWorld=function(level, mode){
     });
     
     //BUILD WORLD
-    var width=level.width_t*5;
-    var height=level.height_t*5;
-    var width_px=level.width_t*tile_scale;
-    var height_px=level.height_t*tile_scale;   
+    var width_px=level.size[0];
+    var height_px=level.size[1];
+    var width=level.width/phys_scale;
+    var height=level.height/phys_scale;
+       
     var world= new World(width, height, width_px, height_px, ai_waypoints, checkpoints, start_positions, mode);
     
     //BUILD PROPS
-    var position, angle;
+    var position, angle, s, sz, sz2, ws;
     level.props.forEach(function(prop){
-         angle=math.normaliseDegrees(-prop.a);
-         world.event('create', {'type':'prop', 'pars':{'filename':dict[prop.f+''],
-                                                        'position':[((prop.x+prop.opx/2)/phys_scale), ((prop.y+prop.opx/2)/phys_scale)],
+         angle=math.normaliseDegrees(prop.a);
+         s=renderer.cache.getPropSprite(dict[prop.f], angle);
+         sz=s.getSize();
+         s=renderer.cache.props[dict[prop.f]].orig;
+         sz2=s.getSize();
+         ws=[sz2[0]/phys_scale, sz2[1]/phys_scale];
+         world.event('create', {'type':'prop', 'pars':{'filename':dict[prop.f],
+                                                        'position':[((prop.p[0]+sz[0]/2)/phys_scale), ((prop.p[1]+sz[1]/2)/phys_scale)],
                                                         'angle':angle,
-                                                        'size':prop.ws}});
+                                                        'size':ws}});
     });
     return world;
 }

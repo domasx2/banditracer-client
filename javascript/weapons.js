@@ -23,6 +23,8 @@ var Projectile=exports.Projectile=function(pars){
     damage   - damage, points
     */
     this.weapon   = pars.weapon;
+    this.speed  = pars.speed;
+    this.damage = pars.damage;
     this.position = pars.position;
     this.angle    = pars.angle;
     this.width    = pars.width;
@@ -122,7 +124,7 @@ var Mine=exports.Mine=function(pars){
     this.width=2;
     this.height=2;
     this.type='mine';
-    this.damage=40;
+    this.damage=pars.damage;
     this.world=this.car.world;
     
     //initialize body
@@ -181,10 +183,8 @@ var Missile=exports.Missile=function(pars){
     position - [x, y]
     angle    - degrees
     */
-    pars.speed=400;
     pars.width=0.5;
     pars.height=2.5;
-    pars.damage=25;
     
     this.tts=50;
     Missile.superConstructor.apply(this, [pars]);
@@ -200,7 +200,7 @@ var Missile=exports.Missile=function(pars){
     };
 
     this.draw=function(renderer, msDuration){
-        renderer.drawCar('missile.png', arr(this.body.GetPosition()), degrees(this.body.GetAngle()));
+        if(!this.spent) renderer.drawCar('missile.png', arr(this.body.GetPosition()), degrees(this.body.GetAngle()));
     };
 
     this.update=function(msDuration){
@@ -223,10 +223,8 @@ var Bullet=exports.Bullet=function(pars){
     position - [x, y]
     angle    - degrees
     */
-    pars.speed=500;
     pars.width=0.3;
     pars.height=0.8;
-    pars.damage=5;
     Bullet.superConstructor.apply(this, [pars]);
     this.color='#FFD800';
     this.car.world.playSound('machinegun_shot.wav', this.position);
@@ -262,10 +260,13 @@ var Weapon=exports.Weapon=function(pars){
     fire_rate - ms, duration between firing
     */
     this.car=pars.car;
-    this.ammo_capacity=pars.ammo_capacity;
+    this.ammo_capacity=pars.ammo_capacity+(pars.ammo_upgrades*pars.ammo_upgrade);
     this.fire_rate=pars.fire_rate;
     this.cooldown=0;
     this.ammo=0;
+    this.damage=pars.damage+(pars.dmg_upgrades*pars.dmg_upgrade);
+    this.speed=pars.speed;
+    this.projectile=pars.projectile;
 
     this.update=function(msDuration){
         if(this.cooldown>0)this.cooldown-=msDuration;
@@ -277,10 +278,30 @@ var Weapon=exports.Weapon=function(pars){
 
     this.getState=function(){
         return {'a':this.ammo}
-    }
+    };
 
     this.setState=function(state){
         this.ammo=state.a;
+    };
+    
+    this.fire=function(){
+        if(this.ammo&&this.cooldown<=0){
+            var pos = this.getFirePos();
+            this.car.world.event('create', {'type':'weapon', 'obj_name':this.projectile, 'pars':{'position':pos,
+                                                                                                 'damage':this.damage,
+                                                                                                 'speed':this.speed,
+                                                                                                'angle':this.car.getAngle(),
+                                                                                                'car':this.car.id}});
+            this.ammo--;
+            this.cooldown=this.fire_rate;
+            this.ofst_x=this.ofst_x* -1;
+        }
+    }
+    
+    this.getFirePos=function(){
+        var retv= arr(this.car.body.GetWorldPoint(vec(0, -(this.car.height/2+3))));
+        console.log(retv);
+        return retv;
     }
 
     return this;
@@ -291,23 +312,13 @@ var Machinegun=exports.Machinegun=function(pars){
     pars:
     car - car object this weapon belongs to
     */
-    if(!pars)pars={'car':null};
-    pars.ammo_capacity=50;
-    pars.fire_rate=100;
     this.type='machinegun';
-
     Machinegun.superConstructor.apply(this, [pars]);
     this.ofst_x=-0.5;
-    this.fire=function(){
-        if(this.ammo&&this.cooldown<=0){
-            var pos =arr(this.car.body.GetWorldPoint(vec(this.ofst_x, -(this.car.height/2+0.8))));
-            this.car.world.event('create', {'type':'weapon', 'obj_name':'Bullet', 'pars':{'position':pos,
-                                                                                          'angle':this.car.getAngle(),
-                                                                                               'car':this.car.id}});
-            this.ammo--;
-            this.cooldown=this.fire_rate;
-            this.ofst_x=this.ofst_x* -1;
-        }
+
+    this.getFirePos=function(){
+        this.ofst_x=this.ofst_x* -1;
+        return arr(this.car.body.GetWorldPoint(vec(this.ofst_x, -(this.car.height/2+0.8))));    
     };
 
     return this;
@@ -320,47 +331,27 @@ var MineLauncher=exports.MineLauncher=function(pars){
     pars:
     car - car object this weapon belongs to
     */
-    if(!pars)pars={'car':null};
-    pars.missile=Mine;
-    pars.ammo_capacity=4;
-    pars.fire_rate=500;
     this.type='minelauncher';
 
     MineLauncher.superConstructor.apply(this, [pars]);
-
-    this.fire=function(){
-        if(this.ammo&&this.cooldown<=0){
-            var pos = arr(this.car.body.GetWorldPoint(new box2d.b2Vec2(0, (this.car.height/2+3))));
-            this.car.world.event('create', {'type':'weapon', 'obj_name':'Mine', 'pars':{'position':pos,
-                                                                                         'car':this.car.id}});
-            this.ammo--;
-            this.cooldown=this.fire_rate;
-        }
+    
+    this.getFirePos=function(){
+        return arr(this.car.body.GetWorldPoint(vec(0, (this.car.height/2+3))));  
     };
     return this;
 };
 gamejs.utils.objects.extend(MineLauncher, Weapon);
 
 var MissileLauncher=exports.MissileLauncher=function(pars){
-    if(!pars)pars={'car':null};
-    pars.missile=Missile;
-    pars.ammo_capacity=14;
-    pars.fire_rate=300;
     this.type='missilelauncher';
-
     MineLauncher.superConstructor.apply(this, [pars]);
-
-    this.fire=function(){
-        if(this.ammo&&this.cooldown<=0){
-            var pos = arr(this.car.body.GetWorldPoint(vec(0, -(this.car.height/2+2))));
-            this.car.world.event('create', {'type':'weapon', 'obj_name':'Missile', 'pars':{'position':pos,
-                                                                                         'angle':this.car.getAngle(),
-                                                                                         'car':this.car.id}});
-            this.ammo--;
-            this.cooldown=this.fire_rate;
-        }
+    
+    this.getFirePos=function(){
+        return arr(this.car.body.GetWorldPoint(vec(0, -(this.car.height/2+3))));    
     };
-
+    
     return this;
 };
+
+
 gamejs.utils.objects.extend(MissileLauncher, Weapon);

@@ -19,6 +19,8 @@ var ACC_BRAKE=exports.ACC_BRAKE=2;
 
 
 exports.AIController=function(car, world, scene){
+    car.max_steer_angle=car.max_steer_angle*1.1;
+    car.turn_msec=50;
     this.scene=scene;
     this.car=car;
     this.world=world;
@@ -39,12 +41,12 @@ exports.AIController=function(car, world, scene){
 
         //if player is ahead, gradually increase speed to up to extra 20 km/h
         if(player_pos<mypos){
-            if(car.mod_speed<30){
+            if(car.mod_speed<10){
                 car.mod_speed+=5*(ms/1000);
             }
         }else if(player_pos>mypos){
             //if car is ahead, gradually decrease speed down to -10 km/h
-            if(car.mod_speed > -10){
+            if(car.mod_speed > -20){
                 car.mod_speed-=5*(ms/1000);
             }
         }
@@ -82,8 +84,8 @@ exports.AIController=function(car, world, scene){
         }else this.car.steer=STEER_NONE;
 
         //try and fire machinegun if something is in front
-        if(this.car.weapon1 && ( this.car.weapon1.type=='machinegun' || this.car.weapon1.type=='missilelauncher')){
-            this.car.fire_weapon1=false;
+        if(this.car.front_weapon && ( this.car.front_weapon.type=='machinegun' || this.car.front_weapon.type=='missilelauncher')){
+            this.car.fire_front_weapon=false;
             var i, c;
             for(i=0;i<this.world.objects['car'].length;i++){
                 c=this.world.objects['car'][i];
@@ -91,7 +93,7 @@ exports.AIController=function(car, world, scene){
                     len=vectors.distance(arr(this.car.body.GetPosition()), arr(c.body.GetPosition()));
                     angle=degrees(vectors.angle([0, -1], arr(this.car.body.GetLocalPoint(c.body.GetPosition()))));
                     if(len<50 && angle<15){
-                        this.car.fire_weapon1=true;
+                        this.car.fire_front_weapon=true;
                         break;
                     }
                 }
@@ -107,19 +109,21 @@ exports.MultiplayerController=function(){
                    brake:gamejs.event.K_DOWN,      //down
                    steer_left:gamejs.event.K_LEFT, //left
                    steer_right:gamejs.event.K_RIGHT, //right
-                   fire_weapon1:gamejs.event.K_x, //fire weapon 1
-                   fire_weapon2:gamejs.event.K_c}; //fire weapkn 2
+                   fire_front_weapon:gamejs.event.K_x, //fire front weapon
+                   fire_rear_weapon:gamejs.event.K_c,
+                   fire_util:gamejs.event.K_v}; //fire rear weapon
 
     this.actions={'accelerate':ACC_NONE,
                   'steer':STEER_NONE,
-                  'fire_weapon1':false,
-                  'fire_weapon2':false};
+                  'fire_front_weapon':false,
+                  'fire_rear_weapon':false,
+                  'fire_util':false};
 
 
     this.update=function(keys_down, ms){
         var changed=false;
 
-        var accelerate, steer, fire_weapon1, fire_weapon2;
+        var accelerate, steer, fire_front_weapon, fire_rear_weapon, fire_util;
 
         if(keys_down[this.bindings.accelerate]){
             accelerate=ACC_ACCELERATE;
@@ -137,11 +141,14 @@ exports.MultiplayerController=function(){
             steer=STEER_NONE;
         }
 
-        if(keys_down[this.bindings.fire_weapon1]) fire_weapon1=true;
-        else fire_weapon1=false;
+        if(keys_down[this.bindings.fire_front_weapon]) fire_front_weapon=true;
+        else fire_front_weapon=false;
 
-        if(keys_down[this.bindings.fire_weapon2]) fire_weapon2=true;
-        else fire_weapon2=false;
+        if(keys_down[this.bindings.fire_rear_weapon]) fire_rear_weapon=true;
+        else fire_rear_weapon=false;
+        
+        if(keys_down[this.bindings.util]) fire_util=true;
+        else fire_util=false;
 
         if(!(accelerate===this.actions.accelerate)){
             this.actions.accelerate=accelerate;
@@ -151,12 +158,16 @@ exports.MultiplayerController=function(){
             this.actions.steer=steer;
             changed=true;
         }
-        if(!(fire_weapon1===this.actions.fire_weapon1)){
-            this.actions.fire_weapon1=fire_weapon1;
+        if(!(fire_front_weapon===this.actions.fire_front_weapon)){
+            this.actions.fire_front_weapon=fire_front_weapon;
             changed=true;
         }
-        if(!(fire_weapon2===this.actions.fire_weapon2)){
-            this.actions.fire_weapon2=fire_weapon2;
+        if(!(fire_rear_weapon===this.actions.fire_rear_weapon)){
+            this.actions.fire_rear_weapon=fire_rear_weapon;
+            changed=true;
+        }
+        if(!(fire_util===this.actions.fire_util)){
+            this.actions.fire_util=fire_util;
             changed=true;
         }
         return changed;
@@ -173,8 +184,9 @@ exports.PlayerCarController=function(car){
                    brake:gamejs.event.K_DOWN,      //down
                    steer_left:gamejs.event.K_LEFT, //left
                    steer_right:gamejs.event.K_RIGHT, //right
-                   fire_weapon1:gamejs.event.K_x, //fire weapon 1
-                   fire_weapon2:gamejs.event.K_c}; //fire weapkn 2
+                   fire_front_weapon:gamejs.event.K_x, //fire front weapon
+                   fire_rear_weapon:gamejs.event.K_c,
+                   fire_util:gamejs.event.K_v}; //fire rear weapon
 
     this.update=function(keys_down, ms){
         if(!this.car.alive)return;
@@ -194,11 +206,14 @@ exports.PlayerCarController=function(car){
             this.car.steer=STEER_NONE;
         }
 
-        if(keys_down[this.bindings.fire_weapon1]) this.car.fire_weapon1=true;
-        else this.car.fire_weapon1=false;
+        if(keys_down[this.bindings.fire_front_weapon]) this.car.fire_front_weapon=true;
+        else this.car.fire_front_weapon=false;
 
-        if(keys_down[this.bindings.fire_weapon2]) this.car.fire_weapon2=true;
-        else this.car.fire_weapon2=false;
+        if(keys_down[this.bindings.fire_rear_weapon]) this.car.fire_rear_weapon=true;
+        else this.car.fire_rear_weapon=false;
+        
+        if(keys_down[this.bindings.fire_util]) this.car.fire_util=true;
+        else this.car.fire_util=false;
 
     };
 

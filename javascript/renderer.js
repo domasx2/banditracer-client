@@ -12,8 +12,65 @@ var resources=require('./resources');
 var skin=require('./skin');
 var settings=require('./settings');
 
+//hax gamejs to render font properly with a very hax fix
+gamejs.font.Font.prototype.size=function(text){
+    var metrics = this.sampleSurface.context.measureText(text);
+    return [metrics.width*3, this.fontHeight];    
+};
+
+gamejs.font.Font.prototype.render = function(text, color) {
+    var dims = this.size(text);
+    var surface = new gamejs.Surface(dims);
+    var ctx = surface.context;
+    ctx.save();
+    ctx.font = this.sampleSurface.context.font;
+    ctx.textBaseline = this.sampleSurface.context.textBaseline;
+    ctx.textAlign = this.sampleSurface.context.textAlign;
+    ctx.fillStyle = ctx.strokeStyle = color || "#000000";
+    ctx.fillText(text, dims[0]/2, surface.rect.height, surface.rect.width);
+    ctx.restore();
+    
+    //scans the surface left to right and right to left to find where hte letter begins and then trims it.
+
+    
+    var s=0, e=dims[0], i;
+    var arr=new gamejs.surfacearray.SurfaceArray(surface);
+    
+    //left to right
+    var found=false;
+    for(s=0;s<arr.getSize()[0];s++){
+        for(i=0;i<arr.getSize()[1];i++){
+            if(arr.get(s, i)[3]!=0){
+                found=true;
+                break;
+            }
+        }
+        if(found)break;
+    }
+    
+    //right to left
+    found=false;
+    for(e=arr.getSize()[0]-1;e>=0;e--){
+        for(i=0;i<arr.getSize()[1];i++){
+            if(arr.get(e, i)[3]!=0){
+                found=true;
+                break;
+            }
+        }
+        if(found) break;
+    }
+    var h=Math.floor(dims[1]);
+    var newsurface=new gamejs.Surface([e-s, h]);
+    newsurface.blit(surface, new gamejs.Rect([0, 0], newsurface.getSize()),
+                             new gamejs.Rect([s, 0], [e-s, h]));
+    return newsurface;
+    
+    
+};
+
 var sprite2rotarray=exports.sprite2rotarray=function(surface, step){
     var retv={'orig':surface,
+              0:surface,
               'step':step};
     var orig_size=surface.getSize();
     var timg;
@@ -78,23 +135,24 @@ var ImageCache=exports.ImageCache = function(){
         this['static'][f]=gamejs.image.load('images/static/'+f);
     }, this); 
     
-    //cache fonts
-    var font, letter;
-    for(font in resources.fonts){
-        this.fonts[font]={};
-        resources.fonts[font].forEach(function(f){
-            letter=f.split('.')[0];
-            this.fonts[font][letter]=gamejs.image.load('images/fonts/'+font+'/'+f);
-        }, this);           
-    };
+/*    //cache fonts
+    var font='hud', letter;
+    
+    this.fonts[font]={};
+    resources.fonts[font].forEach(function(f){
+        letter=f.split('.')[0];
+        this.fonts[font][letter]=gamejs.image.load('images/fonts/'+font+'/'+f);
+    }, this);      */     
+    
     
     this.initFont=function(name, fontSettings, color){
         this.fonts[name]={};
         var font=new gamejs.font.Font(fontSettings);
+        
         var c;
         for(var i=0;i<this.alphabet.length;i++){
             c=this.alphabet[i];
-            this.fonts[name][c]=font.render(c, color)
+            this.fonts[name][c]=font.render(c, color);
         }
         
     };
@@ -161,11 +219,17 @@ var ImageCache=exports.ImageCache = function(){
     };
     
     //init fonts
-    for(var font in skin.fonts){
-        this.initFont(font, skin.fonts[font][0], skin.fonts[font][1]);
-    }
+    this.initFont('hud', skin.fonts['hud'][0], skin.fonts['hud'][1]);
     
+
     return this;
+};
+
+exports.cache=null;
+
+exports.init=function(){
+    exports.cache=new ImageCache();
+    return exports.cache;
 };
 
 
@@ -414,9 +478,10 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
             //speed
             this.drawText('SPEED: '+parseInt(car.getSpeedKMH()), 'hud', [10, display.getSize()[1]-40]);
             //ammo
-            this.drawText('AMMO: '+parseInt(car.weapon1.ammo), 'hud', [300, display.getSize()[1]-40]);
+            
+            if(car.front_weapon) this.drawText('AMMO: '+parseInt(car.front_weapon.ammo), 'hud', [250, display.getSize()[1]-40]);
             //mines
-            this.drawText('MINES: '+parseInt(car.weapon2.ammo), 'hud', [450, display.getSize()[1]-40]);
+            if(car.rear_weapon) this.drawText('MINES: '+parseInt(car.rear_weapon.ammo), 'hud', [450, display.getSize()[1]-40]);
         }
         
         if(settings.get('DEBUG')){

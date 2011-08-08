@@ -1,6 +1,6 @@
 SOURCE:
 
-Bandit Racer source (assets and 3d party libs not included)
+Bandit Racer original source code (assets and 3d party libs (gamejs, box2d) not included):
 
 Copyright (C) 2011 by Domas Lapinskas
 
@@ -25,7 +25,7 @@ THE SOFTWARE.
 
 GameJS:
 
-Copyright (C) 2011 by Simon Oberhammer, MIT license also? unsure.
+Copyright (C) 2011 by Simon Oberhammer, MIT license.
 
 Box2d: see inside box2d.js
 
@@ -33,22 +33,21 @@ ASSETS:
 
 Graphics:
 
-Tiles, UI, weapons (c) Domas Lapinskas, no license, they suck, will be replaced anyway.
+Explosions rendered with http://gmc.yoyogames.com/index.php?showtopic=211466, unsure, no license?
 
-Explosions rendered with http://gmc.yoyogames.com/index.php?showtopic=211466, unsure of licensing
+track pieces, UI assets (c) Oskar Lindqvist (CC-BY 3.0), http://tranberry.se/
 
-Smoke - unknown :(
+Car sprites, background textures (c) Dovilë Lapinskaitë (CC BY 3.0)
 
-track_*.png decals by Tranberry (CC-BY 3.0), http://opengameart.org/content/track-tiles
+Tarmac texture (c) Tiziana http://opengameart.org/content/black-asphalt-tilling-256px
 
-Car sprites (c) Dovilë Lapinskaitë (CC BY 3.0) http://creativecommons.org/licenses/by/3.0/
-
+Anything else is ms-paint hackjob by Domas, public domain or w/e.
 
 Sounds:
 
 Engine sounds - CC-BY-3.0, (c) Domas Lapinskas
 
-From freesound.org, licensed with Creative Commons "sampling plus" 1.0, http://www.freesound.org/legal.php
+From freesound.org, licensed with Creative Commons "sampling plus" 1.0, http://www.freesound.org/legal.php :
 
 sounds/fx/thud.wav:
     By buzzbox (http://www.freesound.org/usersViewSingle.php?id=156343)
@@ -69,3 +68,7 @@ sounds/fx/missile_launch.wav
 sounds/fx/bullet_impact_soft.wav
 sounds/fx/bullet_impact_metal.wav
 sounds/fx/button_click.wav
+
+Font:
+
+Maass Slicer font by Peter Wiegel, http://www.dafont.com/peter-wiegel.d689. Public Domain or GPL, ambiguos/confusing text? TODO: ask author

@@ -6,33 +6,57 @@ var levels=require('./levels');
 
 
 gamejs.display.setCaption("Bandit Racer");
-var progfn;
-var canvas=null;
-var display=null;
-var font=new gamejs.font.Font(skin.fonts.loading[0]);
-var loading_img=font.render('Loading...', skin.fonts.loading[1]);
-var loading_img_size=loading_img.getSize();
+var img;
 
-function loadTick(){
-   var display_size=display.getSize()
-   gamejs.draw.rect(display, skin.ui_background, new gamejs.Rect([0, 0], display_size));
-   var loading_pt=[display_size[0]/2-loading_img_size[0]/2, display_size[1]/2-loading_img_size[1]/2-100];
-   display.blit(loading_img, loading_pt);
-   if(progfn){
-      var progress=progfn();
-      progress=Math.min(Math.max(progress-0.5, 0)*2, 1);
-      gamejs.draw.rect(display, 'black', new gamejs.Rect([loading_pt[0]-100, loading_pt[1]+60], [loading_img_size[0]+200, 40]), 2);
-      gamejs.draw.rect(display, 'black', new gamejs.Rect([loading_pt[0]-100, loading_pt[1]+60], [(loading_img_size[0]+200)*progress, 40]), 0);
-   }
+
+//gamejs.preload(['images/ui/logo.png']);
+function main(){
+   
+   var canvas = document.createElement('canvas');
+   canvas.width = img.naturalWidth || img.width;
+   canvas.height = img.naturalHeight || img.height;
+   var context = canvas.getContext('2d');
+   context.drawImage(img, 0, 0);
+   img.getSize = function() { return [img.naturalWidth, img.naturalHeight]; };
+   var loading_img = new gamejs.Surface(img.getSize());
+   loading_img._canvas = canvas;
+   
+   var progfn;
+   var canvas=null;
+   var display=null;
+  // var font=new gamejs.font.Font(skin.fonts.loading[0]);
+   var loading_img_size=loading_img.getSize();
+   
+   function loadTick(){
+      var display_size=display.getSize()
+      gamejs.draw.rect(display, skin.ui_background, new gamejs.Rect([0, 0], display_size));
+      var loading_pt=[display_size[0]/2-loading_img_size[0]/2, display_size[1]/2-loading_img_size[1]/2-100];
+      display.blit(loading_img, loading_pt);
+      if(progfn){
+         var progress=progfn();
+         progress=Math.min(Math.max(progress-0.5, 0)*2, 1);
+         gamejs.draw.rect(display, 'black', new gamejs.Rect([loading_pt[0]-100, loading_pt[1]+260], [loading_img_size[0]+200, 40]), 2);
+         gamejs.draw.rect(display, 'black', new gamejs.Rect([loading_pt[0]-100, loading_pt[1]+260], [(loading_img_size[0]+200)*progress, 40]), 0);
+      }
+   };
+   
+   settings.init();
+   display=gamejs.display.setMode([settings.get('SCREEN_WIDTH'), settings.get('SCREEN_HEIGHT')]);
+   gamejs.time.fpsCallback(loadTick, this, 50);
+   gamejs.preload(combatracer.getPreloadList());
+   levels.init();
+   progfn=gamejs.ready(function(){
+      var game=new combatracer.init();
+      gamejs.time.deleteCallback(loadTick, 50);
+      game.start(display);
+   });
 };
 
-settings.init();
-display=gamejs.display.setMode([settings.get('SCREEN_WIDTH'), settings.get('SCREEN_HEIGHT')]);
-gamejs.time.fpsCallback(loadTick, this, 50);
-gamejs.preload(combatracer.getPreloadList());
-levels.init();
-progfn=gamejs.ready(function(){
-   var game=new combatracer.Game();
-   gamejs.time.deleteCallback(loadTick, 50);
-   game.start(display);
-});
+//load logo first
+var loadlogo=function(){
+   img = new Image();
+   img.addEventListener('load', main, true);
+   img.src =(window.$g && $g.resourceBaseHref || '.')+'/images/ui/logo.png';
+}
+//load logo
+loadlogo();
