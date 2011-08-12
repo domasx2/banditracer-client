@@ -7,7 +7,7 @@ var renderer=require('./renderer');
 var resources=require('./resources');
 var skin=require('./skin');
 
-var EXAMPLE='{"size":[2100,1100],"title":"Example Raceway","bgtile":"sand.png","props":[{"p":[413,159],"f":1,"a":270},{"p":[687,158],"f":1,"a":270},{"p":[960,157],"f":1,"a":270},{"p":[326,273],"f":2,"a":240},{"p":[283,350],"f":2,"a":180},{"p":[282,442],"f":2,"a":180},{"p":[303,530],"f":2,"a":150},{"p":[374,583],"f":2,"a":105},{"p":[469,596],"f":2,"a":90},{"p":[561,596],"f":2,"a":90},{"p":[654,596],"f":2,"a":90},{"p":[719,562],"f":2,"a":15},{"p":[737,474],"f":2,"a":15},{"p":[786,399],"f":2,"a":225},{"p":[867,360],"f":2,"a":75},{"p":[957,261],"f":1,"a":270},{"p":[1232,352],"f":2,"a":90},{"p":[1321,351],"f":2,"a":90},{"p":[1325,294],"f":2,"a":330},{"p":[1238,278],"f":3,"a":0},{"p":[1272,278],"f":3,"a":0},{"p":[1307,282],"f":3,"a":0},{"p":[1608,587],"f":2,"a":270},{"p":[1704,586],"f":2,"a":270},{"p":[1595,645],"f":2,"a":150},{"p":[1669,686],"f":2,"a":90},{"p":[1747,647],"f":2,"a":45},{"p":[1802,618],"f":3,"a":0},{"p":[1103,-73],"f":1,"a":270},{"p":[832,-74],"f":1,"a":270},{"p":[562,-73],"f":1,"a":270},{"p":[1374,27],"f":2,"a":285},{"p":[1459,58],"f":2,"a":300},{"p":[1525,120],"f":2,"a":330},{"p":[1568,209],"f":2,"a":345},{"p":[1578,304],"f":2,"a":0},{"p":[1610,361],"f":2,"a":270},{"p":[1702,359],"f":2,"a":270},{"p":[1794,359],"f":2,"a":270},{"p":[1889,369],"f":2,"a":285},{"p":[1961,423],"f":2,"a":330},{"p":[2000,508],"f":2,"a":345},{"p":[2006,598],"f":2,"a":0},{"p":[2003,691],"f":2,"a":15},{"p":[1977,781],"f":2,"a":30},{"p":[1923,854],"f":2,"a":45},{"p":[1848,905],"f":2,"a":75},{"p":[1758,921],"f":2,"a":90},{"p":[1664,924],"f":2,"a":90},{"p":[1573,921],"f":2,"a":105},{"p":[1487,894],"f":2,"a":120},{"p":[1412,842],"f":2,"a":135},{"p":[1363,765],"f":2,"a":165},{"p":[1346,671],"f":2,"a":180},{"p":[1377,635],"f":3,"a":0},{"p":[1352,612],"f":3,"a":0},{"p":[1080,493],"f":1,"a":270},{"p":[988,585],"f":2,"a":90},{"p":[953,645],"f":2,"a":0},{"p":[925,731],"f":2,"a":30},{"p":[864,799],"f":2,"a":60},{"p":[778,828],"f":2,"a":90},{"p":[503,739],"f":1,"a":270},{"p":[410,828],"f":2,"a":90},{"p":[320,825],"f":2,"a":90},{"p":[228,811],"f":2,"a":105},{"p":[148,771],"f":2,"a":135},{"p":[86,704],"f":2,"a":150},{"p":[54,620],"f":2,"a":165},{"p":[-42,349],"f":1,"a":0},{"p":[48,257],"f":2,"a":180},{"p":[72,169],"f":2,"a":210},{"p":[124,95],"f":2,"a":225},{"p":[197,40],"f":2,"a":240},{"p":[287,23],"f":2,"a":270},{"p":[383,19],"f":2,"a":270},{"p":[472,18],"f":2,"a":270}],"decals":[{"p":[114,84],"f":4,"a":0},{"p":[426,36],"f":5,"a":0},{"p":[714,36],"f":5,"a":0},{"p":[1002,36],"f":5,"a":0},{"p":[1290,84],"f":4,"a":90},{"p":[1386,396],"f":6,"a":0},{"p":[1410,636],"f":4,"a":270},{"p":[1716,636],"f":4,"a":180},{"p":[1812,420],"f":7,"a":90},{"p":[1668,420],"f":8,"a":90},{"p":[1578,420],"f":8,"a":90},{"p":[1194,420],"f":9,"a":90},{"p":[1002,420],"f":9,"a":90},{"p":[786,420],"f":7,"a":0},{"p":[762,636],"f":7,"a":180},{"p":[474,612],"f":5,"a":0},{"p":[114,540],"f":4,"a":270},{"p":[114,402],"f":8,"a":180},{"p":[114,342],"f":8,"a":180},{"p":[378,660],"f":8,"a":270},{"p":[1446,372],"f":10,"a":90},{"p":[1524,372],"f":10,"a":90},{"p":[1614,450],"f":10,"a":180},{"p":[1614,540],"f":10,"a":180},{"p":[1062,90],"f":11,"a":90},{"p":[1062,168],"f":11,"a":90},{"p":[1014,102],"f":12,"a":90},{"p":[924,210],"f":12,"a":90},{"p":[822,102],"f":12,"a":90},{"p":[720,210],"f":12,"a":90},{"p":[600,102],"f":12,"a":90},{"p":[480,210],"f":12,"a":90}],"ai_waypoints":[{"p":[1362,212],"n":1},{"p":[1492,504],"n":2},{"p":[1559,750],"n":3},{"p":[1876,744],"n":4},{"p":[1851,549],"n":5},{"p":[928,554],"n":6},{"p":[750,714],"n":7},{"p":[279,673],"n":8},{"p":[252,227],"n":9},{"p":[1849,727],"n":4},{"p":[1814,544],"n":5},{"p":[1109,443],"n":6},{"p":[739,675],"n":7},{"p":[264,648],"n":8}],"checkpoints":[{"p":[1107,45],"n":1},{"p":[1377,648],"n":2},{"p":[1763,409],"n":3},{"p":[787,413],"n":4},{"p":[118,577],"n":5},{"p":[167,67],"n":6}],"start_positions":[{"p":[965,95],"n":1,"a":90},{"p":[872,203],"n":2,"a":90},{"p":[771,98],"n":3,"a":90},{"p":[668,206],"n":4,"a":90},{"p":[546,94],"n":5,"a":90},{"p":[426,202],"n":6,"a":90}],"dict":{"1":"9tires.png","2":"3tires.png","3":"tire.png","4":"dideliskampas.png","5":"ilgas.png","6":"kryzius.png","7":"lenktas.png","8":"trumpas.png","9":"paprastas.png","10":"arrow.png","11":"startbar.png","12":"white_bar.png"}}';
+var EXAMPLE='{"size":[2100,1100],"title":"Example Raceway","bgtile":"sand.png","props":[{"p":[413,159],"f":1,"a":270},{"p":[687,158],"f":1,"a":270},{"p":[960,157],"f":1,"a":270},{"p":[326,273],"f":2,"a":240},{"p":[283,350],"f":2,"a":180},{"p":[282,442],"f":2,"a":180},{"p":[303,530],"f":2,"a":150},{"p":[374,583],"f":2,"a":105},{"p":[469,596],"f":2,"a":90},{"p":[561,596],"f":2,"a":90},{"p":[654,596],"f":2,"a":90},{"p":[719,562],"f":2,"a":15},{"p":[737,474],"f":2,"a":15},{"p":[786,399],"f":2,"a":225},{"p":[867,360],"f":2,"a":75},{"p":[957,261],"f":1,"a":270},{"p":[1232,352],"f":2,"a":90},{"p":[1321,351],"f":2,"a":90},{"p":[1325,294],"f":2,"a":330},{"p":[1238,278],"f":3,"a":0},{"p":[1272,278],"f":3,"a":0},{"p":[1307,282],"f":3,"a":0},{"p":[1608,587],"f":2,"a":270},{"p":[1704,586],"f":2,"a":270},{"p":[1595,645],"f":2,"a":150},{"p":[1669,686],"f":2,"a":90},{"p":[1747,647],"f":2,"a":45},{"p":[1802,618],"f":3,"a":0},{"p":[1103,-73],"f":1,"a":270},{"p":[832,-74],"f":1,"a":270},{"p":[562,-73],"f":1,"a":270},{"p":[1374,27],"f":2,"a":285},{"p":[1459,58],"f":2,"a":300},{"p":[1525,120],"f":2,"a":330},{"p":[1568,209],"f":2,"a":345},{"p":[1578,304],"f":2,"a":0},{"p":[1610,361],"f":2,"a":270},{"p":[1702,359],"f":2,"a":270},{"p":[1794,359],"f":2,"a":270},{"p":[1889,369],"f":2,"a":285},{"p":[1961,423],"f":2,"a":330},{"p":[2000,508],"f":2,"a":345},{"p":[2006,598],"f":2,"a":0},{"p":[2003,691],"f":2,"a":15},{"p":[1977,781],"f":2,"a":30},{"p":[1923,854],"f":2,"a":45},{"p":[1848,905],"f":2,"a":75},{"p":[1758,921],"f":2,"a":90},{"p":[1664,924],"f":2,"a":90},{"p":[1573,921],"f":2,"a":105},{"p":[1487,894],"f":2,"a":120},{"p":[1412,842],"f":2,"a":135},{"p":[1363,765],"f":2,"a":165},{"p":[1346,671],"f":2,"a":180},{"p":[1377,635],"f":3,"a":0},{"p":[1352,612],"f":3,"a":0},{"p":[1080,493],"f":1,"a":270},{"p":[988,585],"f":2,"a":90},{"p":[953,645],"f":2,"a":0},{"p":[925,731],"f":2,"a":30},{"p":[864,799],"f":2,"a":60},{"p":[778,828],"f":2,"a":90},{"p":[503,739],"f":1,"a":270},{"p":[410,828],"f":2,"a":90},{"p":[320,825],"f":2,"a":90},{"p":[228,811],"f":2,"a":105},{"p":[148,771],"f":2,"a":135},{"p":[86,704],"f":2,"a":150},{"p":[54,620],"f":2,"a":165},{"p":[-42,349],"f":1,"a":0},{"p":[48,257],"f":2,"a":180},{"p":[72,169],"f":2,"a":210},{"p":[124,95],"f":2,"a":225},{"p":[197,40],"f":2,"a":240},{"p":[287,23],"f":2,"a":270},{"p":[383,19],"f":2,"a":270},{"p":[472,18],"f":2,"a":270}],"decals":[{"p":[114,84],"f":4,"a":0},{"p":[426,36],"f":5,"a":0},{"p":[714,36],"f":5,"a":0},{"p":[1002,36],"f":5,"a":0},{"p":[1290,84],"f":4,"a":90},{"p":[1386,396],"f":6,"a":0},{"p":[1410,636],"f":4,"a":270},{"p":[1716,636],"f":4,"a":180},{"p":[1812,420],"f":7,"a":90},{"p":[1668,420],"f":8,"a":90},{"p":[1578,420],"f":8,"a":90},{"p":[1194,420],"f":9,"a":90},{"p":[1002,420],"f":9,"a":90},{"p":[786,420],"f":7,"a":0},{"p":[762,636],"f":7,"a":180},{"p":[474,612],"f":5,"a":0},{"p":[114,540],"f":4,"a":270},{"p":[114,402],"f":8,"a":180},{"p":[114,342],"f":8,"a":180},{"p":[378,660],"f":8,"a":270},{"p":[1446,372],"f":10,"a":90},{"p":[1524,372],"f":10,"a":90},{"p":[1614,450],"f":10,"a":180},{"p":[1614,540],"f":10,"a":180},{"p":[1062,90],"f":11,"a":90},{"p":[1062,168],"f":11,"a":90},{"p":[1014,102],"f":12,"a":90},{"p":[924,210],"f":12,"a":90},{"p":[822,102],"f":12,"a":90},{"p":[720,210],"f":12,"a":90},{"p":[600,102],"f":12,"a":90},{"p":[480,210],"f":12,"a":90}],"ai_waypoints":[{"p":[1362,212],"n":1},{"p":[1492,504],"n":2},{"p":[1559,750],"n":3},{"p":[928,554],"n":6},{"p":[1849,727],"n":4},{"p":[1814,544],"n":5},{"p":[1109,443],"n":6},{"p":[739,675],"n":7},{"p":[343,688],"n":8},{"p":[228,463],"n":9},{"p":[237,277],"n":10},{"p":[444,186],"n":11}],"checkpoints":[{"p":[1107,45],"n":1},{"p":[1377,648],"n":2},{"p":[1763,409],"n":3},{"p":[787,413],"n":4},{"p":[118,577],"n":5},{"p":[167,67],"n":6}],"start_positions":[{"p":[965,95],"n":1,"a":90},{"p":[872,203],"n":2,"a":90},{"p":[771,98],"n":3,"a":90},{"p":[668,206],"n":4,"a":90},{"p":[546,94],"n":5,"a":90},{"p":[426,202],"n":6,"a":90}],"dict":{"1":"9tires.png","2":"3tires.png","3":"tire.png","4":"dideliskampas.png","5":"ilgas.png","6":"kryzius.png","7":"lenktas.png","8":"trumpas.png","9":"paprastas.png","10":"arrow.png","11":"startbar.png","12":"white_bar.png"}}';
 var LEFT_PANEL_WIDTH=200;
 var BOT_PANEL_HEIGHT=150;
 var CHECKPOINT_SIZE=[280, 280];
@@ -488,6 +488,10 @@ Instance.prototype.select=function(){
     }
 };
 
+Instance.prototype.move=function(pos){
+  if(this.selected) GUI.View.prototype.move.apply(this, [pos]);  
+};
+
 function removeInstance(instance, list){
     for(var i=0;i<list.length;i++){
         if(list[i].instance_id==instance.instance_id){
@@ -512,6 +516,7 @@ Instance.prototype.paint=function(){
 
 var CheckpointInstance=function(pars){
     CheckpointInstance.superConstructor.apply(this, [pars]);
+    GUI.draggable(this);
     this.type='checkpointinstance';
     this.number=pars.number;
       this.on('select', function(){
@@ -546,6 +551,7 @@ CheckpointInstance.prototype.paint=function(){
 //START POSITION INSTANCE
 var StartPositionInstance=function(pars){
     StartPositionInstance.superConstructor.apply(this, [pars]);
+    GUI.draggable(this);
     this.type='startpositioninstance';
     this.number=pars.number;
       this.on('select', function(){
@@ -582,6 +588,7 @@ StartPositionInstance.prototype.paint=function(){
 //AI WAYPOINT INSTANCE
 var AIWaypointInstance=function(pars){
     AIWaypointInstance.superConstructor.apply(this, [pars]);
+    GUI.draggable(this);
     this.type='aiwaypointinstance';
     this.number=pars.number;
       this.on('select', function(){
@@ -598,11 +605,16 @@ AIWaypointInstance.prototype.destroy=function(recalc){
     if(recalc){
         removeInstance(this, this.scene.level.ai_waypoints);
         this.scene.level.ai_waypoints.forEach(function(wp){
-            if(wp.number>this.number){
-                wp.number--;
-                wp.refresh();
-            }
+            if(wp.number==this.number) recalc=false;
         }, this);
+        if(recalc){
+            this.scene.level.ai_waypoints.forEach(function(wp){
+                if(wp.number>this.number){
+                    wp.number--;
+                    wp.refresh();
+                }
+            }, this);
+        }
     }
 };
 
@@ -628,9 +640,14 @@ DecalInstance.prototype.destroy=function(){
     removeInstance(this, this.scene.level.decals);
 };
 
+DecalInstance.prototype.move=function(pos){
+  Instance.prototype.move.apply(this, [snap(pos)]);  
+};
+
 
 var PropInstance=function(pars){
     PropInstance.superConstructor.apply(this, [pars]);
+    GUI.draggable(this);
     this.type='propinstance';
 };
 
@@ -833,9 +850,10 @@ StartPosition.prototype.place=function(position){
 //AI WAYPOINT
 
 var AIWaypoint=exports.AIWaypoint=function(pars){
-    pars.image=this.genImage(1);
+    pars.image=this.genImage(1);  
     pars.rotate_angle=0;
     AIWaypoint.superConstructor.apply(this, [pars]);
+    GUI.draggable(this);
     this.type='aiwaypoint';
     this.number=1;
   
@@ -1394,6 +1412,8 @@ EditorScene.prototype.loadLevel=function(level){
         this.level.decals.push(instance);
     }, this);
     
+    var max_ai_n=1, max_cp_n=1, max_sp_n=1;
+    
     level.ai_waypoints.forEach(function(aip){
         instance=new AIWaypointInstance({'parent':this.level_view,
                                         'size':this.marker_view.ai_waypoint.getCursorImage().getSize(),
@@ -1403,7 +1423,9 @@ EditorScene.prototype.loadLevel=function(level){
                                         'original':this.marker_view.ai_waypoint,
                                         'position':aip.p});
         this.level.ai_waypoints.push(instance);
+        max_ai_n=Math.max(max_ai_n, aip.n);
     }, this);
+    this.marker_view.ai_waypoint.setNumber(max_ai_n+1);
     
     level.checkpoints.forEach(function(cp){
         
@@ -1415,7 +1437,9 @@ EditorScene.prototype.loadLevel=function(level){
                                         'number':cp.n,
                                         'position':cp.p});
         this.level.checkpoints.push(instance);
+        max_cp_n=Math.max(max_cp_n, cp.n);
     }, this);
+    this.marker_view.checkpoint.setNumber(max_cp_n+1);
     
     level.start_positions.forEach(function(sp){
         instance=new StartPositionInstance({'parent':this.level_view,
@@ -1426,7 +1450,9 @@ EditorScene.prototype.loadLevel=function(level){
                                        'number':sp.n,
                                        'position':sp.p});
         this.level.start_positions.push(instance);
+        max_sp_n=Math.max(max_sp_n, sp.n);
     }, this);
+    this.marker_view.start_position.setNumber(max_sp_n+1);
     this.level_view.refresh();
 };
 
