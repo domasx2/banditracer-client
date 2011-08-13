@@ -931,9 +931,6 @@ Decal.prototype.place=function(position){
     this.scene.level.decals.push(instance);
 };
 
-
-
-
 //PROP
 
 var Prop=exports.Prop=function(pars){
@@ -1067,7 +1064,7 @@ var EditorScene=exports.EditorScene=function(){
     this.playdialog=new PlayDialog({'gui':this.gui,
                                    'scene':this});
     
-    this.playbtn=new ui2.Button({'position':[0, 280],
+    this.playbtn=new ui2.Button({'position':[0, 270],
                                     'size':[190, 50],
                                     'parent':this.gui,
                                     'text':'Play',
@@ -1075,7 +1072,17 @@ var EditorScene=exports.EditorScene=function(){
     
     this.playbtn.onClick(function(){this.show();}, this.playdialog);
     
-    this.backbtn=new ui2.Button({'position':[0, 350],
+    this.helpbtn=new ui2.Button({'position':[0, 330],
+                                    'size':[190, 50],
+                                    'parent':this.gui,
+                                    'text':'Help',
+                                    'lean':'left'});
+    
+    this.helpbtn.onClick(function(){
+        window.open('http://www.banditracer.eu/index.php?page=track-editor-help');
+    }, this);
+    
+    this.backbtn=new ui2.Button({'position':[0, 390],
                                     'size':[190, 50],
                                     'parent':this.gui,
                                     'text':'Back',
@@ -1084,6 +1091,8 @@ var EditorScene=exports.EditorScene=function(){
     this.backbtn.onClick(function(){
         combatracer.game.showTitle();
     }, this);
+    
+    
     
     this.dialog=new ui2.Dialog({'gui':this.gui,
                                 'size':[450, 150]});

@@ -123,7 +123,7 @@ var GameOverScene=exports.GameOverScene=function(table, win){
     
     this.label=new GUI.Label({'parent':this.container,
                                 'position':[30, 120],
-                                'text':win ? 'You win! Well done.' : 'You lose! Ha-ha.',
+                                'text':win ? 'You win! Well done.' : 'You lose! Better luck next time.',
                                 'font':ui2.getFont('header')});
     var columns=[{'key':'place', 'label':'Place', 'width':80},
               {'key':'player', 'label':'Player', 'width':200},
