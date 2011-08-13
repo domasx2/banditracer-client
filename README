@@ -21,21 +21,10 @@ Start the banditracer-client webserver:
 
 Access the game at: <http://localhost:8080/>
 
-Map Editor
+Track Editor
 ===============
 
-requires:
-
-  * python 2.5+
-  * wxPython
-  * PIL
-  * simple json
-
-    $ python editor.py
-
-You can select objects with left mouse button and delete them with
-delete key, use mousewheel to rotate props / car starting positions
-before placing them. Tiles are not rotatable.
+See instructions at: http://www.banditracer.eu/index.php?page=track-editor-help
 
 Your own dedicated multiplayer server
 =======================================

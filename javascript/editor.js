@@ -1424,7 +1424,7 @@ EditorScene.prototype.loadLevel=function(level){
     
     
     
-    var max_ai_n=1, max_cp_n=1, max_sp_n=1;
+    var max_ai_n=0, max_cp_n=0, max_sp_n=0;
     
     level.ai_waypoints.forEach(function(aip){
         instance=new AIWaypointInstance({'parent':this.level_view,
