@@ -6,6 +6,7 @@ var _queue=[];
 
 function Channels(filename, count){
     this.audios=[];
+    this.next=0;
     var s;
     for(var i=0;i<count;i++){
         s=new gamejs.mixer.Sound('sounds/fx/'+filename);
@@ -15,15 +16,9 @@ function Channels(filename, count){
     
     this.play=function(){
         var a;
-        for(var i=0;i<this.audios.length;i++){
-            a=this.audios[i];
-            if(a.getCurrentTime()>=a.getLength())a.stop(); //firefox hack, it does not end playback automatically.
-            if(a.isEnded() || a.isPaused()){
-                a.seek(0);
-                a.play();
-                return;
-            }
-        }
+        this.audios[this.next].play();
+        this.next++;
+        if(this.next==this.audios.length) this.next=0;
     }
     return this;
 }
@@ -35,13 +30,14 @@ function Engine(){
     this.second_launched=false;
     this.third_launched=false;
     var s;
-    for(var i=0;i<=5;i++){
+    /*for(var i=0;i<=5;i++){
         s=new gamejs.mixer.Sound('sounds/engine/loop_'+i+'.wav');
         s.setVolume(0.15);
         this.audios[i]=s;
-    }   
+    }   */
     
     this.play=function(pitch){
+        return; //temporarily 
         if(this.playing!=pitch){
             for(var p=0;p<=5;p++){
                 if(p!=pitch){
@@ -67,6 +63,7 @@ function Engine(){
     };
     
     this.stop=function(){
+        return;
         for(var p in this.audios){
             this.audios[p].stop();
             this.audios[p].seek(0);

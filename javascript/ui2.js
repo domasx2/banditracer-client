@@ -1,12 +1,13 @@
 var gamejs=require('gamejs');
-var GUI=require('gamejs-gui');
-var skin=require('skin');
-var renderer=require('renderer');
-var settings=require('settings');
-var combatracer=require('combatracer');
-var car_descriptions=require('car_descriptions');
-var levels=require('levels');
-var utils=require('utils');
+var GUI=require('./gamejs-gui');
+var skin=require('./skin');
+var renderer=require('./renderer');
+var settings=require('./settings');
+var combatracer=require('./combatracer');
+var car_descriptions=require('./car_descriptions');
+var levels=require('./levels');
+var utils=require('./utils');
+var sounds=require('./sounds');
 
 exports.fonts={};
 
@@ -161,6 +162,9 @@ NameInput.prototype.paint=function(){
 var TitleButton=exports.TitleButton=function(pars){
     pars.font=pars.font || getFont(skin.title_button.font);
     TitleButton.superConstructor.apply(this, [pars]);
+    this.onClick(function(){
+        sounds.play({'filename':'button_click.wav'});
+    });
 };
 
 gamejs.utils.objects.extend(TitleButton, GUI.Button);
@@ -177,6 +181,9 @@ var Button=exports.Button=function(pars){
     this.hover_fill = pars.hover_fill || skin.button.hover_fill;
     this.lean = pars.lean || 'right';
     Button.superConstructor.apply(this, [pars]);
+    this.onClick(function(){
+        sounds.play({'filename':'button_click.wav'});
+    });
 };
 
 gamejs.utils.objects.extend(Button, GUI.Button);
@@ -515,5 +522,8 @@ var IncrementButton=exports.IncrementButton=function(pars){
     pars.image_hover=image_hover;
     pars.image_down=false;
     IncrementButton.superConstructor.apply(this, [pars]);
+    this.onClick(function(){
+        sounds.play({'filename':'button_click.wav'});
+    });
 };
 gamejs.utils.objects.extend(IncrementButton, GUI.Button);

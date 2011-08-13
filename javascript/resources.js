@@ -7,4 +7,4 @@ exports.statics=['mine.png'];
 exports.levels=['snowpeakcircuit', 'drycircuit', 'deathvalley'];
 exports.decals=['arrow.png','dideliskampas.png','ilgas.png','issisakojimas.png','kryzius.png','lenktas.png','paprastas.png','siauras.png','siaurasiplatu.png','siaurejantis1.png','siaurejantis2.png','sonaslenktas1.png','sonaslenktas2.png','startbar.png','susikerta.png','trumpas.png','white_bar.png'];
 exports.sound_fx=['bullet_impact_metal.wav','bullet_impact_soft.wav','button_click.wav','explosion.wav','machinegun_shot.wav','missile_launch.wav','thud.wav'];
-exports.sound_engine=['loop_0.wav','loop_1.wav','loop_2.wav','loop_3.wav','loop_4.wav','loop_5.wav'];
+exports.sound_engine=[];
