@@ -8,7 +8,7 @@ var box2d = require('./box2d');
 var GUI = require('./gamejs-gui');
 var vec=utils.vec;
 var arr=utils.arr;
-var ui2=require('./ui2');
+var ui=require('./ui');
 
 var vectors = gamejs.utils.vectors;
 var math = gamejs.utils.math;
@@ -315,7 +315,7 @@ gamejs.utils.objects.extend(MultiplayerLevelScene, LevelScene);
 var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(level, ai_test){
     SingleplayerLevelScene.superConstructor.apply(this, [level]);
     
-    this.dialog=new SinglePlayerDialog({'gui':this.gui,
+    this.dialog=new SinglePlayerDialog({'parent':this.gui,
                                        'scene':this});
 
     this.test_ai=ai_test;
@@ -429,7 +429,7 @@ function SinglePlayerDialog(pars){
     SinglePlayerDialog.superConstructor.apply(this, [pars]);
     this.scene=pars.scene;
     
-    this.quitbtn=new ui2.Button({'parent':this,
+    this.quitbtn=new ui.Button({'parent':this,
                                 'text':'Quit',
                                 'size':[180, 40],
                                 'lean':'both',
@@ -441,7 +441,7 @@ function SinglePlayerDialog(pars){
     }, this);
     
     
-    this.continuebtn=new ui2.Button({'parent':this,
+    this.continuebtn=new ui.Button({'parent':this,
                                 'text':'Continue',
                                 'size':[180, 40],
                                 'lean':'both',

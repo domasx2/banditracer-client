@@ -1,6 +1,5 @@
 var gamejs = require('gamejs');
 var ui=require('./ui');
-var ui2=require('./ui2');
 var utils=require('./utils');
 var levels=require('./levels');
 var car_descriptions=require('./car_descriptions');
@@ -8,6 +7,7 @@ var GUI=require('./gamejs-gui');
 var skin=require('./skin');
 var combatracer=require('./combatracer');
 
+/*
 var LobbyScene=exports.LobbyScene=function(game, cache, lobby_id){
     LobbyScene.superConstructor.apply(this, [game, cache]);
     this.lobby_id=lobby_id;
@@ -111,7 +111,7 @@ var LobbyScene=exports.LobbyScene=function(game, cache, lobby_id){
     return this;
 
 };
-gamejs.utils.objects.extend(LobbyScene, ui.UIScene);
+gamejs.utils.objects.extend(LobbyScene, ui.UIScene);*/
 
 var GameOverScene=exports.GameOverScene=function(table, win){
     GameOverScene.superConstructor.apply(this, []);
@@ -119,24 +119,24 @@ var GameOverScene=exports.GameOverScene=function(table, win){
     this.titlelbl=new GUI.Label({'parent':this.container,
                                 'position':[210, 40],
                                 'text':'Race Over',
-                                'font':ui2.getFont('header_black')});
+                                'font':ui.getFont('header_black')});
     
     this.label=new GUI.Label({'parent':this.container,
                                 'position':[30, 120],
                                 'text':win ? 'You win! Well done.' : 'You lose! Better luck next time.',
-                                'font':ui2.getFont('header')});
+                                'font':ui.getFont('header')});
     var columns=[{'key':'place', 'label':'Place', 'width':80},
               {'key':'player', 'label':'Player', 'width':200},
               {'key':'kills', 'label':'Kills', 'width':80},
               {'key':'deaths', 'label':'Deaths', 'width':80}];
     
-    new ui2.Table({'parent':this.container,
+    new ui.Table({'parent':this.container,
                   'size':[460, 300],
                   'position':[30, 200],
                   'columns':columns,
                   'data':table});
     
-    var btn=new ui2.Button({'parent':this.container,
+    var btn=new ui.Button({'parent':this.container,
                    'position':[800-150, 500],
                    'size':[150, 50],
                    'lean':'right',
@@ -147,9 +147,9 @@ var GameOverScene=exports.GameOverScene=function(table, win){
 
 };
 
-gamejs.utils.objects.extend(GameOverScene, ui2.UIScene);
+gamejs.utils.objects.extend(GameOverScene, ui.UIScene);
 
-
+/*
 var JoinLobbyScene2=exports.JoinLobbyScene2=function(game, cache){
     JoinLobbyScene2.superConstructor.apply(this, [game, cache]);
 
@@ -229,43 +229,43 @@ var JoinLobbyScene=exports.JoinLobbyScene=function(){
     this.titlelbl=new GUI.Label({'parent':this.container,
                                 'position':[210, 40],
                                 'text':'Multiplayer',
-                                'font':ui2.getFont('header_black')});
+                                'font':ui.getFont('header_black')});
     
     var columns=[{'key':'title', 'label':'Title', 'width':150},
                  {'key':'track', 'label':'Track', 'width':150},
                  {'key':'players', 'label':'Players', 'width':150}]
-    this.table=new ui2.Table({'parent':this.container,
+    this.table=new ui.Table({'parent':this.container,
                              'size':[450, 350],
                              'position':[300, 150],
                              'columns':columns,
                              'data':[]});
     
-    this.create_btn=new ui2.Button({'parent':this.container,
+    this.create_btn=new ui.Button({'parent':this.container,
                                   'size':[200, 50],
                                   'lean':'left',
                                   'position':[0, 150],
                                   'text':'Create Lobby'});
     
-    this.refresh_btn=new ui2.Button({'parent':this.container,
+    this.refresh_btn=new ui.Button({'parent':this.container,
                                     'size':[200, 50],
                                     'lean':'left',
                                     'position':[0, 210],
                                     'text':'Refresh'});
     
-    this.back_btn=new ui2.Button({'parent':this.container,
+    this.back_btn=new ui.Button({'parent':this.container,
                                     'size':[200, 50],
                                     'lean':'left',
                                     'position':[0, 520],
                                     'text':'Back'});
     this.back_btn.onClick(this.returnToTitle, this);
     
-    this.join_btn=new ui2.Button({'parent':this.container,
+    this.join_btn=new ui.Button({'parent':this.container,
                                 'size':[200, 50],
                                 'lean':'right',
                                 'position':[this.container.size[0]-200, 520],
                                 'text':'Join'});
 };
-gamejs.utils.objects.extend(JoinLobbyScene, ui2.UIScene);
+gamejs.utils.objects.extend(JoinLobbyScene, ui.UIScene);
 
 
 var CreateLobbyScene=exports.CreateLobbyScene=function(game, cache){
@@ -324,7 +324,7 @@ var CreateLobbyScene=exports.CreateLobbyScene=function(game, cache){
     this.selector=new ui.LevelSelector({'scene':this,
                          'position':[250, 90]});
 };
-gamejs.utils.objects.extend(CreateLobbyScene, ui.UIScene);
+gamejs.utils.objects.extend(CreateLobbyScene, ui.UIScene);*/
 
 var TitleScene=exports.TitleScene=function(game, cache){
     TitleScene.superConstructor.apply(this, [game, cache]);
@@ -342,11 +342,11 @@ var TitleScene=exports.TitleScene=function(game, cache){
     //name: label
     new GUI.Label({'position':[50, 115],
                   'parent':this.container,
-                  'font':ui2.getFont('alias_label'),
+                  'font':ui.getFont('alias_label'),
                   'text':'name:'});
     
     //name input
-    this.nameinput=new ui2.NameInput({'position':[178, 129],
+    this.nameinput=new ui.NameInput({'position':[178, 129],
                                      'size':[200, 40],
                                      'text':'Guest',
                                      'parent':this.container});
@@ -355,32 +355,29 @@ var TitleScene=exports.TitleScene=function(game, cache){
         this.game.player.alias=event.value; 
     }, this);
     
-    this.btn_single=new ui2.TitleButton({'position':[440, 210],
+    this.btn_single=new ui.TitleButton({'position':[440, 210],
                                         'size':[360, 65],
                                         'text':'Single player',
                                         'parent':this.container});
     
     this.btn_single.onClick(this.singleplayer, this);
     
-    this.btn_multi=new ui2.TitleButton({'position':[440, 300],
+   /* this.btn_multi=new ui.TitleButton({'position':[440, 300],
                                         'size':[360, 65],
                                         'text':'Multiplayer',
-                                        'parent':this.container});
+                                        'parent':this.container});*/
     
-    this.btn_multi.onClick(this.joinLobby, this);
+   // this.btn_multi.onClick(this.joinLobby, this);
     
-    this.btn_editor=new ui2.TitleButton({'position':[440, 390],
+    this.btn_editor=new ui.TitleButton({'position':[440, 300],
                                         'size':[360, 65],
                                         'text':'Track Editor',
                                         'parent':this.container});
     
     this.btn_editor.onClick(this.editTrack, this);
-    
-
-    
 };
 
-gamejs.utils.objects.extend(TitleScene, ui2.UIScene);
+gamejs.utils.objects.extend(TitleScene, ui.UIScene);
 
 TitleScene.prototype.editTrack=function(){
     this.game.showEditor();
@@ -398,8 +395,6 @@ TitleScene.prototype.handleMessage=function(cmd, payload){
 };
 
 TitleScene.prototype.joinLobby=function(){
-        this.alert('Temporarily out of order!');
-        return;
         var alias=this.game.player.alias;
         if(!alias) this.alert('You must enter your name first!');
         else{
@@ -422,42 +417,42 @@ var SinglePlayerScene=exports.SinglePlayerScene=function(game, cache){
     this.titlelbl=new GUI.Label({'parent':this.container,
                                 'position':[210, 40],
                                 'text':'Single Player',
-                                'font':ui2.getFont('header_black')});
+                                'font':ui.getFont('header_black')});
     
-    this.backbtn=new ui2.Button({'size':[130, 50],
+    this.backbtn=new ui.Button({'size':[130, 50],
                                 'parent':this.container,
                                 'position':[0, 520],
                                 'lean':'left',
                                 'fill':skin.sp_button.fill,
-                                'font':ui2.getFont(skin.sp_button.font),
+                                'font':ui.getFont(skin.sp_button.font),
                                 'hover_fill':skin.sp_button.fill_hover,
                                 'text':'BACK'});
     this.backbtn.onClick(this.back, this);
     
-    this.racebtn=new ui2.Button({'size':[130, 50],
+    this.racebtn=new ui.Button({'size':[130, 50],
                                 'parent':this.container,
                                 'position':[this.container.size[0]-130, 520],
                                 'lean':'right',
                                 'fill':skin.sp_button.fill,
-                                'font':ui2.getFont(skin.sp_button.font),
+                                'font':ui.getFont(skin.sp_button.font),
                                 'hover_fill':skin.sp_button.fill_hover,
                                 'text':'RACE!'});
     this.racebtn.onClick(this.race, this);
     
-    this.gotogarage=new ui2.GoToGarage({'position':[14, 160],
+    this.gotogarage=new ui.GoToGarage({'position':[14, 160],
                                        'parent':this.container});
     this.gotogarage.on(GUI.EVT_MOUSE_DOWN, function(){
         this.alert('Coming soon!', true);
     }, this);
     
-    this.car_display=new ui2.CarDisplay({'position':[14, 356],
+    this.car_display=new ui.CarDisplay({'position':[14, 356],
                                         'gameinfo':combatracer.game.player.singleplayer,
                                           'parent':this.container});
     
-    this.track_selector=new ui2.TrackSelector({'position':[254, 160],
+    this.track_selector=new ui.TrackSelector({'position':[254, 160],
                                             'parent':this.container});
 };
-gamejs.utils.objects.extend(SinglePlayerScene, ui2.UIScene);
+gamejs.utils.objects.extend(SinglePlayerScene, ui.UIScene);
 
 SinglePlayerScene.prototype.back=function(){
     this.game.showTitle();
@@ -488,7 +483,7 @@ var ControlsSplash=exports.ControlsSplash=function(game, cache, next_scene){
     var lbl=new GUI.Label({'position':[0, 0],
                           'parent':this.gui,
                       'text':'Press any key or click to continue...',
-                      'font':ui2.getFont('header')});
+                      'font':ui.getFont('header')});
     this.gui.center(lbl);
     lbl.move([lbl.position[0], img.position[1]+img.size[1]+30]);
     this.gui.despatchEvent({'type':GUI.EVT_FOCUS});
@@ -496,35 +491,9 @@ var ControlsSplash=exports.ControlsSplash=function(game, cache, next_scene){
     this.gui.on(GUI.EVT_KEY_DOWN, this.next, this);
 };
 
-gamejs.utils.objects.extend(ControlsSplash, ui2.UIScene);
+gamejs.utils.objects.extend(ControlsSplash, ui.UIScene);
 
 ControlsSplash.prototype.next=function(){
     this.game.director.replaceScene(this.next_scene);  
 };
 
-var EndRaceScene=exports.EndRaceScene=function(game, cache, pos){
-    EndRaceScene.superConstructor.apply(this, [game, cache]);
-
-    if(pos==1){
-        new ui.Label({'scene':this,
-                     'position':[game.director.width/2-90, 100],
-                     'text':'You Win'});
-    }else{
-        new ui.Label({'scene':this,
-                     'position':[game.director.width/2-90, 100],
-                     'text':'You Lose'});
-    }
-
-    this.showTitle=function(){
-        this.game.showTitle();
-    };
-
-    new ui.Button({'scene':this,
-                  'position':[game.director.width/2-90, 200],
-                  'size':[200, 32],
-                  'text':'Continue',
-                  'onclick':this.showTitle});
-
-
-};
-gamejs.utils.objects.extend(EndRaceScene, ui.UIScene);

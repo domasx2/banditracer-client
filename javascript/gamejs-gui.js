@@ -23,13 +23,8 @@ var DEFAULT_FONT_DESCR='14px Verdana';
 var gamejs_ui_next_id=1;
 
 
-/**********************************************
- *cloneEvent
- *
- * evt- event to clone
- * offset [x, y] - substract from events position.
- *
- *
+/**
+ *@ignore
  */
 function cloneEvent(evt, offset){
     var new_evt={};
@@ -42,13 +37,19 @@ function cloneEvent(evt, offset){
     return new_evt; 
 }
 
-//returns pos of size2 if to be placed at the center of size1
+/**
+ *@ignore
+ */
 function getCenterPos(size1, size2){
     return [Math.max(parseInt((size1[0]-size2[0])/2), 0),
             Math.max(parseInt((size1[1]-size2[1])/2), 0)];
 }
 
-//make a view draggable
+/**
+ *Make a view draggable within it's parent. Dragging generates EVT_DRAG
+ *@function
+ *@param {View} view view to make draggable.
+ */
 var draggable=exports.draggable=function(view){
     view.grab_pos=null;
     view.on(EVT_MOUSE_DOWN, function(event){
@@ -75,12 +76,17 @@ var draggable=exports.draggable=function(view){
     }, view);
 };
 
-/*****************************************************
- *CachedFont
- *font cache where each letter is saved as an image. caching is lazy
+/**
+ *implements lazy caching for individual letters
+ *@class cached font
+ *@constructor
  *
- *font: {String|Array} - either font description as string, or assoc array character:gamejs.Surface
- *color - color of the font, not required if image array is supplied. defaults to black.
+ *@param {String|Array} font either font description as string, or assoc array character:gamejs.Surface
+ *@param {String} color a valid #RGB String, "#ffcc00"
+ *
+ *@property {Number} space_width space between lettersin pixels. Default 'm' width divided by 3
+ *@property {Number} tab_width tab width in pixels. Default 3*space_width
+ *@property {gamejs.font.Font} font font object used to render characters. Default 14px Verdana
  */
 var CachedFont=exports.CachedFont=function(font, color){
     this.space_width=3;
@@ -102,6 +108,15 @@ var CachedFont=exports.CachedFont=function(font, color){
     this.tab_width=3*this.space_width;
 };
 
+
+/**
+ *returns gamejs.Surface for a character. Caches this surface if it is not cached
+ *
+ *@function
+ *@param {String} c single character
+ *
+ *@returns {gamejs.Surface} surface object with the character painted on. Not a copy, don't paint on it!
+ */
 CachedFont.prototype.getCharSurface=function(c){
     if(!this.chars[c]){
         var s=this.font.render(c, this.color);
@@ -110,6 +125,14 @@ CachedFont.prototype.getCharSurface=function(c){
     return this.chars[c];
 };
 
+/**
+ *get size text would occupy if it was rendered
+ *@function
+ *
+ *@param {String} text
+ *
+ *@returns {Array} size, eg. [width, height]
+ */
 CachedFont.prototype.getTextSize=function(text){
     var w=0, h=0, c, l, sz;
     if(text){ 
@@ -131,9 +154,18 @@ CachedFont.prototype.getTextSize=function(text){
     }else return [0, 0];
 };
 
+/**
+ *render text on a surface
+ *@function
+ *
+ *@param {gamejs.Surface} surface surface to render text on
+ *@param {String} text text to render
+ *@param {Array} position position to render the text at
+ *@param {Number} space_width OPTIONAL, override space width
+ */
 CachedFont.prototype.render=function(surface, text, position, space_width){
     ofst=position[0];
-    var space_width=space_width? space_width : this.space_width;
+    space_width=space_width? space_width : this.space_width;
     var i, c, s;
     for(i=0;i<text.length;i++){
         c=text[i];
@@ -146,23 +178,27 @@ CachedFont.prototype.render=function(surface, text, position, space_width){
             ofst+=s.getSize()[0];
         }
     }        
-    
 };
 
 
 exports.DEFAULT_FONT=new CachedFont('12px Verdana', 'black');
 
-/******************************************************
- *view
+/**
+ *View
+ *@class base gui object !CONSTRUCTOR PARAMETERS ARE PROVIDED IN A OBJECT LITERAL!
+ *@constructor
  *
- *contains other views, handles and despatches events
- *pars:
+ *@param {View} parent parent element
+ *@param {Array} size  array containing width & height of the element, eg. [width, height]
+ *@param {Array} position position of the view relative to parent, eg. [x, y]. OPTIONAL, default [0, 0]
+ *@param {gamejs.Surface} surface surface to render this view on, OPTIONAL
+ *@param {Bool} visible is this view visible? default true
  *
- *parent - parent view
- *size  [x, y]
- *position [x, y]
- *surface - if provided, this surface is used instead of creating a new one
- *visible
+ *@property {Array} size view size, [width, length]
+ *@property {Array} position view position relative to parent, [x, y]
+ *@property {gamejs.Surface} surface surface this view is rendered on
+ *@property {View} parent parent view of this view
+ *@property {Array} children array of this views children views
  */
 var View=exports.View=function(pars){
     this.type='view';
@@ -185,10 +221,10 @@ var View=exports.View=function(pars){
     this._refresh=true;
     
     //is the mouse over this view?
-    this.hover=false;
+    this.is_hovered=false;
     
     //is this view focused?
-    this.focus=false;
+    this.is_focused=false;
     
     //evenet type: [{'callback':x, 'scope':y, ...]
     this.listeners={};
@@ -196,10 +232,55 @@ var View=exports.View=function(pars){
     
 };
 
+/*
+ *get is focus state
+ *@function
+ *@returns {Bool} is this view focused?
+ */
+View.prototype.isFocused=function(){
+    return this.is_focused;  
+};
+
 /**
- *remove child. this effectively destroys the child and its children
- *
- *child - View object or view id
+ *get hover state
+ *@function
+ *@returns {Bool} is mouse hovering on this element?
+ */
+View.prototype.isHovered=function(){
+    return this.is_hovered;  
+};
+/**
+ *get view size
+ *@function
+ *@returns {Array} view size, [width, height]
+ */
+View.prototype.getSize=function(){
+    return [this.size[0], this.size[1]];
+};
+
+/**
+ *get view position within it's parent element
+ *@function
+ *@returns {Array} view position within it's parent element, [x, y]
+ */
+View.prototype.getPosition=function(){
+    return [this.position[0], this.position[1]];
+};
+
+/**
+ *get visible state
+ *@function
+ *@returns {Bool} is this view visible?
+ */
+
+View.prototype.isVisible=function(){
+  return this.visible;
+};
+
+/**
+ *detaches a child from this view
+ *@function
+ *@param {View|Number} child View or or child View id.
  */
 View.prototype.removeChild=function(child){
     if(typeof(child)!='number')child=child.id;
@@ -214,24 +295,34 @@ View.prototype.removeChild=function(child){
 }
 
 /**
- *calls parent's removeChild
+ *detaches view from it's parent, effectively destroying it
+ *@function
  */
 View.prototype.destroy=function(){
     if(this.parent)this.parent.removeChild(this);
 }
 
+/**
+ *get position & size rect
+ *@returns gamejs.Rect instance. Position is relative to parent
+ */
 View.prototype.getRect=function(){
     return new gamejs.Rect(this.position, this.size);  
 };
 
-//child views
-
-
+/**
+ *add child to this view
+ *@param {View} child view to add as a child of this view
+ */
 View.prototype.addChild=function(child){
     this.children.push(child);
-}
+};
 
-//redraw this view
+/**
+ *if needed, paints this view, draws children and coposites them on this views surface
+ *@function
+ *@returns {Bool} has this view been repainted
+ */
 View.prototype.draw=function(){
     if(!this.visible){
         if(this._refresh){
@@ -263,19 +354,35 @@ View.prototype.draw=function(){
     
     return painted;
 };
-
+/**
+ *blit child's surface on this view's surface
+ *@function
+ *@param {View} child child view to blit
+ */
 View.prototype.blitChild=function(child){
     this.surface.blit(child.surface, child.position);
 };
 
-//actual draw code, override
+/**
+ *paint this view on it's surface. does not repaint/blit children! override this to implement custom drawing of the element itself. by default, only clears the surface
+ *@function
+ */
 View.prototype.paint=function(){
     this.surface.clear();
 };
 
+
+/**
+ *update view. does nothing by default
+ *@function
+ *@param {Number} miliseconds since last update
+ */
 View.prototype.update=function(msDuration){};
 
-//update view state
+/**
+ *recursively calls _update on this views children, then calls update for this view.
+ *@ignore
+ */
 View.prototype._update=function(msDuration){
     this.children.forEach(function(child){
         child._update(msDuration);        
@@ -283,17 +390,30 @@ View.prototype._update=function(msDuration){
     this.update(msDuration);
 };
 
+/**
+ *register a callback for an event. When event is triggered, callback is called with event object as argument
+ *@function
+ *@param {Event ID} event event ID of the event to be registered on, eg gamejs-gui.EVT_BLUR, gamejs-gui.EVT_KEY_DOWN, etc.
+ *@param {Function} callback function to call when event is triggered
+ *@param {Object} scope - this object for the callback
+ */
 View.prototype.on=function(event_type, callback, scope){
     if(!this.listeners[event_type])this.listeners[event_type]=[];
     this.listeners[event_type].push({'callback':callback, 'scope':scope});
 };
 
+/**
+ *despatches event to all children. internal
+ *@ignore
+ */
 View.prototype.despatchEventToChildren= function(event){
     this.children.forEach(function(child){child.despatchEvent(event);});
 };
 
 /**
- *move view to new position
+ *Move view relative to its parent. Generates EVT_MOVE event
+ *@function
+ *@param {Array} new position relative to parent element, eg. [x, y]
  */
 View.prototype.move=function(position){
     var old_position=this.position;
@@ -305,14 +425,18 @@ View.prototype.move=function(position){
 };
 
 /**
- *move view, relative coordinates
+ *Move view relative to its position. Generates EVT_MOVE event
+ *@function
+ *@param {Array} delta coordinates relative to current position ,eg. [delta x, delta y]
  */
 View.prototype.moveRelative=function(position){
     this.move([this.position[0]+position[0], this.position[1]+position[1]]);  
 };  
 
 /**
- *resize view
+ *Resize this view. Generates EVT_RESIZE event
+ *@function
+ *@param {Array} new size, eg. [width, height]
  */
 View.prototype.resize=function(size){
     var old_size=this.size;
@@ -324,10 +448,18 @@ View.prototype.resize=function(size){
                        'new_size':size});
 };
 
+/**
+ *Redraw this view and its children.
+ *@function
+ */
 View.prototype.refresh=function(){
     this._refresh=true;
 };
 
+/**
+ *If this view is hidden, make it visible
+ *@function
+ */
 View.prototype.show=function(){
     if(!this.visible){
         this.visible=true;
@@ -335,6 +467,10 @@ View.prototype.show=function(){
     }
 };
 
+/**
+ *If this view is visible, hide it. This also blurs and mouse-outs the view, if applicable
+ *@function
+ */
 View.prototype.hide=function(){
     if(this.visible){
         this.despatchEvent({'type':EVT_BLUR});
@@ -344,41 +480,45 @@ View.prototype.hide=function(){
     }
 };
 
-//despatch events to children, handle them if needed
+/**
+ *Despatch event to this view. Event is despatched to children if applicable, then handled by this view.
+ *@function
+ *@param {Event} event event to despatch
+ */
 View.prototype.despatchEvent=function(event){
     if(!this.visible) return;
     var inside=false; //event position inside this view
     
     if(event.type==EVT_BLUR){
-        if(this.focus){
-            this.focus=false;
+        if(this.is_focused){
+            this.is_focused=false;
             this.refresh();
             this.handleEvent(event);
         }
         this.despatchEventToChildren(event);
     }
     else if(event.type==EVT_MOUSE_OUT){
-        if(this.hover){
-            this.hover=false;
+        if(this.is_hovered){
+            this.is_hovered=false;
             this.refresh();
             this.handleEvent(event);
         }
         this.despatchEventToChildren(event);
     }
     else if(event.type==EVT_MOUSE_OVER){
-        this.hover=true;
+        this.is_hovered=true;
         this.refresh();
         this.handleEvent(event);
     }
     
     else if(event.type==EVT_FOCUS){
-        this.focus=true;
+        this.is_focused=true;
         this.refresh();
         this.handleEvent(event);
     }
     
     else if(event.type==EVT_MOUSE_DOWN){
-        if(!this.focus){
+        if(!this.isFocused()){
             this.despatchEvent({'type':EVT_FOCUS});
         }
         this.children.forEach(function(child){
@@ -387,7 +527,7 @@ View.prototype.despatchEvent=function(event){
                 child.despatchEvent(cloneEvent(event, child.position));
             }else{
                 //not inside, but child is focused: blur
-                if(child.focus) child.despatchEvent({'type':EVT_BLUR});
+                if(child.isFocused()) child.despatchEvent({'type':EVT_BLUR});
             }
         }, this);
         this.handleEvent(event);
@@ -410,20 +550,20 @@ View.prototype.despatchEvent=function(event){
             //click inside child: despatch
             if(child.getRect().collidePoint(event.pos)){
                 //inside, not hovering: hover
-                if(!child.hover) child.despatchEvent(cloneEvent({'type':EVT_MOUSE_OVER, 'pos':event.pos}, child.position));
+                if(!child.isHovered()) child.despatchEvent(cloneEvent({'type':EVT_MOUSE_OVER, 'pos':event.pos}, child.position));
                 child.despatchEvent(cloneEvent(event, child.position));
             }else{
                 //not inside, but child is focused: blur
-                if(child.hover) child.despatchEvent(cloneEvent({'type':EVT_MOUSE_OUT, 'pos':event.pos}, child.position));
+                if(child.isHovered()) child.despatchEvent(cloneEvent({'type':EVT_MOUSE_OUT, 'pos':event.pos}, child.position));
             }
         }, this);
         this.handleEvent(event);
         
     }
     else if(event.type==EVT_KEY_UP || event.type==EVT_KEY_DOWN || event.type==EVT_KEY_UP){
-        if(this.focus){     
+        if(this.isFocused()){     
             this.children.forEach(function(child){
-                if(child.focus) child.despatchEvent(cloneEvent(event));
+                if(child.isFocused()) child.despatchEvent(cloneEvent(event));
             });
             this.handleEvent(event);
         }
@@ -434,6 +574,11 @@ View.prototype.despatchEvent=function(event){
 
 };
 
+/**
+ *returns GUI object at the base of this views branch
+ *@function
+ *@returns {GUI} GUI object at the base if this views branch
+ */
 View.prototype.getGUI=function(){
     var parent=this.parent;
     while(parent!=null && parent.type!='gui'){
@@ -442,12 +587,19 @@ View.prototype.getGUI=function(){
     return parent;
 };
 
-//center a child in this view
+/**
+ *Center a child view within this view. Must be direct child
+ *@function
+ *@param {View} child child view
+ */
 View.prototype.center=function(child){
     child.move(getCenterPos(this.size, child.size));   
 };
 
-//CAN ONLY BE CALLED BY DESPATCH EVENT!
+/**
+ *execute any registered callbacks for this event. Should only be called by despatchEvent!
+ *@ignore
+ */
 View.prototype.handleEvent=function(event){
     if(this.listeners[event.type]){
         this.listeners[event.type].forEach(function(listener){
@@ -457,55 +609,75 @@ View.prototype.handleEvent=function(event){
     }
 };
 
-/********************************************
- *LABEL
- *pars:
- *parent
- *position
- *text
- *font - CachedFont instance, optional - uses exports.DEFAULT_FONT by default
+/**
+ *@class single-line text display !CONSTRUCTOR PARAMETERS ARE PROVIDED IN A OBJECT LITERAL!
+ *@augments View
+ *@constructor 
  *
+ *@param {CachedFont} font font to draw text with. OPTIONAL, default gamejs-gui.DEFAULT_FONT
+ *@param {String} text text to draw
+ *@param {View} parent parent element
+ *@param {Array} position position of the view relative to parent, eg. [x, y]. OPTIONAL, default [0, 0]
+ *@param {gamejs.Surface} surface surface to render this view on, OPTIONAL
+ *@param {Bool} visible is this view visible? OPTIONAL, EFAULT true
  *
- *size is set automatically.
+ *resized automatically to house text.
+ *
+ *@property {CachedFont} font
+ *@property {String} text
+
  */
 
 var Label=exports.Label=function(pars){
-    this.font=pars.font;
+    this.font=pars.font ? pars.font : exports.DEFAULT_FONT;
     pars.size=[1, 1];
     Label.superConstructor.apply(this, [pars]);
+    if(!pars.text) throw "Label: label text must be provided!"
     this.setText(pars.text);
     this.type='label'; 
 };
 
 gamejs.utils.objects.extend(Label, View);
 
-Label.prototype.getFont=function(){
-    return this.font ? this.font : exports.DEFAULT_FONT;
-};
-
+/**
+ *set new text for this label. Resizes the view automatically.
+ *@function
+ *
+ *@param {String} text new text
+ */
 Label.prototype.setText=function(text){
     this.text=text ? text : ' ';
-    this.size=this.getFont().getTextSize(text);
+    this.size=this.font.getTextSize(text);
     this.resize(this.size);
 };
 
+/***
+ *paint implementation for label. clears surface and renders text
+ *@function
+ */
 Label.prototype.paint=function(){
     this.surface.clear();
-    this.getFont().render(this.surface, this.text, [0, 0]);
+    this.font.render(this.surface, this.text, [0, 0]);
 };
 
-/************************************************
- *BUTTON
+/**
+ *@class button !CONSTRUCTOR PARAMETERS ARE PROVIDED IN A OBJECT LITERAL!
+ *@augments View
  *
- *pars:
- *parent
- *position
- *size
- *image
- *image_down optional
- *image_hover optional
- *text
- *font - CachedFont instance
+ *@param {gamejs.Surface} image button image, OPTIONAL
+ *@param {gamejs.Surface} image_down button image when pressed down, OPTIONAL
+ *@param {gamejs.Surface} image_hover button image when hovered on, OPTIONAL
+ *@param {String} text text to display on button, OPTIONAL
+ *@param {CachedFont} font to render text with, OPTIONAL
+ *@param {View} parent parent element
+ *@param {Array} size  array containing width & height of the element, eg. [width, height]
+ *@param {Array} position position of the view relative to parent, eg. [x, y]. OPTIONAL, default [0, 0]
+ *@param {gamejs.Surface} surface surface to render this view on, OPTIONAL
+ *@param {Bool} visible is this view visible? default true
+ *
+ *@property {String} text
+ *@property {CachedFont} font
+ *@property {Label} label  Label obejct, created if text was provided.
  */
 
 var Button=exports.Button=function(pars){
@@ -522,14 +694,6 @@ var Button=exports.Button=function(pars){
         this.image.fill('#FFF');
         gamejs.draw.rect(this.image, '#808080', new gamejs.Rect([0, 0], this.size), 1);
     }
-    
-    if(this.image_down==undefined){
-        this.image_down=new gamejs.Surface(this.size);
-        this.image_down.fill('#E0E0E0');
-        gamejs.draw.rect(this.image_down, '#808080', new gamejs.Rect([0, 0], this.size), 1);
-    }
-    
-    
     
     if(pars.text){     
         this.label=new Label({'parent':this,
@@ -565,19 +729,35 @@ var Button=exports.Button=function(pars){
 
 gamejs.utils.objects.extend(Button, View);
 
+/**
+ *short hand for on(EVT_BTN_CLICK, callback, scope)
+ *@function
+ *
+ *@param {Function} callback function to call when EVT_BTN_CLICK event is triggered
+ *@param {Object} scope this object for callback, OPTIONAL
+ */
 Button.prototype.onClick=function(callback, scope){
     this.on(EVT_BTN_CLICK, callback, scope);
 };
 
+/**
+ *default button paint implementation paints image, image_down or image_hover based on button sotate
+ *@function
+ */
 Button.prototype.paint=function(){
     var img;
     if(this.pressed_down && this.image_down) img=this.image_down;
-    else if(this.hover && this.image_hover) img=this.image_hover;
+    else if(this.isHovered() && this.image_hover) img=this.image_hover;
     else img=this.image;
     this.surface.blit(img, new gamejs.Rect([0, 0], this.surface.getSize()), new gamejs.Rect([0, 0], img.getSize()));
     
 };
 
+/**
+ *set button text
+ *@function
+ *@param {String} text
+ */
 Button.prototype.setText=function(text){
     if(this.label){
         this.label.setText(text);
@@ -585,13 +765,18 @@ Button.prototype.setText=function(text){
     }
 };
 
-/************************************************
- *IMAGE
- * pars:
- * parent
- * image - gamejs.Surface
- * position
- * size - defaults to image size, if other is set, image is resized
+/**
+ *@class image !CONSTRUCTOR PARAMETERS ARE PROVIDED IN A OBJECT LITERAL!
+ *@augments View
+ *
+ *@param {gamejs.Surface} image to paint
+ *@param {View} parent parent element
+ *@param {Array} size  array containing width & height of the element, eg. [width, height]
+ *@param {Array} position position of the view relative to parent, eg. [x, y]. OPTIONAL, default [0, 0]
+ *@param {gamejs.Surface} surface surface to render this view on, OPTIONAL
+ *@param {Bool} visible is this view visible? OPTIONAL, DEFAULT true
+ *
+ *@property {gamejs.Surface} image
  */
 
 var Image=exports.Image=function(pars){
@@ -605,45 +790,49 @@ var Image=exports.Image=function(pars){
 
 gamejs.utils.objects.extend(Image, View);
 
+/**
+ *set new image
+ *@function
+ *@param {gamejs.Surface} image
+ */
 Image.prototype.setImage=function(image){
     this.image=image;
     this.refresh();
 };
 
-Image.prototype.resize=function(size){
-    View.prototype.resize.apply(this, [size]);
-    if((size[0]!=this.image.getSize()[0]) || (size[1]!=this.image.getSize()[1])){
-        this.surface.blit(this.image, new gamejs.Rect([0, 0], size), new gamejs.Rect([0, 0], this.image.getSize()));
-    }
-    else{
-        this.surface=this.image;
-    }
-};
-
+/**
+ *default paint implementation for image. If Image object size!=provided image surface size, image is stretched.
+ *@function
+ */
 Image.prototype.paint=function(){
     View.prototype.paint.apply(this, []);
     this.surface.blit(this.image, new gamejs.Rect([0, 0], this.surface.getSize()), new gamejs.Rect([0, 0], this.image.getSize()));  
 };
 
-
-
-/******************************************
+/**
+ *@class draggable frame header with a close button !CONSTRUCTOR PARAMETERS ARE PROVIDED IN A OBJECT LITERAL!
+ *@augments View
  *
-
-
-/*************************************************
- *FRAMEHEADER
- *pars:
- *parent
- *title
+ *@param {Frame} parent frame object this header is applied to
+ *@param {Number} height frame height, OPTIONAL, DEFAULT 20
+ *@param {String} title frame title OPTIONAL
+ *@param {CachedFont} title_font font for title OPTIONAL
+ *@param {Bool} close_btn show close button? OPTIONAL, DEFAULT false
+ *@param {gamejs.Surface} close_icon image to use for close button, OPTIONAL
+ *@param {gamejs.Surface} close_btn close button image OPTIONAL
+ *@param {gamejs.Surface} surface surface to render this view on, OPTIONAL
+ *@param {Bool} visible is this view visible? OPTIONAL, DEFAULT true
  *
+ *@property {CachedFont) title_font
+ *@property {Number} height
  */
 var FrameHeader=exports.FrameHeader=function(pars){
     if(!pars.parent) throw 'FrameHeader: parent parameter is required';
-    this.height=20;
+    this.height=pars.height || 20;
     pars.width=pars.parent.size[0];
     pars.size=[pars.width, this.height];
     pars.position=[0, 0];
+    this.title_font=pars.title_font;
     
     FrameHeader.superConstructor.apply(this, [pars]);
     draggable(this);
@@ -658,9 +847,9 @@ var FrameHeader=exports.FrameHeader=function(pars){
             img=pars.close_icon;
         }
         else{
-            img=new gamejs.Surface([20, 20]);
-            gamejs.draw.line(img, '#000', [3, 3], [17, 17], 3);
-            gamejs.draw.line(img, '#000', [3, 17], [17, 3], 3);
+            img=new gamejs.Surface([this.height, this.height]);
+            gamejs.draw.line(img, '#000', [3, 3], [this.height-3, this.height-3], 3);
+            gamejs.draw.line(img, '#000', [3, this.height-3], [this.height-3, 3], 3);
         }
       
         img=new Image({'parent':this,
@@ -677,72 +866,78 @@ var FrameHeader=exports.FrameHeader=function(pars){
 
 gamejs.utils.objects.extend(FrameHeader, View);
 
+/**
+ *moving header moves parent frame too
+ *@function
+ *
+ *@param {Array} pos position ot move header to
+ */
 FrameHeader.prototype.move=function(pos){
     this.parent.move([this.parent.position[0]+pos[0]-this.position[0],
                       this.parent.position[1]+pos[1]-this.position[1]]);
 };
 
+/**
+ *set header title
+ *@function
+ *
+ *@param {String} text new header title
+ */
 FrameHeader.prototype.setTitle=function(text){
     if(!this.title_label)this.title_label=new Label({'parent':this,
                                                     'position':[0, 0],
+                                                    'font':this.title_font,
                                                     'text':text});
     else this.title_label.setText(text);
-    var font=this.title_label.getFont();
+    var font=this.title_label.font;
     var size=font.getTextSize(text);
     this.title_label.move([font.space_width, Math.max(parseInt(this.height-size[1]))], 0);
     draggable(this);
 };
 
+/**
+ *default paint implementation: gray background
+ *@function
+ */
 FrameHeader.prototype.paint=function(){
     gamejs.draw.rect(this.surface, '#C0C0C0', new gamejs.Rect([0, 0], this.size));
 };
 
 
 
-/**************************************************************
- *FRAME
- *Root view, handles gamejs events and despatches them to children
+/**
+ *@class a overlay view with it's own space and hierarchy, a 'window' in OS talk. Hidden by default !CONSTRUCTOR PARAMETERS ARE PROVIDED IN A OBJECT LITERAL!
+ *@augments View
  *
- *pars:
- *gui
- *position
- *size
- *header - {Bool} display header?
- *constrain - {Bool} constrain to visible area?
- *title  - {String} frame title, displayed only if header is on
- *close_btn {Bool} display cross for closing?
- *close_icon - surface to use as close frame icon
- ***************************************************************/
+ *@param {GUI} parent parent GUI object
+ *@param {Bool} constrain if true, frame cannot be moved out of visible area
+ *@param {Array} size  array containing width & height of the element, eg. [width, height]
+ *@param {Array} position position of the view relative to parent, eg. [x, y]. OPTIONAL, default [0, 0]
+ *@param {gamejs.Surface} surface surface to render this view on, OPTIONAL
+ *@param {Bool} visible is this view visible? OPTIONAL, DEFAULT true
+ *
+ *@property {Bool} constrain
+ */
 var Frame=exports.Frame=function(pars){
-    if(!pars.gui) throw 'Frame: gui parameter is required';
+    if(!pars.parent) throw 'Frame: parent parameter is required';
+    if(pars.parent.type!='gui') throw 'Frame: parent object must be instance of GUI';
+    var gui=pars.parent;
     pars.parent=null;
     Frame.superConstructor.apply(this, [pars]);
     this.type='frame';
     this.visible=false;
-    pars.gui.frames.push(this);
-    this.parent=pars.gui;
-    
-    //header
-    this.header=null;
-    if(pars.header){
-        this.header=new this.header_class({'parent':this,
-                                        'close_btn':pars.close_btn,
-                                        'close_icon':pars.close_icon,
-                                        'title':pars.title});
-    }
-    
+    gui.frames.push(this);
+    this.parent=gui;    
     //constrain
     this.constrain=pars.constrain;
     return this;
 };
 gamejs.utils.objects.extend(Frame, View);
 
-Frame.prototype.header_class=FrameHeader;
-
-Frame.prototype.refresh=function(){
-    View.prototype.refresh.apply(this, []);
-};
-
+/**
+ *Default implementation, white fill and gray border.
+ *@function
+ */
 Frame.prototype.paint=function(){
     //fill
     gamejs.draw.rect(this.surface, '#FFF', new gamejs.Rect([0, 0], this.size));
@@ -751,19 +946,29 @@ Frame.prototype.paint=function(){
     gamejs.draw.rect(this.surface, '#404040', new gamejs.Rect([0, 0], this.size), 1);
 };
 
-Frame.prototype.setTitle=function(text){
-    if(this.header)this.header.setTitle(text);
-}
-
+/**
+ *Show frame, move it to top of the screen
+ *@function
+ */
 Frame.prototype.show=function(){
     View.prototype.show.apply(this, []);
     this.parent.moveFrameToTop(this);
 };
 
+/**
+ *Close frame. You propably want to use this instead of hide()! generates EVT_CLOSE
+ *@function
+ */
 Frame.prototype.close=function(){
     View.prototype.hide.apply(this, []);
     this.despatchEvent({'type':EVT_CLOSE});
 };
+
+/**
+ *implements restricting frame to GUI bounds. generates EVT_MOVE
+ *@function
+ *@param {Array} position position to move frame to
+ */
 
 Frame.prototype.move=function(position){
     if(this.constrain){
@@ -776,25 +981,32 @@ Frame.prototype.move=function(position){
 };
 
 /**
- *calls parent's removeChild
+ *closes frame, then destroys it
+ *@function
  */
 Frame.prototype.destroy=function(){
     if(this.visible) this.close();
     if(this.parent) this.parent.removeFrame(this);
 };
 
-/**********************
- *DraggableView
+/**
+ *@class draggable view: can be dragged within its parent by holding down left mouse btn
+ *@augments View
  *
- *pars:
- *parent
- *size
- *position
- *image
- *min_x
- *max_x
- *min_y
- *max_y
+ *@param {Number} min_x minimum x coordinate view can be dragged to, OPTIONAL
+ *@param {Number} max_x maximum x coordinate view can be dragged to, OPTIONAL
+ *@param {Number} min_y minimum y coordinate view can be dragged to, OPTIONAL
+ *@param {Number} max_y maximum y coordinate view can be dragged to, OPTIONAL
+ *@param {View} parent parent element
+ *@param {Array} size  array containing width & height of the element, eg. [width, height]
+ *@param {Array} position position of the view relative to parent, eg. [x, y]. OPTIONAL, default [0, 0]
+ *@param {gamejs.Surface} surface surface to render this view on, OPTIONAL
+ *@param {Bool} visible is this view visible? default true
+ *
+ *@property {Number} min_x
+ *@property {Number} max_x
+ *@property {Number} min_y
+ *@property {Number} max_y
  */
 
 var DraggableView=exports.DraggableView=function(pars){
@@ -809,6 +1021,11 @@ var DraggableView=exports.DraggableView=function(pars){
 
 gamejs.utils.objects.extend(DraggableView, View);
 
+/**
+ *implements restricting to coordinates, if applicable
+ *@function
+ *@param {Array} pos new position
+ */
 DraggableView.prototype.move=function(pos){
     var x=pos[0];
     if(this.min_x || (this.min_x==0)) x=Math.max(x, this.min_x);
@@ -822,19 +1039,22 @@ DraggableView.prototype.move=function(pos){
 };
 
 
-/**********************
- *Scroller
+/**
+ *@class draggable part of the scrollbar !CONSTRUCTOR PARAMETERS ARE PROVIDED IN A OBJECT LITERAL!
+ *@augments DraggableView
  *
- *the draggable part of the scrollbar
+ *@param {View} parent parent element
+ *@param {Array} size  array containing width & height of the element, eg. [width, height]
+ *@param {gamejs.Surface} image iamge to use for the scroller, OPTIONAL
+ *@param {Number} min_x minimum x coordinate view can be dragged to, OPTIONAL
+ *@param {Number} max_x maximum x coordinate view can be dragged to, OPTIONAL
+ *@param {Number} min_y minimum y coordinate view can be dragged to, OPTIONAL
+ *@param {Number} max_y maximum y coordinate view can be dragged to, OPTIONAL
+ *@param {Array} position position of the view relative to parent, eg. [x, y]. OPTIONAL, default [0, 0]
+ *@param {gamejs.Surface} surface surface to render this view on, OPTIONAL
+ *@param {Bool} visible is this view visible? OPTIONAL, DEFAULT true
  *
- *parent
- *size
- *position
- *min_x
- *max_x
- *min_y
- *max_y
- *image optional
+ *@property {Image} img Image object created if image parameter was provided
  */
 var Scroller=exports.Scroller=function(pars){
     Scroller.superConstructor.apply(this, [pars]);
@@ -848,31 +1068,34 @@ var Scroller=exports.Scroller=function(pars){
 };
 gamejs.utils.objects.extend(Scroller, DraggableView);
 
+/**
+ *resizes image along with scroller
+ *@function 
+ */
 Scroller.prototype.resize=function(size){
     DraggableView.prototype.resize.apply(this,[size]);
     if(this.img)this.img.resize(size);
 
 };
 
-/***************************
- *Horizontal Scrollbar
- *pars:
- *parent
- *size
- *position
- *left_btn_image {gamejs.Surface}
- *scroller_image {gamejs.Surface}
- *right_btn_image {gamejs.Surface}
+/**
+ *@class !CONSTRUCTOR PARAMETERS ARE PROVIDED IN A OBJECT LITERAL!
+ *@augments View
+ *
+ *@param {gamejs.Surface} left_btn_image image for left scrollbar button
+ *@param {gamejs.Surface} scroller_image image for scroller
+ *@param {gamejs.Surface} right_btn_image image for right scrollbar button
+ *@param {View} parent parent element
+ *@param {Array} size  array containing width & height of the element, eg. [width, height]
+ *@param {Array} position position of the view relative to parent, eg. [x, y]. OPTIONAL, default [0, 0]
+ *@param {gamejs.Surface} surface surface to render this view on, OPTIONAL
+ *@param {Bool} visible is this view visible? OPTIONAL, DEFAULT true
+ *
+ *@property {Button} left_btn left scrollbar button
+ *@property {Button} right_btn right scrollbar button
+ *@property {Scroller} scroller
+ *@property {Function} scroller_class scroller class used to create scroller #TODO find better way to implement customization
  */
-
-var getLevelTemplate=function(){
-    return {'bgtile':'sand.png',
-            'decals':[],
-            'props':[],
-            'ai_waypoints':[],
-            'checkpoints':[],
-            'start_positions':[]};
-};
 
 var HorizontalScrollbar=exports.HorizontalScrollbar=function(pars){
     HorizontalScrollbar.superConstructor.apply(this, [pars]);
@@ -937,7 +1160,11 @@ gamejs.utils.objects.extend(HorizontalScrollbar, View);
 
 HorizontalScrollbar.prototype.scroller_class=Scroller;
 
-//sz between 0.1 and 1
+/**
+ *set relative scroller width
+ *@function
+ *@param {Number} sz relative scroller width, between 0.1 and 1, 
+ */
 HorizontalScrollbar.prototype.setScrollerSize=function(sz){
     sz=Math.min(Math.max(sz, 0.1), 1);
     this.scroller.resize([this.sts*sz, this.scroller.size[1]]);
@@ -947,7 +1174,11 @@ HorizontalScrollbar.prototype.setScrollerSize=function(sz){
     this.refresh();
 };
 
-//pos - px
+/**
+ *set scroll amount, px
+ *@function
+ *@param {Number} pos scroll amount, px
+ */
 HorizontalScrollbar.prototype.setScrollPX=function(pos){
     this.scroller.move([pos+this.left_btn.size[0], 0]);
     var pos_x=this.scroller.position[0]-this.left_btn.size[0];
@@ -962,31 +1193,48 @@ HorizontalScrollbar.prototype.setScrollPX=function(pos){
     this.refresh();
 };
 
-//pos betwween 0 and 1
+/**
+ *set scroll amount, relative
+ *@function
+ *@param {Number} pos scroll amount, between 0 and 1
+ */
 HorizontalScrollbar.prototype.setScroll=function(pos){
     this.setScrollPX(parseInt(this.max_scroll_pos*pos));
 };
 
+/**
+ *scroll left by 0.1 of max scrollable amount
+ *@function
+ */
 HorizontalScrollbar.prototype.scrollLeft=function(){
     this.setScrollPX(Math.max(0, this.scroll_pos-this.max_scroll_pos*0.1));
 };
 
+/**
+ *scroll right by 0.1 of max scrollable amount
+ *@function
+ */
 HorizontalScrollbar.prototype.scrollRight=function(){
     this.setScrollPX(Math.min(this.max_scroll_pos, this.scroll_pos+this.max_scroll_pos*0.1));
 };
-HorizontalScrollbar.prototype.paint=function(){
-    this.surface.clear();
-};
 
-/****************************
- *Vertical Scrollbar
- *pars:
- *parent
- *size
- *position
- *top_btn_image {gamejs.Surface}
- *scroller_image {gamejs.Surface}
- *bot_btn_image {gamejs.Surface}
+/**
+ *@class !CONSTRUCTOR PARAMETERS ARE PROVIDED IN A OBJECT LITERAL!
+ *@augments View
+ *
+ *@param {gamejs.Surface} top_btn_image image for top scrollbar button
+ *@param {gamejs.Surface} scroller_image image for scroller
+ *@param {gamejs.Surface} bot_btn_image image for bottom scrollbar button
+ *@param {View} parent parent element
+ *@param {Array} size  array containing width & height of the element, eg. [width, height]
+ *@param {Array} position position of the view relative to parent, eg. [x, y]. OPTIONAL, default [0, 0]
+ *@param {gamejs.Surface} surface surface to render this view on, OPTIONAL
+ *@param {Bool} visible is this view visible? OPTIONAL, DEFAULT true
+ *
+ *@property {Button} top_btn top scrollbar button
+ *@property {Button} bot_btn bottom scrollbar button
+ *@property {Scroller} scroller
+ *@property {Function} scroller_class scroller class used to create scroller #TODO find better way to implement customization
  */
 
 var VerticalScrollbar=exports.VerticalScrollbar=function(pars){
@@ -1052,7 +1300,11 @@ gamejs.utils.objects.extend(VerticalScrollbar, View);
 
 VerticalScrollbar.prototype.scroller_class=Scroller;
 
-//sz between 0.1 and 1
+/**
+ *set relative scroller width
+ *@function
+ *@param {Number} sz relative scroller width, between 0.1 and 1, 
+ */
 VerticalScrollbar.prototype.setScrollerSize=function(sz){
     sz=Math.min(Math.max(sz, 0.1), 1);
     this.scroller.resize([this.scroller.size[0], this.sts*sz]);
@@ -1062,7 +1314,11 @@ VerticalScrollbar.prototype.setScrollerSize=function(sz){
     this.refresh();
 };
 
-//pos - px
+/**
+ *set scroll amount, px
+ *@function
+ *@param {Number} pos scroll amount, px
+ */
 VerticalScrollbar.prototype.setScrollPX=function(pos){
     this.scroller.move([0, pos+this.top_btn.size[1]]);
     var pos_y=this.scroller.position[1]-this.top_btn.size[1];
@@ -1077,38 +1333,40 @@ VerticalScrollbar.prototype.setScrollPX=function(pos){
     this.refresh();
 };
 
-//pos betwween 0 and 1
+/**
+ *set scroll amount, relative
+ *@function
+ *@param {Number} pos scroll amount, between 0 and 1
+ */
 VerticalScrollbar.prototype.setScroll=function(pos){
     this.setScrollPX(parseInt(this.max_scroll_pos*pos));
 };
 
-/*
-VerticalScrollbar.prototype.refresh=function(){
-    View.prototype.refresh.apply(this, []);
-    this.parent.refresh();
-};*/
-
+/**
+ *@function
+ *scroll up by 0.1 of max scrollable amount
+ */
 VerticalScrollbar.prototype.scrollUp=function(){
     this.setScrollPX(Math.max(0, this.scroll_pos-this.max_scroll_pos*0.1));
 };
 
+/**
+ *@function
+ *scroll down by 0.1 of max scrollable amount
+ */
 VerticalScrollbar.prototype.scrollDown=function(){
     this.setScrollPX(Math.min(this.max_scroll_pos, this.scroll_pos+this.max_scroll_pos*0.1));
 };
-VerticalScrollbar.prototype.paint=function(){
-    this.surface.clear();
-};
 
-
-/****************************************
- *ScrollableView
+/**
+ *@class view with scrollable content !CONSTRUCTOR PARAMETERS ARE PROVIDED IN A OBJECT LITERAL!
+ *@augments View
  *
- *scroll contents.
- *
- *pars:
- *parent
- *position
- *size
+ *@param {View} parent parent element
+ *@param {Array} size  array containing width & height of the element, eg. [width, height]
+ *@param {Array} position position of the view relative to parent, eg. [x, y]. OPTIONAL, default [0, 0]
+ *@param {gamejs.Surface} surface surface to render this view on, OPTIONAL
+ *@param {Bool} visible is this view visible? OPTIONAL, DEFAULT true
  */
 var ScrollableView=exports.ScrollableView=function(pars){
     ScrollableView.superConstructor.apply(this, [pars]);
@@ -1124,6 +1382,11 @@ var ScrollableView=exports.ScrollableView=function(pars){
 };
 gamejs.utils.objects.extend(ScrollableView, View);
 
+/**
+ *set vertical scrollbar for this view
+ *@function
+ *@param {VerticalScrollbar} scrollbar
+ */
 ScrollableView.prototype.setVerticalScrollbar=function(scrollbar){
     this.vertical_scrollbar=scrollbar;
     scrollbar.on(EVT_SCROLL, function(event){
@@ -1131,6 +1394,11 @@ ScrollableView.prototype.setVerticalScrollbar=function(scrollbar){
     }, this);
 };
 
+/**
+ *set horizontal scrollbar for this view
+ *@function
+ *@param {HorizontalScrollbar} scrollbar
+ */
 ScrollableView.prototype.setHorizontalScrollbar=function(scrollbar){
     this.horizontal_scrollbar=scrollbar;
     scrollbar.on(EVT_SCROLL, function(event){
@@ -1138,6 +1406,11 @@ ScrollableView.prototype.setHorizontalScrollbar=function(scrollbar){
     }, this);
 };
 
+/**
+ *manually set size of scrollable area
+ *@function
+ *@param {Array} area scrollbale area, [width, height]
+ */
 ScrollableView.prototype.setScrollableArea=function(area){
     this.scrollable_area=area;
     this.max_scroll_y=Math.max(area[1]-this.size[1], 0);
@@ -1152,6 +1425,10 @@ ScrollableView.prototype.setScrollableArea=function(area){
     }
 };
 
+/**
+ *automatically set scrollable area based on children positions and sizes
+ *@function
+ */
 ScrollableView.prototype.autoSetScrollableArea=function(){
     scrollable_area=[0, 0];
     this.children.forEach(function(child){
@@ -1161,18 +1438,27 @@ ScrollableView.prototype.autoSetScrollableArea=function(){
     this.setScrollableArea(scrollable_area);
 };
 
-//implement autosetscrollablearea?
+/**
+ *TODO: implement optional auto setting scrollable area when children are added
+ *@function
+ */
 ScrollableView.prototype.addChild=function(child){
     View.prototype.addChild.apply(this, [child]);
     this.refresh();    
 };
 
-//alter blit pos to account for scroll
+/**
+ *implements child blitting adjusted to scroll state
+ *@function
+ */
 ScrollableView.prototype.blitChild=function(child){
     this.surface.blit(child.surface, [child.position[0]-this.scroll_x, child.position[1]-this.scroll_y]);
 };
 
-//alter event pos to account for scroll
+/**
+ *adjusts event position based on scroll state
+ *@function
+ */
 ScrollableView.prototype.despatchEvent=function(event){
     if(event.pos){
         event=cloneEvent(event);
@@ -1181,46 +1467,61 @@ ScrollableView.prototype.despatchEvent=function(event){
     View.prototype.despatchEvent.apply(this, [event]);
 };
 
-ScrollableView.prototype.paint=function(){
-    this.surface.clear();
-};
-
-//increment horizontal scroll
+/**
+ *increment horizontal scroll
+ *@function
+ *@param {Number} x px to increment horizontal scroll by
+ */
 ScrollableView.prototype.scrollX=function(x){
   this.setScrollX(this.scroll_x+x);
   this.refresh();
 };
 
-//increment vertical scroll
+/**
+ *increment vertical scroll
+ *@function
+ *@param {Number} y px to increment vertical scroll by
+ */
 ScrollableView.prototype.scrollY=function(y){
     this.setScrollY(this.scroll_y+y);
     this.refresh();
 };
 
-//set horizontal scroll
+/**
+ *set horizontal scroll
+ *@function
+ *@param {Number} x horizontal scroll, px
+ */
 ScrollableView.prototype.setScrollX=function(x){
     this.scroll_x=Math.min(Math.max(x, 0), this.max_scroll_x);
     this.refresh();
 };
 
-//set vertical scroll
+/**
+ *set vertical scroll
+ *@function
+ *@param {Number} y vertical scroll, px
+ */
 ScrollableView.prototype.setScrollY=function(y){
     this.scroll_y=Math.min(Math.max(y, 0), this.max_scroll_y);
     this.refresh();
 };
 
-
-/******************************************
- *TEXTINPUT
- *input text
+/**
+ *@class text input !CONSTRUCTOR PARAMETERS ARE PROVIDED IN A OBJECT LITERAL!
+ *@augments View
  *
- *pars:
- *parent
- *size
- *position
- *font -CachedFont
- *text
- *scw_size - inner text box size
+ *@param {CachedFont} font 
+ *@param {String} text
+ *@param {Array} scw_size actual text display size, [width, height].
+ *@param {View} parent parent element
+ *@param {Array} size  array containing width & height of the element, eg. [width, height]
+ *@param {Array} position position of the view relative to parent, eg. [x, y]. OPTIONAL, default [0, 0]
+ *@param {gamejs.Surface} surface surface to render this view on, OPTIONAL
+ *@param {Bool} visible is this view visible? OPTIONAL, DEFAULT true
+ *
+ *@property {CachedFont} font
+ *@property {String} text
  */
 var TextInput=exports.TextInput=function(pars){
     TextInput.superConstructor.apply(this, [pars]);
@@ -1256,14 +1557,23 @@ var TextInput=exports.TextInput=function(pars){
 };
 gamejs.utils.objects.extend(TextInput, View);
 
+/**
+ *turn blip on
+ *@ignore
+ */
 TextInput.prototype.blipon=function(event){
     this.blip=true;
     this.ms=500;
     this.refresh();
 };
 
+/**
+ *implements blip updating
+ *@function
+ *@param {Number} msDuration
+ */
 TextInput.prototype.update=function(msDuration){
-    if(this.focus){
+    if(this.isFocused()){
         this.ms-=msDuration;
         if(this.ms<0){
             this.ms=500;
@@ -1279,30 +1589,34 @@ TextInput.prototype.update=function(msDuration){
     }
 };
 
+/**
+ *default implementation: white fill, gray border
+ *@function
+ */
 TextInput.prototype.paint=function(){
     this.surface.fill('#FFF');
     gamejs.draw.rect(this.surface, '#COCOCO', new gamejs.Rect([0, 0], this.size), 1);
 };
 
+/**
+ *set input text. generates EVT_CHANGE
+ *@function
+ *@param {String} text
+ */
 TextInput.prototype.setText=function(text){
     this.setPos(this.text.length);
     this._setText(text);
 };
 
+/**
+ *set blip position
+ *@ignore
+ */
 TextInput.prototype.setPos=function(pos){
     this.pos=Math.min(Math.max(pos, 0), this.text.length);
 
     //calc offset for scorllable area
     var ofst=0;
-   /* var origlen, tlen;
-    tlen=origlen=this.font.getTextSize(this.text)[0];
-    if(tlen>this.scw.size[0]){
-        ofst=tlen-this.scw.size[0];
-    }
-    if(this.pos<this.text.length){
-        tlen=this.font.getTextSize(this.text.substr(0, this.pos))[0];
-        ofst=Math.min(tlen, ofst)+this.font.getTextSize('m')[0];
-    }*/
     var ofst=0;
     var tlen=this.font.getTextSize(this.text.substr(0, this.pos))[0];
     ofst=Math.max(tlen-this.scw.size[0]+this.font.getTextSize('s')[0]);
@@ -1312,7 +1626,9 @@ TextInput.prototype.setPos=function(pos){
            
 };
 
-
+/**
+ *@ignore
+ */
 TextInput.prototype._setText=function(text){
     this.text=text;
     this.label.setText(text);
@@ -1321,6 +1637,10 @@ TextInput.prototype._setText=function(text){
     this.despatchEvent({'type':EVT_CHANGE,'value':text});
 };
 
+/**
+ *key down handler
+ *@ignore
+ */
 TextInput.prototype.onKeyDown=function(event){
     var charcode=event.key;
     if(charcode==13){
@@ -1364,43 +1684,56 @@ TextInput.prototype.onKeyDown=function(event){
     }
 };
 
-/******************************************
- *DIALOG
- *a dialog that pops out in the middle, disables everything else until closed
- *pars:
- *gui
- *size
+/**
+ *@class a centered dialog position at the top of the GUI. disables and grays out rest of the guy
+ *@augments Frame
+ *
+ *@param {GUI} parent parent GUI object
+ *@param {Bool} constrain if true, frame cannot be moved out of visible area
+ *@param {Array} size  array containing width & height of the element, eg. [width, height]
+ *@param {Array} position position of the view relative to parent, eg. [x, y]. OPTIONAL, default [0, 0]
+ *@param {gamejs.Surface} surface surface to render this view on, OPTIONAL
+ *@param {Bool} visible is this view visible? default true
  */
 
 var Dialog=exports.Dialog=function(pars){
-    pars.position=getCenterPos(pars.gui.size, pars.size);
+    pars.position=getCenterPos(pars.parent.size, pars.size);
     Dialog.superConstructor.apply(this, [pars]);
     
 };
 
 gamejs.utils.objects.extend(Dialog, Frame);
 
+/**
+ *lock GUI & show dialog
+ *@function
+ */
 Dialog.prototype.show=function(){
     this.getGUI().lockFrame(this);
     Frame.prototype.show.apply(this, []);
 };
 
+/**
+ *unlock gui & hide dialog
+ *@function
+ */
 Dialog.prototype.close=function(){
     this.getGUI().unlockFrame();
     Frame.prototype.close.apply(this, []);
 };
 
-/****
- *Text
+/**
+ *@class multi-line, line-wrapped text dislay !CONSTRUCTOR PARAMETERS ARE PROVIDED IN A OBJECT LITERAL!
+ *@augments View
  *
- *wrapped multi-line text
- *
- *pars:
- *position
- *width
- *font - CachedFont
- *text
- *justify {Bool} justify text? default aligned left
+ *@param {CachedFont} font 
+ *@param {String} text
+ *@param {Bool} justify if true, text is justified. By default, it's left-aligned
+ *@param {View} parent parent element
+ *@param {Array} size  array containing width & height of the element, eg. [width, height]
+ *@param {Array} position position of the view relative to parent, eg. [x, y]. OPTIONAL, default [0, 0]
+ *@param {gamejs.Surface} surface surface to render this view on, OPTIONAL
+ *@param {Bool} visible is this view visible? OPTIONAL, DEFAULT true
  */
 var Text=exports.Text=function(pars){
     pars.size=[pars.width, 1];
@@ -1412,8 +1745,13 @@ var Text=exports.Text=function(pars){
 };
 gamejs.utils.objects.extend(Text, View);
 
+/**
+ *set text
+ *@function
+ *@param {String} text
+ */
 Text.prototype.setText=function(text){
-    //wow, is this a hacky mess! but i think it works
+    //wow, is this a hacky mess!
     
     this.text=text;
     this.lines=[];
@@ -1463,7 +1801,11 @@ Text.prototype.setText=function(text){
     this.refresh();
 };
 
+/**
+ *@function
+ */
 Text.prototype.paint=function(){
+    View.prototype.paint.apply(this, []);
     var pos=0;
     this.lines.forEach(function(line){
         var sz=this.font.getTextSize(line.t);
@@ -1481,8 +1823,10 @@ Text.prototype.paint=function(){
 }
 
 /**
- *GUI
+ *@class root GUI object. Handles gamejs events, frames
+ *@augments View
  *
+ *@param {gamejs.Surface} surface surface to render GUI on
  */
 var GUI=exports.GUI=function(surface){
     GUI.superConstructor.apply(this, [{'position':[0, 0],
@@ -1496,6 +1840,11 @@ var GUI=exports.GUI=function(surface){
 
 gamejs.utils.objects.extend(GUI, View);
 
+/**
+ *redraw GUI, if needed
+ *@function
+ *@param {Bool} force_redraw if true GUI is redrawn even if tehre are no internal changes
+ */
 GUI.prototype.draw=function(force_redraw){
     if(force_redraw)this.refresh();
     var painted=View.prototype.draw.apply(this, []);
@@ -1510,17 +1859,20 @@ GUI.prototype.draw=function(force_redraw){
     }, this);
 };
 
-GUI.prototype.paint=function(){
-    //gamejs.draw.rect(this.surface, '#FFF', new gamejs.Rect([0, 0], this.size));
-};
+/**
+ *Does nothing! don't remove!
+ *@function
+ */
+GUI.prototype.paint=function(){};
 
 GUI.prototype.blur_bg=function(){
     gamejs.draw.rect(this.surface, 'rgba(192,192, 192, 0.5)', new gamejs.Rect([0, 0], this.size),0); 
 };
 
-/*****
- *frame - frame id or object
- *removes this frame, effectively destroying it
+/**
+ *Remove a frame from GUI
+ *@function
+ *@param {Frame|Id} frame frame object or id of frame to remove
  */
 
 GUI.prototype.removeFrame=function(frame){
@@ -1535,6 +1887,11 @@ GUI.prototype.removeFrame=function(frame){
     return false;
 };
 
+/**
+ *Move a frame to the top
+ *@function
+ *@param {Frame} frame
+ */
 GUI.prototype.moveFrameToTop=function(frame){   
     for(var i=0;i<this.frames.length;i++){
         var f=this.frames[i];
@@ -1549,6 +1906,12 @@ GUI.prototype.moveFrameToTop=function(frame){
         }
     }
 };
+
+/**
+ *Update GUI and its child objects
+ *@function
+ *@param {Number} msDuration miliseconds since last update
+ */
 GUI.prototype.update=function(msDuration){
     this.children.forEach(function(child){
         child._update(msDuration);  
@@ -1558,16 +1921,28 @@ GUI.prototype.update=function(msDuration){
     });
     
 };
+
+/**
+ *@ignore
+ */
 GUI.prototype.lockFrame=function(frame){
     this.locked_frame=frame;
     this.refresh();
 };
 
+/**
+ *@ignore
+ */
 GUI.prototype.unlockFrame=function(){
     this.locked_frame=null;
     this.refresh();
 };
 
+/**
+ *despatch gamejs event
+ *@function
+ *@param {gamejs Event| GUI event} event event generated by gamejs, or a GUI event if needed.
+ */
 GUI.prototype.despatchEvent=function(event){
     if(event.pos)event.global_pos=event.pos;
     
@@ -1595,11 +1970,11 @@ GUI.prototype.despatchEvent=function(event){
                 }
                 hit=true;
                 //mouseout view if mouse is on a frame
-                if(frame.focus)topframe=i;
+                if(frame.isFocused())topframe=i;
                 break;
             }else{
                 //blur frame if focused but clicked somewhere else
-                if((event.type==EVT_MOUSE_DOWN) && (frame.focus)){
+                if((event.type==EVT_MOUSE_DOWN) && (frame.isFocused())){
                     frame.despatchEvent({'type':EVT_BLUR});
                 }
             }
@@ -1646,40 +2021,43 @@ GUI.prototype.despatchEvent=function(event){
     }
 };
 
-exports.layout={};
+var layout=exports.layout={
 
-/********************
- *layout:vertical
- *objects - a list of gui objects (with the same parent)
- *y - starting y, default 0
- *space- space between objects, default 0
- *
- *arranges objects vertically.
+/**
+ *arranges obejcts vertically
+ *@function
+ *@name vertical
+ *@lends layout
+ *@param {Array} objects a list of gui objects (with the same parent)
+ *@param {Number} y starting y coordinate, default 0
+ *@param {Number} space space between objects px, default 0
  */
-exports.layout.vertical=function(objects, y, space){
-    y=y || 0;
-    space = space || 0;
-    objects.forEach(function(object){
-        object.move([object.position[0], y]);
-        y+=object.size[1]+space;
-    });
-    
-};
+'vertical':function(objects, y, space){
+        y=y || 0;
+        space = space || 0;
+        objects.forEach(function(object){
+            object.move([object.position[0], y]);
+            y+=object.size[1]+space;
+        });
+        
+    },
 
-/********************
- *layout:horizontal
- *objects - a list of gui objects (with the same parent)
- *x - starting x, default 0
- *space- space between objects, default 0
- *
- *arranges objects horizontally.
+/**
+ *arranges obejcts horizontally
+ *@function
+ *@name horizontal
+ *@lends layout
+ *@param {Array} objects a list of gui objects (with the same parent)
+ *@param {Number} x startingx coordinate, default 0
+ *@param {Number} space space between objects px, default 0
  */
-exports.layout.horizontal=function(objects, x, space){
-    x=x || 0;
-    space = space || 0;
-    objects.forEach(function(object){
-        object.move([x, object.position[1]]);
-        x+=object.size[0]+space;
-    });
+'horizontal':function(objects, x, space){
+        x=x || 0;
+        space = space || 0;
+        objects.forEach(function(object){
+            object.move([x, object.position[1]]);
+            x+=object.size[0]+space;
+        });
+    }
 };
 

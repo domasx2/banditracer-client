@@ -1,5 +1,5 @@
 var GUI = require('./gamejs-gui');
-var ui2 = require('./ui2');
+var ui = require('./ui');
 var combatracer = require('./combatracer');
 var settings=require('./settings');
 var gamejs=require('gamejs');
@@ -115,7 +115,7 @@ ToolViewSelectItem=exports.ToolViewSelectItem=function(pars){
     ToolViewSelectItem.superConstructor.apply(this, [pars]);
     this.label=new GUI.Label({'position':[0, 0],
                          'parent':this,
-                         'font':ui2.getFont(skin.track_selector.item_font),
+                         'font':ui.getFont(skin.track_selector.item_font),
                          'text':pars.text});
     this.center(this.label);
     this.label.move([this.size[0]-this.label.size[0]-16, this.label.position[1]]);
@@ -137,7 +137,7 @@ ToolViewSelectItem.prototype.deselect=function(){
 };
 
 ToolViewSelectItem.prototype.paint=function(){
-    this.surface.fill(this.selected ? skin.track_selector.front_color : this.hover ? skin.track_selector.item_hover_color : skin.track_selector.back_color);
+    this.surface.fill(this.selected ? skin.track_selector.front_color : this.isHovered() ? skin.track_selector.item_hover_color : skin.track_selector.back_color);
 };
 
 var ToolView=exports.ToolView=function(pars){
@@ -180,7 +180,7 @@ var MarkerView=exports.MarkerView=function(pars){
     this.scene=pars.scene;
     MarkerView.superConstructor.apply(this, [pars]);
     var lbl1=new GUI.Label({'parent':this,
-                           'font':ui2.getFont('16_33'),
+                           'font':ui.getFont('16_33'),
                            'text':'AI Waypoints',
                            'position':[20, 2]});
     
@@ -193,7 +193,7 @@ var MarkerView=exports.MarkerView=function(pars){
     this.scene.tools.push(this.ai_waypoint);
     this.ai_waypoint.on('select', this.scene.selectTool, this.scene);
     
-    this.ai_waypoint_up=new ui2.IncrementButton({'direction':'up',
+    this.ai_waypoint_up=new ui.IncrementButton({'direction':'up',
                                             'position':[100, 30],
                                             'size':[40, 30],
                                             'parent':this});
@@ -202,7 +202,7 @@ var MarkerView=exports.MarkerView=function(pars){
         this.setNumber(this.number+1);
     }, this.ai_waypoint);
     
-    this.ai_waypoint_down=new ui2.IncrementButton({'direction':'down',
+    this.ai_waypoint_down=new ui.IncrementButton({'direction':'down',
                                                 'position':[100, 70],
                                                 'size':[40, 30],
                                                 'parent':this});
@@ -213,7 +213,7 @@ var MarkerView=exports.MarkerView=function(pars){
     
     //checkpoint
     var lbl2=new GUI.Label({'parent':this,
-                           'font':ui2.getFont('16_33'),
+                           'font':ui.getFont('16_33'),
                            'text':'Checkpoints',
                            'position':[150, 2]});
     
@@ -225,7 +225,7 @@ var MarkerView=exports.MarkerView=function(pars){
     this.scene.tools.push(this.checkpoint);
     this.checkpoint.on('select', this.scene.selectTool, this.scene);
     
-    this.checkpoint_up=new ui2.IncrementButton({'direction':'up',
+    this.checkpoint_up=new ui.IncrementButton({'direction':'up',
                                             'position':[230, 30],
                                             'size':[40, 30],
                                             'parent':this});
@@ -234,7 +234,7 @@ var MarkerView=exports.MarkerView=function(pars){
         this.setNumber(this.number+1);
     }, this.checkpoint);
     
-    this.checkpoint_down=new ui2.IncrementButton({'direction':'down',
+    this.checkpoint_down=new ui.IncrementButton({'direction':'down',
                                                 'position':[230, 70],
                                                 'size':[40, 30],
                                                 'parent':this});
@@ -245,7 +245,7 @@ var MarkerView=exports.MarkerView=function(pars){
     
     //start position
     var lbl3=new GUI.Label({'parent':this,
-                           'font':ui2.getFont('16_33'),
+                           'font':ui.getFont('16_33'),
                            'text':'Start Positions',
                            'position':[280, 2]});
     
@@ -257,7 +257,7 @@ var MarkerView=exports.MarkerView=function(pars){
     this.scene.tools.push(this.start_position);
     this.start_position.on('select', this.scene.selectTool, this.scene);
     
-    this.start_position_up=new ui2.IncrementButton({'direction':'up',
+    this.start_position_up=new ui.IncrementButton({'direction':'up',
                                             'position':[370, 30],
                                             'size':[40, 30],
                                             'parent':this});
@@ -266,7 +266,7 @@ var MarkerView=exports.MarkerView=function(pars){
         this.setNumber(this.number+1);
     }, this.start_position);
     
-    this.start_position_down=new ui2.IncrementButton({'direction':'down',
+    this.start_position_down=new ui.IncrementButton({'direction':'down',
                                                 'position':[370, 70],
                                                 'size':[40, 30],
                                                 'parent':this});
@@ -285,12 +285,12 @@ var PropertiesView=exports.PropertiesView=function(pars){
     PropertiesView.superConstructor.apply(this, [pars]);
     this.scene=pars.scene;
     var lbl=new GUI.Label({'parent':this,
-                    'font':ui2.getFont('16_33'),
+                    'font':ui.getFont('16_33'),
                     'text':'Title',
                     'position':[100, 2]});
     
     this.title=new GUI.TextInput({'parent':this,
-                                 'font':ui2.getFont('16_33'),
+                                 'font':ui.getFont('16_33'),
                                  'text':this.scene.level.title,
                                  'position':[40, 50],
                                  'size':[180, 30]});
@@ -298,16 +298,16 @@ var PropertiesView=exports.PropertiesView=function(pars){
     this.title.on(GUI.EVT_CHANGE, this.titleChange, this);
     
     new GUI.Label({'parent':this,
-                    'font':ui2.getFont('16_33'),
+                    'font':ui.getFont('16_33'),
                     'text':'Width, PX',
                     'position':[280, 2]});
     
     this.widthlbl=new GUI.Label({'parent':this,
-                                'font':ui2.getFont('16_33'),
+                                'font':ui.getFont('16_33'),
                                 'text':String(this.scene.level.size[0]),
                                 'position':[280, 50]});
     
-    this.width_up_btn=new ui2.IncrementButton({'parent':this,
+    this.width_up_btn=new ui.IncrementButton({'parent':this,
                                           'position':[380, 20],
                                           'size':[40, 40],
                                           'direction':'up'});
@@ -317,7 +317,7 @@ var PropertiesView=exports.PropertiesView=function(pars){
         this.scene.resizeLevelView();
     }, this);
     
-    this.width_down_btn=new ui2.IncrementButton({'parent':this,
+    this.width_down_btn=new ui.IncrementButton({'parent':this,
                                           'position':[380, 70],
                                           'size':[40, 40],
                                           'direction':'down'});
@@ -329,16 +329,16 @@ var PropertiesView=exports.PropertiesView=function(pars){
     
     
     new GUI.Label({'parent':this,
-                    'font':ui2.getFont('16_33'),
+                    'font':ui.getFont('16_33'),
                     'text':'Height, PX',
                     'position':[460, 2]});
     
     this.heightlbl=new GUI.Label({'parent':this,
-                                'font':ui2.getFont('16_33'),
+                                'font':ui.getFont('16_33'),
                                 'text':String(this.scene.level.size[1]),
                                 'position':[460, 50]});
     
-    this.height_up_btn=new ui2.IncrementButton({'parent':this,
+    this.height_up_btn=new ui.IncrementButton({'parent':this,
                                           'position':[560, 20],
                                           'size':[40, 40],
                                           'direction':'up'});
@@ -348,7 +348,7 @@ var PropertiesView=exports.PropertiesView=function(pars){
         this.scene.resizeLevelView();
     }, this);
     
-    this.height_down_btn=new ui2.IncrementButton({'parent':this,
+    this.height_down_btn=new ui.IncrementButton({'parent':this,
                                           'position':[560, 70],
                                           'size':[40, 40],
                                           'direction':'down'});
@@ -391,7 +391,7 @@ var LayerView=exports.LayerView=function(pars){
     LayerView.superConstructor.apply(this, [pars]);
     
     new GUI.Label({'parent':this.scw,
-                    'font':ui2.getFont('16_33'),
+                    'font':ui.getFont('16_33'),
                     'text':'Decals',
                     'position':[10, 2]});
     
@@ -401,7 +401,7 @@ var LayerView=exports.LayerView=function(pars){
                       'position':[10, 50]});
     
     new GUI.Label({'parent':this.scw,
-                    'font':ui2.getFont('16_33'),
+                    'font':ui.getFont('16_33'),
                     'text':'Props',
                     'position':[160, 2]});
     
@@ -411,7 +411,7 @@ var LayerView=exports.LayerView=function(pars){
                       'position':[160, 50]});
     
     new GUI.Label({'parent':this.scw,
-                    'font':ui2.getFont('16_33'),
+                    'font':ui.getFont('16_33'),
                     'text':'AI Waypoints',
                     'position':[320, 2]});
     
@@ -421,7 +421,7 @@ var LayerView=exports.LayerView=function(pars){
                       'position':[320, 50]});
     
     new GUI.Label({'parent':this.scw,
-                    'font':ui2.getFont('16_33'),
+                    'font':ui.getFont('16_33'),
                     'text':'Checkpoints',
                     'position':[470, 2]});
     
@@ -431,7 +431,7 @@ var LayerView=exports.LayerView=function(pars){
                       'position':[470, 50]});
     
     new GUI.Label({'parent':this.scw,
-                    'font':ui2.getFont('16_33'),
+                    'font':ui.getFont('16_33'),
                     'text':'Start pos.',
                     'position':[620, 2]});
     
@@ -731,7 +731,7 @@ gamejs.utils.objects.extend(Checkpoint, Tool);
 
 Checkpoint.prototype.genImage=function(number){
     var s=new gamejs.Surface([40, 40]);
-    var font=ui2.getFont('editor_checkpoint');
+    var font=ui.getFont('editor_checkpoint');
     gamejs.draw.rect(s, 'RGBA(255, 86, 86, 0.2)', new gamejs.Rect([0, 0], s.getSize()));
     font.render(s, String(number), [12, 12]);
     gamejs.draw.rect(s, '#FF5656', new gamejs.Rect([0, 0], s.getSize()), 3);
@@ -740,7 +740,7 @@ Checkpoint.prototype.genImage=function(number){
 
 Checkpoint.prototype.genHugeImage=function(number){
     var s=new gamejs.Surface([280, 280]);
-    var font=ui2.getFont('editor_checkpoint');
+    var font=ui.getFont('editor_checkpoint');
     gamejs.draw.rect(s, 'RGBA(255, 86, 86, 0.2)', new gamejs.Rect([0, 0], s.getSize()));
     font.render(s, String(number), [130, 130]);
     gamejs.draw.rect(s, '#FF5656', new gamejs.Rect([0, 0], s.getSize()), 3);
@@ -793,7 +793,7 @@ gamejs.utils.objects.extend(StartPosition, Tool);
 
 StartPosition.prototype.genImage=function(number, angle){
     var s=new gamejs.Surface([60, 60]);
-    var font=ui2.getFont('editor_start_pos');
+    var font=ui.getFont('editor_start_pos');
     
     
     //ptlist
@@ -864,7 +864,7 @@ gamejs.utils.objects.extend(AIWaypoint, Tool);
 
 AIWaypoint.prototype.genImage=function(number){
     var s=new gamejs.Surface([40, 40]);
-    var font=ui2.getFont('editor_ai_wp');
+    var font=ui.getFont('editor_ai_wp');
     font.render(s, String(number), [12, 12]);
     gamejs.draw.rect(s, '#0094FF', new gamejs.Rect([0, 0], s.getSize()), 3);
     return s;
@@ -987,7 +987,7 @@ LevelView.prototype.paint=function(){
 };
 
 LevelView.prototype.post_paint=function(){
-    if(this.hover && this.scene.selected && this.scene.selected.subtype=='tool' && this.scene.selected.getCursorImage){
+    if(this.isHovered() && this.scene.selected && this.scene.selected.subtype=='tool' && this.scene.selected.getCursorImage){
         var img=this.scene.selected.getCursorImage();
         var sz=img.getSize();
         
@@ -1041,7 +1041,7 @@ var EditorScene=exports.EditorScene=function(){
         this.surface.clear();
     }, this.gui);
     
-    this.alertdialog=new ui2.Dialog({'gui':this.gui,
+    this.alertdialog=new ui.Dialog({'parent':this.gui,
                            'size':[600, 150]});
 
     
@@ -1052,7 +1052,7 @@ var EditorScene=exports.EditorScene=function(){
                                'parent':this.gui,
                                'image':new gamejs.Surface([LEFT_PANEL_WIDTH, LEFT_PANEL_WIDTH])});
     
-    this.saveloadbtn=new ui2.Button({'position':[0, 210],
+    this.saveloadbtn=new ui.Button({'position':[0, 210],
                                     'size':[190, 50],
                                     'parent':this.gui,
                                     'text':'Save / Load',
@@ -1062,10 +1062,10 @@ var EditorScene=exports.EditorScene=function(){
         $(this.dialogel).dialog('open');
     }, this);
     
-    this.playdialog=new PlayDialog({'gui':this.gui,
+    this.playdialog=new PlayDialog({'parent':this.gui,
                                    'scene':this});
     
-    this.playbtn=new ui2.Button({'position':[0, 270],
+    this.playbtn=new ui.Button({'position':[0, 270],
                                     'size':[190, 50],
                                     'parent':this.gui,
                                     'text':'Play',
@@ -1073,7 +1073,7 @@ var EditorScene=exports.EditorScene=function(){
     
     this.playbtn.onClick(function(){this.show();}, this.playdialog);
     
-    this.helpbtn=new ui2.Button({'position':[0, 330],
+    this.helpbtn=new ui.Button({'position':[0, 330],
                                     'size':[190, 50],
                                     'parent':this.gui,
                                     'text':'Help',
@@ -1083,7 +1083,7 @@ var EditorScene=exports.EditorScene=function(){
         window.open('http://www.banditracer.eu/index.php?page=track-editor-help');
     }, this);
     
-    this.backbtn=new ui2.Button({'position':[0, 390],
+    this.backbtn=new ui.Button({'position':[0, 390],
                                     'size':[190, 50],
                                     'parent':this.gui,
                                     'text':'Back',
@@ -1095,7 +1095,7 @@ var EditorScene=exports.EditorScene=function(){
     
     
     
-    this.dialog=new ui2.Dialog({'gui':this.gui,
+    this.dialog=new ui.Dialog({'parent':this.gui,
                                 'size':[450, 150]});
     
     this.scw=new GUI.ScrollableView({'parent':this.gui,
@@ -1514,7 +1514,7 @@ function LayerOnOffBtn(pars){
     this.onClick(this.onclick, this);
 };
 
-gamejs.utils.objects.extend(LayerOnOffBtn, ui2.Button);
+gamejs.utils.objects.extend(LayerOnOffBtn, ui.Button);
 
 LayerOnOffBtn.prototype.onclick=function(){
     if(this.is_on){
@@ -1538,7 +1538,7 @@ function PlayDialog(pars){
     PlayDialog.superConstructor.apply(this, [pars]);
     this.scene=pars.scene;
     
-    this.playbtn=new ui2.Button({'parent':this,
+    this.playbtn=new ui.Button({'parent':this,
                                 'text':'Play',
                                 'size':[180, 40],
                                 'lean':'both',
@@ -1553,7 +1553,7 @@ function PlayDialog(pars){
         else combatracer.game.playLevel(structifyLevel(this.scene.level), false, false, 'editor');
     }, this);
     
-    this.testaibtn=new ui2.Button({'parent':this,
+    this.testaibtn=new ui.Button({'parent':this,
                                 'text':'Test AI',
                                 'size':[180, 40],
                                 'lean':'both',
@@ -1568,7 +1568,7 @@ function PlayDialog(pars){
         else combatracer.game.playLevel(structifyLevel(this.scene.level), true, false, 'editor');
     }, this);
     
-    this.cancelbtn=new ui2.Button({'parent':this,
+    this.cancelbtn=new ui.Button({'parent':this,
                                 'text':'Cancel',
                                 'size':[180, 40],
                                 'lean':'both',

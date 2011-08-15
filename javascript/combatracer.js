@@ -6,7 +6,6 @@ var levels=require('./levels');
 var resources = require('./resources');
 var weapons=require('./weapons');
 var ui=require('./ui');
-var ui2=require('./ui2');
 var uiscenes=require('./uiscenes');
 var settings=require('./settings');
 var gamescenes=require('./gamescenes');
@@ -201,7 +200,7 @@ var Game=exports.Game=function(){
     this.director=null;
     this.cache=renderer.init();
     if(settings.get('SOUND')) sounds.init();
-    ui2.init();
+    ui.init();
     this.socket=null;
     this.player={'alias':'Guest',
                  'uid':null,
