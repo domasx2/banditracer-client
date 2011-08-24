@@ -38,10 +38,14 @@
  
 */
 
+
 exports.Bandit={'width':1.7,
                 'height':3.5,
+                'id':'Bandit',
                 'name':'Bandit',
+                'description':'Small but agile',
                 'filenames':['bandit_yellow.png', 'bandit_green.png', 'bandit_blue.png', 'bandit_red.png'],
+                'art_filename':'bandit_big.png',
                 'power':105,
                 'max_speed':115,
                 'max_steer_angle':17,
@@ -50,6 +54,14 @@ exports.Bandit={'width':1.7,
                 'power_upgrade':5,
                 'speed_upgrade':5,
                 'armor_upgrade':10,
+                'upgrade_price':600,
+                
+                'speed_stars':1,
+                'acceleration_stars':4,
+                'armor_stars':1,
+                'handling_stars':4,
+                
+                'price':1600,
                 
                 'main_weapon':'Machinegun',
                 'wheels':[{'x':-0.85, 'y':-1, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
@@ -57,10 +69,45 @@ exports.Bandit={'width':1.7,
                           {'x':-0.85, 'y':1.1, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'},
                           {'x':0.85, 'y':1.1, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'}]
                 };
+                
+exports.Sandbug={'id':'Sandbug',
+                'width':1.8,
+                'height':4,
+                'name':'Sandbug',
+                'description':'A basic, low budget car',
+                'filenames':['sandbug_yellow.png', 'sandbug_green.png', 'sandbug_blue.png', 'sandbug_red.png'],
+               'art_filename':'sandbug_big.png',
+               'power':75,
+               'max_steer_angle':15,
+               'max_speed':110,
+               'health':100,
+               
+               'power_upgrade':5,
+               'speed_upgrade':5,
+               'armor_upgrade':10,
+               'upgrade_price':300,
+               
+               'speed_stars':1,
+               'acceleration_stars':1,
+               'armor_stars':2,
+               'handling_stars':2,
+               
+               'price':1000,
+               'wheels':[{'x':-0.9, 'y':-1.2, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
+                          {'x':0.9, 'y':-1.2, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
+                          {'x':-0.9, 'y':1.2, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'},
+                          {'x':0.9, 'y':1.2, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'}]};
+               
+                
+                
+                
 exports.Racer={'width':2,
+                'id':'Racer',
                 'name':'Racer',
+                'description':'A well rounded racing car',
                'height':4,
                'filenames':['racer_yellow.png', 'racer_green.png', 'racer_blue.png', 'racer_red.png'],
+               'art_filename':'racer_big.png',
                 'power':90,
                 'max_steer_angle':16,
                 'max_speed':125,
@@ -69,6 +116,14 @@ exports.Racer={'width':2,
                 'power_upgrade':5,
                 'speed_upgrade':5,
                 'armor_upgrade':10,
+                'upgrade_price':600,
+                
+                'speed_stars':3,
+                'acceleration_stars':2,
+                'armor_stars':2,
+                'handling_stars':3,
+                
+                'price':2000,
                 
                 'main_weapon':'Machinegun',
                 'wheels':[{'x':-1, 'y':-1.2, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
@@ -79,8 +134,11 @@ exports.Racer={'width':2,
             };
 exports.Brawler={'width':3,
                 'height':6,
+                'id':'Brawler',
                 'name':'Brawler',
+                'description':'Heavily armored combat SUV',
                 'filenames':['brawler_yellow.png', 'brawler_green.png', 'brawler_blue.png', 'brawler_red.png'],
+                'art_filename':'brawler_big.png',
                 'power':150,
                 'max_steer_angle':16,
                 'max_speed':120,
@@ -89,6 +147,14 @@ exports.Brawler={'width':3,
                 'power_upgrade':8,
                 'speed_upgrade':5,
                 'armor_upgrade':10,
+                'upgrade_price':600,
+                
+                'speed_stars':2,
+                'armor_stars':4,
+                'acceleration_stars':1,
+                'handling_stars':1,
+                
+                'price':2400,
                 
                 'main_weapon':'MissileLauncher',
                 'wheels':[{'x':-1.25, 'y':-2, 'width':0.6, 'length':1.2, 'revolving':true, 'powered':true, 'filename':'big_wheel.png'},

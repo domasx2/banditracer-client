@@ -2,6 +2,7 @@ var gamejs = require('gamejs');
 var box2d = require('./box2d');
 var utils = require('./utils');
 var sounds = require('./sounds');
+var buffs = require('./buffs');
 var vec=utils.vec;
 var arr=utils.arr;
 
@@ -83,8 +84,7 @@ var Projectile=exports.Projectile=function(pars){
 
     this.setSpeed=function(speed){
         if(this.getSpeedKMH()<1) var velocity=arr(this.car.body.GetWorldVector(vec(0, -1)));
-        else var velocity=arr(this.body.GetWorldVector(vec(0, -1))); //crude hax: with this version of box2d, some projectiles slow down (apparently due to collision with other bullets)
-                                                                     //despite being sensor mode. Might be box2d bug. Could not find resolution in acceptable time, resetting speed every frame.
+        else var velocity=arr(this.body.GetWorldVector(vec(0, -1))); 
         velocity=vectors.multiply(velocity, ((speed*1000)/3600));
         this.body.SetLinearVelocity(vec(velocity));
     };
@@ -216,6 +216,55 @@ var Missile=exports.Missile=function(pars){
 }
 gamejs.utils.objects.extend(Missile, Projectile);
 
+
+var HomingMissile=exports.HomingMissile=function(pars){
+    HomingMissile.superConstructor.apply(this, [pars]);
+    
+    this.draw=function(renderer, msDuration){
+        if(!this.spent) renderer.drawCar('missile_homing.png', arr(this.body.GetPosition()), degrees(this.body.GetAngle()));
+    };
+    
+    this.update=function(msDuration){
+        //spawn smoke
+        this.tts-=msDuration;
+        if(this.tts<0){
+            this.car.world.spawnAnimation('smoke',arr(this.body.GetWorldPoint(vec([0, 1.25]))));
+            this.tts=50;
+        }
+        
+        //drive the missile towards nearest front facing target
+        var target=null;
+        var target_distance=1000000;
+        this.car.world.objects.car.forEach(function(car){
+            var cpos=arr(this.body.GetLocalPoint(car.body.GetPosition()));
+            if(cpos[1]<0){
+                var distance=gamejs.utils.vectors.distance(arr(this.body.GetPosition()), arr(car.body.GetPosition()));
+                if(target_distance>distance){
+                    target=car;
+                    target_distance=distance;
+                    
+                }
+            }
+            return false;
+        }, this);
+        if(target){
+            var cpos=arr(this.body.GetLocalPoint(target.body.GetPosition()));
+            var angle=this.body.GetAngle();
+            if(cpos[0]<0){
+                angle+=gamejs.utils.math.radians((-90/700) * msDuration);
+            }else if(cpos[0]>0){
+                angle+=gamejs.utils.math.radians((90/700) * msDuration);
+            }
+            this.body.SetAngle(angle);
+            
+            this.setSpeed(this.speed);
+        }
+        
+    };
+};
+
+gamejs.utils.objects.extend(HomingMissile, Missile);
+
 var Bullet=exports.Bullet=function(pars){
     /*
     pars:
@@ -260,11 +309,12 @@ var Weapon=exports.Weapon=function(pars){
     fire_rate - ms, duration between firing
     */
     this.car=pars.car;
+    this.weapon_id=pars.weapon_id;
     this.ammo_capacity=pars.ammo_capacity+(pars.ammo_upgrades*pars.ammo_upgrade);
     this.fire_rate=pars.fire_rate;
     this.cooldown=0;
     this.ammo=0;
-    this.damage=pars.damage+(pars.dmg_upgrades*pars.dmg_upgrade);
+    this.damage=pars.damage+(pars.damage_upgrades*pars.damage_upgrade);
     this.speed=pars.speed;
     this.projectile=pars.projectile;
 
@@ -307,6 +357,22 @@ var Weapon=exports.Weapon=function(pars){
     return this;
 };
 
+var RepairKit=exports.RepairKit=function(pars){
+    Machinegun.superConstructor.apply(this, [pars])
+    this.type='repairkit';
+    
+    this.fire=function(){
+        if(this.ammo&&this.cooldown<=0){
+            if(this.car.health<this.car.max_health){
+                this.car.hit(-this.damage, this.car);
+                this.ammo--;
+                this.cooldown=this.fire_rate;
+            }
+        }  
+    };
+};
+gamejs.utils.objects.extend(RepairKit, Weapon);
+
 var Machinegun=exports.Machinegun=function(pars){
     /*
     pars:
@@ -325,6 +391,36 @@ var Machinegun=exports.Machinegun=function(pars){
 };
 
 gamejs.utils.objects.extend(Machinegun, Weapon);
+
+var ShockwaveGenerator=exports.ShockwaveGenerator=function(pars){
+    ShockwaveGenerator.superConstructor.apply(this, [pars]);
+    this.type='shockwave';
+    this.fire=function(){
+        if(this.ammo&&this.cooldown<=0){
+            this.car.world.objects.car.forEach(function(car){
+                if(car.id!=this.car.id){
+                    var tp=arr(this.car.body.GetPosition());
+                    var cp=arr(car.body.GetPosition());
+                    var d=vectors.distance(tp, cp);
+                    if(d<=12){
+                        car.hit(this.damage, this.car);
+                        new buffs.SlipDebuff(car, 500);
+                        //var fvect=vectors.unit(arr(this.car.body.GetLocalPoint(car.body.GetPosition())));
+                        var fvect=vectors.unit(vectors.substract(cp, tp));
+                        fvect=vectors.multiply(fvect, 400);
+                        car.body.ApplyImpulse(vec(fvect), car.body.GetPosition());
+                    };
+                }
+            }, this);
+            
+            this.car.world.spawnAnimation('shockwave',arr(this.car.body.GetPosition()), this.car);
+            this.ammo--;
+            this.cooldown=this.fire_rate;
+        }  
+    };
+};
+
+gamejs.utils.objects.extend(ShockwaveGenerator, Weapon);
 
 var MineLauncher=exports.MineLauncher=function(pars){
     /*

@@ -11,11 +11,12 @@ degrees=math.degrees;
 var resources=require('./resources');
 var skin=require('./skin');
 var settings=require('./settings');
+var weapon_descriptions=require('./weapon_descriptions');
 
 //hax gamejs to render font properly with a very hax fix
 gamejs.font.Font.prototype.size=function(text){
     var metrics = this.sampleSurface.context.measureText(text);
-    return [metrics.width*3, this.fontHeight];    
+    return [metrics.width*4, this.fontHeight];    
 };
 
 gamejs.font.Font.prototype.render = function(text, color) {
@@ -443,15 +444,16 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
         this.surface.blit(sprite, [pos[0]-sz[0]/2, pos[1]-sz[1]/2]);
     };
     
-    this.drawAnimation=function(filename, pos, frame){
+    this.drawAnimation=function(filename, pos, frame, sz){
         /*
         pos - position in world coordinates
         frame - frame number (starts with 0 ) 
         */
-        var sheet=this.cache.getAnimationSheet(filename)
-        var w=sheet.getSize()[1];
+        var sheet=this.cache.getAnimationSheet(filename);
+        var h=sheet.getSize()[1];
+        sz=sz ? sz : h;
         pos=this.getScreenPoint(pos);
-        this.surface.blit(sheet, new gamejs.Rect([pos[0]-w/2, pos[1]-w/2], [w, w]), new gamejs.Rect([frame*w, 0], [w, w]))
+        this.surface.blit(sheet, new gamejs.Rect([pos[0]-sz/2, pos[1]-sz/2], [sz, sz]), new gamejs.Rect([frame*h, 0], [h, h]))
     };
     
     this.renderHUD=function(display,  pars){
@@ -479,9 +481,18 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
             this.drawText('SPEED: '+parseInt(car.getSpeedKMH()), 'hud', [10, display.getSize()[1]-40]);
             //ammo
             
-            if(car.front_weapon) this.drawText('AMMO: '+parseInt(car.front_weapon.ammo), 'hud', [250, display.getSize()[1]-40]);
-            //mines
-            if(car.rear_weapon) this.drawText('MINES: '+parseInt(car.rear_weapon.ammo), 'hud', [450, display.getSize()[1]-40]);
+            var x=250;
+            var y=display.getSize()[1]-40;
+            (['front_weapon', 'util', 'rear_weapon']).forEach(function(weapon_type){
+                if(car[weapon_type]){
+                    var descr=weapon_descriptions[car[weapon_type].weapon_id];
+                    var icon=this.cache.getStaticSprite(descr.icon);
+                    this.surface.blit(icon, [x, y-15]);
+                    x+=50;
+                    this.drawText(String(parseInt(car[weapon_type].ammo)), 'hud', [x, y]);
+                    x+=60;
+                }
+            }, this);
         }
         
         if(settings.get('DEBUG')){

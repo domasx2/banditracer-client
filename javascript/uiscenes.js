@@ -6,7 +6,7 @@ var car_descriptions=require('./car_descriptions');
 var GUI=require('./gamejs-gui');
 var skin=require('./skin');
 var combatracer=require('./combatracer');
-
+var renderer=require('./renderer');
 /*
 var LobbyScene=exports.LobbyScene=function(game, cache, lobby_id){
     LobbyScene.superConstructor.apply(this, [game, cache]);
@@ -348,7 +348,7 @@ var TitleScene=exports.TitleScene=function(game, cache){
     //name input
     this.nameinput=new ui.NameInput({'position':[178, 129],
                                      'size':[200, 40],
-                                     'text':'Guest',
+                                     'text':this.game.player.alias,
                                      'parent':this.container});
     
     this.nameinput.on(GUI.EVT_CHANGE, function(event){
@@ -407,8 +407,10 @@ TitleScene.prototype.singleplayer=function(){
     this.game.singleplayer();
 };
 
-var SinglePlayerScene=exports.SinglePlayerScene=function(game, cache){
-    SinglePlayerScene.superConstructor.apply(this, [game, cache]);
+
+
+var SinglePlayerScene=exports.SinglePlayerScene=function(){
+    SinglePlayerScene.superConstructor.apply(this, []);
     
     this.container.header_height=130;
     this.container.background_color=skin.single_player_scene.background_color;
@@ -442,7 +444,8 @@ var SinglePlayerScene=exports.SinglePlayerScene=function(game, cache){
     this.gotogarage=new ui.GoToGarage({'position':[14, 160],
                                        'parent':this.container});
     this.gotogarage.on(GUI.EVT_MOUSE_DOWN, function(){
-        this.alert('Coming soon!', true);
+        this.game.return_to='singleplayer';
+        this.game.showSPGarage();
     }, this);
     
     this.car_display=new ui.CarDisplay({'position':[14, 356],
@@ -451,6 +454,7 @@ var SinglePlayerScene=exports.SinglePlayerScene=function(game, cache){
     
     this.track_selector=new ui.TrackSelector({'position':[254, 160],
                                             'parent':this.container});
+    
 };
 gamejs.utils.objects.extend(SinglePlayerScene, ui.UIScene);
 
@@ -478,14 +482,41 @@ var ControlsSplash=exports.ControlsSplash=function(game, cache, next_scene){
                   'image':cache.getUIImage('controls.png'),
                   'parent':this.gui});
     this.gui.center(img);
-    img.move([img.position[0], img.position[1]-50]);
+    var y=img.getPosition()[1]-120;
+    x=img.getPosition()[0];
+    img.move([x, y]);
+    x-=60;
+    y+=img.getSize()[1]+10;
     
-    var lbl=new GUI.Label({'position':[0, 0],
+    new ui.KeyExplanation({'position':[x, y],
+                          'key':'x',
+                          'parent':this.gui,
+                          'text':'Fire front weapon'});
+    y+=62;
+    
+    new ui.KeyExplanation({'position':[x, y],
+                          'key':'c',
+                          'parent':this.gui,
+                          'text':'Use utility'});
+    y+=62;
+    
+    new ui.KeyExplanation({'position':[x, y],
+                          'key':'v',
+                          'parent':this.gui,
+                          'text':'Fire rear weapon'});
+    y+=62;
+    
+    new ui.KeyExplanation({'position':[x, y],
+                          'key':'ESC',
+                          'parent':this.gui,
+                          'text':'Menu'});
+    y+=62;
+    
+    var lbl=new GUI.Label({'position':[x-60, y],
                           'parent':this.gui,
                       'text':'Press any key or click to continue...',
-                      'font':ui.getFont('header')});
-    this.gui.center(lbl);
-    lbl.move([lbl.position[0], img.position[1]+img.size[1]+30]);
+                      'font':ui.getFont('25_66')});
+
     this.gui.despatchEvent({'type':GUI.EVT_FOCUS});
     this.gui.on(GUI.EVT_MOUSE_DOWN, this.next, this);
     this.gui.on(GUI.EVT_KEY_DOWN, this.next, this);

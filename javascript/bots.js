@@ -9,7 +9,7 @@ exports.generateBotCarDescr=function(){
     var retv={'type':ct,
                 'front_weapon':{'type':wp,
                                 'ammo_upgrades':0,
-                                'dmg_upgrades':0},
+                                'damage_upgrades':0},
                 'util':null,
                 'rear_weapon':null,
                 'acc_upgrades':0,

@@ -72,3 +72,12 @@ exports.removeObjFromList=function(val, list){
         }
     }
 };
+
+exports.resizeSurfaceToHeight=function(surface, height){
+    var sz=surface.getSize();
+    var q=sz[1]/height
+    var new_sz=[parseInt(sz[0]/q), parseInt(sz[1]/q)];
+    var s=new gamejs.Surface(new_sz[0], new_sz[1]);
+    s.blit(surface, new gamejs.Rect([0, 0], s.getSize()), new gamejs.Rect([0, 0], surface.getSize()));
+    return s;
+};

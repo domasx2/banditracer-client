@@ -11,16 +11,19 @@ var settings=require('./settings');
 var gamescenes=require('./gamescenes');
 var sounds=require('./sounds');
 var editor=require('./editor');
+var garage=require('./garage');
 
-var getDefCarDescr=exports.getDefCarDescr=function(){
-    return {'type':'Racer',
-            'front_weapon':{'type':'Machinegun',
-                            'ammo_upgrades':3,
-                            'dmg_upgrades':3},
-            'util':null,
+var getDefCarDescr=exports.getDefCarDescr=function(car){
+    return {'type':car ? car : 'Sandbug',
+            'front_weapon':{'type':'HomingMissiles',
+                            'ammo_upgrades':0,
+                            'damage_upgrades':0},
+            'util':{'type':'Shockwave',
+                            'ammo_upgrades':5,
+                            'damage_upgrades':0},
             'rear_weapon':{'type':'MineLauncher',
                             'ammo_upgrades':0,
-                            'dmg_upgrades':0},
+                            'damage_upgrades':0},
             'acc_upgrades':0,
             'speed_upgrades':0,
             'armor_upgrades':0}
@@ -202,10 +205,10 @@ var Game=exports.Game=function(){
     if(settings.get('SOUND')) sounds.init();
     ui.init();
     this.socket=null;
-    this.player={'alias':'Guest',
+    this.player={'alias':'Player',
                  'uid':null,
                  'singleplayer':{
-                    'balance':1000,
+                    'balance':10000,
                     'car':getDefCarDescr()
                     }
                 };
@@ -275,6 +278,19 @@ var Game=exports.Game=function(){
     
     this.singleplayer=function(){
          this.director.replaceScene(new uiscenes.SinglePlayerScene(this, this.cache));
+    };
+    
+    this.showGarage=function(player_data){
+        this.director.replaceScene(new garage.GarageScene(player_data));
+    };
+    
+    this.showCarDealer=function(player_data){
+        this.director.replaceScene(new garage.BuyCarScene(player_data));
+    };
+    
+    //singleplayer garage
+    this.showSPGarage=function(){
+        this.director.replaceScene(new garage.GarageScene(this.player.singleplayer));
     };
 
     this.playMultiplayer=function(level){

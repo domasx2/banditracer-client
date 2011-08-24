@@ -9,12 +9,15 @@ var Animation=exports.Animation=function(pars){
     duration
     world
     */
-    this.position=utils.vectorToList(pars.position);
+    this.position=utils.arr(pars.position);
     this.filename=pars.filename;
     this.world=pars.world;
     this.age=0;
     this.duration=pars.duration;
     this.type='animation';
+    this.follow_obj=pars.follow_obj;
+    this.expand_from=pars.expand_from;
+    this.expand_to=pars.expand_to;
 
     this.getState=function(){return null;};
     this.interpolate=function(){};
@@ -29,9 +32,13 @@ var Animation=exports.Animation=function(pars){
 
     this.draw=function(renderer){
         var frames=renderer.cache.getAnimationFrameCount(this.filename);
-        renderer.drawAnimation(this.filename, this.position, Math.min(parseInt(this.age/(this.duration/frames)), frames-1));
+        var sz=null;
+        if(this.expand_from && this.expand_to){
+            sz=this.expand_from+parseInt((this.expand_to-this.expand_from)*(this.age/this.duration));
+        }    
+        var position = this.follow_obj ? utils.arr(this.follow_obj.body.GetPosition()) : this.position;
+        renderer.drawAnimation(this.filename, position, Math.min(parseInt(this.age/(this.duration/frames)), frames-1), sz);
     };
-
     return this;
 }
 
@@ -40,4 +47,8 @@ exports.animations={'small_explosion':{'filename':'explosion_small.png',
                     'smoke':{'filename':'smoke.png',
                             'duration':300},
                     'explosion':{'filename':'explosion.png',
-                                 'duration':1000}};
+                                 'duration':1000},
+                    'shockwave':{'filename':'sw.png',
+                                'duration':200,
+                                'expand_from':40,
+                                'expand_to':200}};

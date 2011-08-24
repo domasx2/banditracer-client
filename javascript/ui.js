@@ -5,6 +5,7 @@ var renderer=require('./renderer');
 var settings=require('./settings');
 var combatracer=require('./combatracer');
 var car_descriptions=require('./car_descriptions');
+var weapon_descriptions=require('./weapon_descriptions');
 var levels=require('./levels');
 var utils=require('./utils');
 var sounds=require('./sounds');
@@ -31,6 +32,7 @@ var SceneContainer=function(pars){
 gamejs.utils.objects.extend(SceneContainer, GUI.View);
 
 SceneContainer.prototype.paint=function(){
+    this.surface.clear();
     gamejs.draw.rect(this.surface, skin.ui_header_background, new gamejs.Rect([0, 0], [this.surface.getSize()[0], this.header_height]));
     gamejs.draw.rect(this.surface, this.background_color, new gamejs.Rect([0, this.header_height], [this.surface.getSize()[0], this.surface.getSize()[1]-this.header_height]));
 };
@@ -40,7 +42,7 @@ SceneContainer.prototype.paint=function(){
 var UIScene=exports.UIScene=function(){
     var cache=this.cache=cache=renderer.cache;
     var game=this.game=combatracer.game;
-    game.display.fill('#FFF');
+   // game.display.fill('#FFF');
     this.gui=new GUI.GUI(game.display);
     this.gui.on(GUI.EVT_PAINT,
                 function(){
@@ -176,7 +178,8 @@ TitleButton.prototype.paint=function(){
 };
 
 var Button=exports.Button=function(pars){
-    pars.font=pars.font || getFont(skin.button.font);
+    this.font=pars.font=pars.font || getFont(skin.button.font);
+    this.hover_font=pars.hover_font;
     this.fill=pars.fill || skin.button.fill;
     this.hover_fill = pars.hover_fill || skin.button.hover_fill;
     this.lean = pars.lean || 'right';
@@ -189,10 +192,17 @@ var Button=exports.Button=function(pars){
 gamejs.utils.objects.extend(Button, GUI.Button);
 
 Button.prototype.paint=function(){
+    if(this.label && this.isHovered() && this.hover_font){
+        this.label.font=this.hover_font;
+    }else{
+        this.label.font=this.font;
+    }
+    this.label.refresh();
     var color = this.isHovered() ? this.hover_fill : this.fill;
     this.surface.clear();
     if(this.lean=='right') gamejs.draw.polygon(this.surface, color, [[10, 0], [this.size[0], 0], [this.size[0], this.size[1]], [0, this.size[1]]]);
     else if(this.lean=='both') gamejs.draw.polygon(this.surface, color, [[10, 0], [this.size[0], 0], [this.size[0]-10, this.size[1]], [0, this.size[1]]]);
+    else if(this.lean=='none') gamejs.draw.rect(this.surface, color, new gamejs.Rect([0,0], this.getSize()));
     else gamejs.draw.polygon(this.surface, color, [[0, 0], [this.size[0]-10, 0], [this.size[0], this.size[1]], [0, this.size[1]]]);
 };
 
@@ -269,34 +279,6 @@ var CarDisplay=exports.CarDisplay=function(pars){
                               'font':getFont(skin.sp_car_display.font2),
                               'text':car_descriptions[this.gameinfo.car.type].name});
     
-    this.upbtn=new IncrementButton({'parent':this,
-                                   'position':[170, 10],
-                                   'size':[30, 20],
-                                   'direction':'up'});
-    this.cararray=['Racer', 'Brawler', 'Bandit'];
-    this.upbtn.onClick(function(){
-        var idx=this.cararray.indexOf(this.gameinfo.car.type)+1;
-        if(idx==3)idx=0;
-        this.setCar(this.cararray[idx]);
-    }, this);
-    
-    this.downbtn=new IncrementButton({'parent':this,
-                                     'position':[170, 35],
-                                     'size':[30, 20],
-                                     'direction':'down'});
-    this.setCar=function(car){
-        this.gameinfo.car.type=car;
-        this.carlbl.setText(car_descriptions[this.gameinfo.car.type].name);
-        if(car=='Brawler') this.gameinfo.car.front_weapon.type='MissileLauncher';
-        else this.gameinfo.car.front_weapon.type='Machinegun';
-    };
-    
-    this.downbtn.onClick(function(){
-        var idx=this.cararray.indexOf(this.gameinfo.car.type)-1;
-        if(idx==-1)idx=2;
-        this.setCar(this.cararray[idx]);
-        
-    }, this);
 };
 gamejs.utils.objects.extend(CarDisplay, GUI.View);
 
@@ -527,3 +509,43 @@ var IncrementButton=exports.IncrementButton=function(pars){
     });
 };
 gamejs.utils.objects.extend(IncrementButton, GUI.Button);
+
+
+var Stars=exports.Stars=function(pars){
+    pars.image=renderer.cache['static'][pars.stars+'stars.png'];
+    Stars.superConstructor.apply(this, [pars]);
+};
+gamejs.utils.objects.extend(Stars, GUI.Image);
+
+Stars.prototype.setStars=function(stars){
+    var img=renderer.cache['static'][stars+'stars.png'];
+    this.resize(img.getSize())
+    this.setImage(img);
+};
+
+var KeyExplanation=exports.KeyExplanation=function(pars){
+    pars.size=[400, 52];
+    KeyExplanation.superConstructor.apply(this, [pars]);
+    var font=getFont('25_66');
+    this.key=pars.key;
+    this.text=pars.text;
+    var bt_w= 60;
+    if(this.key.length>1) bt_w=font.getTextSize(this.key)[0]+50;
+    this.btn=new GUI.Button({'size':[bt_w, this.getSize()[1]],
+                            'position':[0, 0],
+                            'font':font,
+                            'parent':this,
+                            'image':renderer.cache.getUIImage('key_bg.png'),
+                            'text':this.key});
+    this.btn.label.move([this.btn.label.getPosition()[0], this.btn.label.getPosition()[1]-7]);
+    
+    this.lbl=new GUI.Label({'position':[0, 0],
+                           'parent':this,
+                           'font':font,
+                           'text':this.text});
+    
+    this.center(this.lbl);
+    this.lbl.move([bt_w+30, this.lbl.getPosition()[1]]);
+};
+
+gamejs.utils.objects.extend(KeyExplanation, GUI.View);

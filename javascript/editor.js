@@ -552,7 +552,7 @@ CheckpointInstance.prototype.paint=function(){
 //START POSITION INSTANCE
 var StartPositionInstance=function(pars){
     StartPositionInstance.superConstructor.apply(this, [pars]);
-    GUI.draggable(this);
+   // GUI.draggable(this);
     this.type='startpositioninstance';
     this.number=pars.number;
       this.on('select', function(){
@@ -562,6 +562,10 @@ var StartPositionInstance=function(pars){
 };
 
 gamejs.utils.objects.extend(StartPositionInstance, Instance);
+
+StartPositionInstance.prototype.move=function(pos){
+  Instance.prototype.move.apply(this, [snap(pos)]);  
+};
 
 StartPositionInstance.prototype.destroy=function(recalc){
     
@@ -842,7 +846,7 @@ StartPosition.prototype.place=function(position){
                                         'angle':this.angle,
                                         'original':this,
                                         'number':this.number,
-                                        'position':[position[0]-Math.ceil(sz[0]/2), position[1]-Math.ceil(sz[0]/2)]});
+                                        'position':snap([position[0]-Math.ceil(sz[0]/2), position[1]-Math.ceil(sz[0]/2)])});
     this.scene.level.start_positions.push(instance);
     this.setNumber(this.number+1);
     this.refresh();
@@ -992,7 +996,7 @@ LevelView.prototype.post_paint=function(){
         var sz=img.getSize();
         
         var pos=[parseInt(this.mpos[0]-sz[0]/2), parseInt(this.mpos[1]-sz[1]/2)];
-        if(this.scene.selected.type=='decal'){
+        if(this.scene.selected.type=='decal' || this.scene.selected.type=='startposition'){
             pos=snap(pos);
         }
         this.surface.blit(img, pos);

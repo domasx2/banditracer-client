@@ -110,8 +110,8 @@ exports.MultiplayerController=function(){
                    steer_left:gamejs.event.K_LEFT, //left
                    steer_right:gamejs.event.K_RIGHT, //right
                    fire_front_weapon:gamejs.event.K_x, //fire front weapon
-                   fire_rear_weapon:gamejs.event.K_c,
-                   fire_util:gamejs.event.K_v}; //fire rear weapon
+                   fire_rear_weapon:gamejs.event.K_v,
+                   fire_util:gamejs.event.K_c}; //fire rear weapon
 
     this.actions={'accelerate':ACC_NONE,
                   'steer':STEER_NONE,
@@ -185,8 +185,8 @@ exports.PlayerCarController=function(car){
                    steer_left:gamejs.event.K_LEFT, //left
                    steer_right:gamejs.event.K_RIGHT, //right
                    fire_front_weapon:gamejs.event.K_x, //fire front weapon
-                   fire_rear_weapon:gamejs.event.K_c,
-                   fire_util:gamejs.event.K_v}; //fire rear weapon
+                   fire_rear_weapon:gamejs.event.K_v,
+                   fire_util:gamejs.event.K_c}; //fire rear weapon
 
     this.update=function(keys_down, ms){
         if(!this.car.alive)return;

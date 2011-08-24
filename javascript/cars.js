@@ -2,6 +2,7 @@ var gamejs = require('gamejs');
 var box2d = require('./box2d');
 var utils = require('./utils');
 var sounds = require('./sounds');
+var buffs=require('./buffs');
 var car_descriptions = require('./car_descriptions');
 var vec=utils.vec;
 var arr=utils.arr;
@@ -180,6 +181,8 @@ var Car = exports.Car = function(pars){
     this.type='car';
     this.car_type=pars.type;
     this.descr=car_descriptions[this.car_type];
+    this.next_buff_id=1;
+    this.buffs={};
 
     //STATE
     this.max_health=pars.health+pars.armor_upgrades * this.descr.armor_upgrade;
@@ -220,6 +223,7 @@ var Car = exports.Car = function(pars){
     this.mod_speed=0;
     this.local_engine_pos=[0, -(pars.height/2)];
     this.cur_wheel_angle=0;
+    
 
     //ANIM
     this.smoke_cd=0;
@@ -401,6 +405,25 @@ var Car = exports.Car = function(pars){
         if(this.rear_weapon && state.wr) this.rear_weapon.setState(state.wr);
         if(this.util && state.wu) this.util.setState(wu);
     };
+    
+    this.hasEffect=function(effect){
+        for(var id in this.buffs){
+            if(this.buffs[id].effect==effect){
+                return true;
+            }
+        }
+        return false;
+    };
+    
+    this.clearBuffs=function(){
+        this.buffs={};  
+    };
+    
+    this.updateBuffs=function(msDuration){
+        for(var id in this.buffs){
+            this.buffs[id]._update(msDuration);
+        }
+    };
 
     this.getSpeedKMH=function(){
         var velocity=arr(this.body.GetLinearVelocity());
@@ -452,6 +475,7 @@ var Car = exports.Car = function(pars){
         this.teleport([0, 0]);
         this.body.SetLinearVelocity(vec(0, 0));
         this.wheels.forEach(function(wheel){wheel.die();});
+        this.clearBuffs();
     };
 
     this.respawn=function(){
@@ -474,7 +498,7 @@ var Car = exports.Car = function(pars){
     this.processHits=function(){
         this.hits.forEach(function(hit){
             if(this.alive){
-                this.health-=hit.damage;
+                this.health=Math.min(this.health-hit.damage, this.max_health);
                 if(this.health<=0){
                     this.die();
                     if(hit.owner)hit.owner.kill(this);
@@ -501,6 +525,7 @@ var Car = exports.Car = function(pars){
 
     this.updateAlive=function(msDuration){
         this.updateCheckpoint();
+        this.updateBuffs(msDuration);
         var steer=this.steer;
         var acceleration=this.accelerate;
         var speed=this.getSpeedKMH();
@@ -508,7 +533,9 @@ var Car = exports.Car = function(pars){
         var max_speed=(local_velocity[1]>0 ? 0.5*this.max_speed : this.max_speed)+this.mod_speed;
 
         //kill sideways velocity
-        this.wheels.forEach(function(wheel){wheel.killSidewaysVelocity();});
+        if(!this.hasEffect(buffs.EFFECT_NO_GRIP)){
+            this.wheels.forEach(function(wheel){wheel.killSidewaysVelocity();});
+        }
 
         //SET STEER
         //need to calculate maximum allowed steer angle first

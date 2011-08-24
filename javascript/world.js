@@ -139,8 +139,10 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
         this.event('destroy', id);
     }
     
-    this.spawnAnimation=function(animation, position){
-        this.event('create', {'type':'animation', 'obj_name':animation, 'pars':{'position':position}});  
+    this.spawnAnimation=function(animation, position, follow_obj){
+        var pars={'position':position};
+        if(follow_obj) pars['follow_obj']=follow_obj.id;
+        this.event('create', {'type':'animation', 'obj_name':animation, 'pars':pars});  
     };
     
     this.playSound=function(sound, position){
@@ -193,7 +195,8 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
             
             for(var weapon_type in {'front_weapon':1, 'rear_weapon':1, 'util':1}){
                 if(descr.pars[weapon_type]){
-                    pars={'car':obj};
+                    pars={'car':obj,
+                          'weapon_id':descr.pars[weapon_type].type};
                     utils.copy(descr.pars[weapon_type], pars);
                     utils.copy(weapon_descriptions[pars.type], pars);
                     obj[weapon_type]=new weapons[pars.launcher](pars);
@@ -219,7 +222,8 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
             angle
             car   - car id!
             */
-            var pars={'world':this};
+            var pars={'world':this,
+                      'weapon_id':descr.obj_name};
             utils.copy(descr.pars, pars);
             var car=this.getObjectById(descr.pars.car);
             if(car){
@@ -236,6 +240,7 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
             */
             var pars={'world':this,
                       'position':descr.pars.position};
+            if(descr.pars.follow_obj)pars.follow_obj=this.getObjectById(descr.pars.follow_obj);
             utils.copy(animation.animations[descr.obj_name], pars);
             obj=new animation.Animation(pars);
         }

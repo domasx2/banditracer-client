@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 14.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 43363)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="500px" height="500px" viewBox="0 0 500 500" enable-background="new 0 0 500 500" xml:space="preserve">
+<pattern  y="500" width="192" height="96" patternUnits="userSpaceOnUse" id="New_Pattern_Swatch_2" viewBox="0 -96 192 96" overflow="visible">
+	<g>
+		<polygon fill="none" points="0,0 192,0 192,-96 0,-96 		"/>
+		<polygon fill="#E6E6E6" points="12,0 0,0 0,-96 12,-96 		"/>
+		<polygon fill="#C1272D" points="24,0 12,0 12,-96 24,-96 		"/>
+		<polygon fill="#E6E6E6" points="36,0 24,0 24,-96 36,-96 		"/>
+		<polygon fill="#C1272D" points="48,0 36,0 36,-96 48,-96 		"/>
+		<polygon fill="#E6E6E6" points="60,0 48,0 48,-96 60,-96 		"/>
+		<polygon fill="#C1272D" points="72,0 60,0 60,-96 72,-96 		"/>
+		<polygon fill="#E6E6E6" points="84,0 72,0 72,-96 84,-96 		"/>
+		<polygon fill="#C1272D" points="96,0 84,0 84,-96 96,-96 		"/>
+		<polygon fill="#E6E6E6" points="108,0 96,0 96,-96 108,-96 		"/>
+		<polygon fill="#C1272D" points="120,0 108,0 108,-96 120,-96 		"/>
+		<polygon fill="#E6E6E6" points="132,0 120,0 120,-96 132,-96 		"/>
+		<polygon fill="#C1272D" points="144,0 132,0 132,-96 144,-96 		"/>
+		<polygon fill="#E6E6E6" points="156,0 144,0 144,-96 156,-96 		"/>
+		<polygon fill="#C1272D" points="168,0 156,0 156,-96 168,-96 		"/>
+		<polygon fill="#E6E6E6" points="180,0 168,0 168,-96 180,-96 		"/>
+		<polygon fill="#C1272D" points="192,0 180,0 180,-96 192,-96 		"/>
+	</g>
+</pattern>
+<g>
+	<path fill="#4D4D4D" d="M274,130c0,13.254-10.745,24-24,24s-24-10.746-24-24H34v48v36v156h108h216h108V214v-36v-48H274z"/>
+	<g>
+		
+			<pattern  id="SVGID_1_" xlink:href="#New_Pattern_Swatch_2" patternTransform="matrix(-0.7015 -0.7155 0.7015 -0.7155 -8229.9043 -20645.7598)">
+		</pattern>
+		<path fill="url(#SVGID_1_)" d="M325.674,370c-5.289-0.761-10.517-1.713-15.674-2.855c-14.193-3.142-27.859-7.697-40.845-13.521
+			c-5.218-2.339-10.321-4.888-15.309-7.623c-1.312-0.719-2.619-1.443-3.913-2.189c-1.296,0.746-2.605,1.47-3.918,2.189
+			c-4.994,2.735-10.104,5.284-15.326,7.621c-12.939,5.789-26.554,10.32-40.689,13.449c-5.336,1.181-10.749,2.155-16.226,2.929
+			H325.674z"/>
+		<g>
+			<polygon fill="#E6E6E6" points="37.001,130 37.001,181 34,181 34,184 37.001,184 40,184 40.001,184 40.001,130 			"/>
+			<polygon fill="#E6E6E6" points="462.999,130 462.999,181 466,181 466,184 462.999,184 460,184 459.999,184 459.999,130 			"/>
+			<path fill="#E6E6E6" d="M358,364v-0.012c-38.174,0-73.998-9.915-104.981-27.262c-1.015-0.566-2.018-1.145-3.019-1.727
+				c-1.001,0.582-2.004,1.16-3.019,1.727c-30.984,17.347-66.808,27.262-104.981,27.262V364H34v3h108v-0.012
+				c39.344,0,76.229-10.379,108-28.503c31.771,18.124,68.656,28.503,108,28.503V367h108v-3H358z"/>
+			<path fill="#E6E6E6" d="M277,130c0,14.906-12.09,27-27,27s-27-12.094-27-27h-3c0,16.564,13.433,30,30,30s30-13.436,30-30H277z"/>
+		</g>
+	</g>
+</g>
+</svg>
