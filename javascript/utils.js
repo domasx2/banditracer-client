@@ -81,3 +81,10 @@ exports.resizeSurfaceToHeight=function(surface, height){
     s.blit(surface, new gamejs.Rect([0, 0], s.getSize()), new gamejs.Rect([0, 0], surface.getSize()));
     return s;
 };
+
+exports.inArray=function(haystack, needle){
+    for(var i=0;i<haystack.length;i++){
+        if(haystack[i]==needle) return true;
+    }
+    return false;
+};

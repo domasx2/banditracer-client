@@ -5,7 +5,7 @@ var sounds = require('./sounds');
 var buffs = require('./buffs');
 var vec=utils.vec;
 var arr=utils.arr;
-
+var weapon_descriptions=require('./weapon_descriptions');
 var vectors = gamejs.utils.vectors;
 var math = gamejs.utils.math;
 radians=math.radians;
@@ -113,6 +113,8 @@ var Projectile=exports.Projectile=function(pars){
     return this;
 }
 
+
+
 var Mine=exports.Mine=function(pars){
     /*
     pars:
@@ -171,6 +173,63 @@ var Mine=exports.Mine=function(pars){
 
     this.destroy=function(){
         this.car.world.event('destroy', this.id);
+    };
+
+    return this;
+};
+
+
+var OilPuddle=exports.OilPuddle=function(pars){
+    /*
+    pars:
+    car   - car object
+    position - [x, y]
+    */
+    this.position=pars.position;
+    this.car=pars.car;
+    this.width=4.5;
+    this.height=3.5;
+    this.damage=pars.damage;
+    this.world=this.car.world;
+    this.weapon=pars.weapon;
+    
+    //initialize body
+    var bdef=new box2d.b2BodyDef();
+    bdef.position=vec(this.position);
+    bdef.angle=0;
+    bdef.fixedRotation=true;
+    bdef.linearDamping=0;
+    bdef.angularDamping=0;
+    this.body=this.world.CreateBody(bdef);
+    this.body.SetUserData(this);
+    this.drawn=false;
+    //initialize shape
+    var fixdef=new box2d.b2FixtureDef;
+    fixdef.shape=new box2d.b2PolygonShape();
+    fixdef.shape.SetAsBox(this.width/2, this.height/2);
+    fixdef.isSensor=true;    
+    this.body.CreateFixture(fixdef);
+
+    this.getState=function(){
+        return null;
+    };
+
+    this.setState=function(state){};
+
+    this.impact=function(obj, cpoint, direction){
+        if((obj.type=='car')){
+            this.car.world.createBuff('SlipDebuff', obj, {'duration':weapon_descriptions.Oil.duration});
+        }
+    };
+
+    this.draw=function(renderer, msDuration){
+        if(!this.drawn){
+            var sprite=renderer.cache.getStaticSprite('oil_spill.png');
+            var sz=sprite.getSize();
+            var pos=[this.position[0]*this.car.world.phys_scale, this.position[1]*this.car.world.phys_scale];
+            renderer.background.blit(sprite, [pos[0]-sz[0]/2, pos[1]-sz[1]/2]);
+            this.drawn=true;
+        }
     };
 
     return this;
@@ -334,23 +393,26 @@ var Weapon=exports.Weapon=function(pars){
         this.ammo=state.a;
     };
     
-    this.fire=function(){
+    this._fire=function(){
         if(this.ammo&&this.cooldown<=0){
-            var pos = this.getFirePos();
-            this.car.world.event('create', {'type':'weapon', 'obj_name':this.projectile, 'pars':{'position':pos,
-                                                                                                 'damage':this.damage,
-                                                                                                 'speed':this.speed,
-                                                                                                'angle':this.car.getAngle(),
-                                                                                                'car':this.car.id}});
+            this.fire();
             this.ammo--;
             this.cooldown=this.fire_rate;
-            this.ofst_x=this.ofst_x* -1;
         }
-    }
+    };
+    
+    this.fire=function(){
+        var pos = this.getFirePos();
+        this.car.world.event('create', {'type':'weapon', 'obj_name':this.projectile, 'pars':{'position':pos,
+                                                                                             'damage':this.damage,
+                                                                                             'speed':this.speed,
+                                                                                            'angle':this.car.getAngle(),
+                                                                                            'car':this.car.id}});
+        this.ofst_x=this.ofst_x* -1;       
+    };
     
     this.getFirePos=function(){
         var retv= arr(this.car.body.GetWorldPoint(vec(0, -(this.car.height/2+3))));
-        console.log(retv);
         return retv;
     }
 
@@ -362,13 +424,11 @@ var RepairKit=exports.RepairKit=function(pars){
     this.type='repairkit';
     
     this.fire=function(){
-        if(this.ammo&&this.cooldown<=0){
-            if(this.car.health<this.car.max_health){
-                this.car.hit(-this.damage, this.car);
-                this.ammo--;
-                this.cooldown=this.fire_rate;
-            }
-        }  
+        if(this.car.health<this.car.max_health){
+            this.car.hit(-this.damage, this.car);
+            this.ammo--;
+            this.cooldown=this.fire_rate;
+        }
     };
 };
 gamejs.utils.objects.extend(RepairKit, Weapon);
@@ -392,31 +452,40 @@ var Machinegun=exports.Machinegun=function(pars){
 
 gamejs.utils.objects.extend(Machinegun, Weapon);
 
+var NOS=exports.NOS=function(pars){
+    NOS.superConstructor.apply(this, [pars]);
+    this.duration=pars.duration;
+    this.type='nos';
+    
+    this.fire=function(){
+        this.car.world.createBuff('EngineBuff', this.car, {'duration':this.duration,
+                                                           'value':this.damage});
+    }
+};
+
+gamejs.utils.objects.extend(NOS, Weapon);
+
 var ShockwaveGenerator=exports.ShockwaveGenerator=function(pars){
     ShockwaveGenerator.superConstructor.apply(this, [pars]);
     this.type='shockwave';
     this.fire=function(){
-        if(this.ammo&&this.cooldown<=0){
-            this.car.world.objects.car.forEach(function(car){
-                if(car.id!=this.car.id){
-                    var tp=arr(this.car.body.GetPosition());
-                    var cp=arr(car.body.GetPosition());
-                    var d=vectors.distance(tp, cp);
-                    if(d<=12){
-                        car.hit(this.damage, this.car);
-                        new buffs.SlipDebuff(car, 500);
-                        //var fvect=vectors.unit(arr(this.car.body.GetLocalPoint(car.body.GetPosition())));
-                        var fvect=vectors.unit(vectors.substract(cp, tp));
-                        fvect=vectors.multiply(fvect, 400);
-                        car.body.ApplyImpulse(vec(fvect), car.body.GetPosition());
-                    };
-                }
-            }, this);
-            
-            this.car.world.spawnAnimation('shockwave',arr(this.car.body.GetPosition()), this.car);
-            this.ammo--;
-            this.cooldown=this.fire_rate;
-        }  
+        this.car.world.objects.car.forEach(function(car){
+            if(car.id!=this.car.id){
+                var tp=arr(this.car.body.GetPosition());
+                var cp=arr(car.body.GetPosition());
+                var d=vectors.distance(tp, cp);
+                if(d<=12){
+                    car.hit(this.damage, this.car);
+                    this.car.world.createBuff('SlipDebuff', this.car, {'duration':500});
+                    var fvect=vectors.unit(vectors.substract(cp, tp));
+                    fvect=vectors.multiply(fvect, 400);
+                    car.body.ApplyImpulse(vec(fvect), car.body.GetPosition());
+                };
+            }
+        }, this);
+        
+        this.car.world.spawnAnimation('shockwave',arr(this.car.body.GetPosition()), this.car);
+        
     };
 };
 
@@ -451,3 +520,18 @@ var MissileLauncher=exports.MissileLauncher=function(pars){
 
 
 gamejs.utils.objects.extend(MissileLauncher, Weapon);
+
+
+var Oil=exports.Oil=function(pars){
+    this.type='oil';
+    Oil.superConstructor.apply(this, [pars]);
+    
+    this.getFirePos=function(){
+        return arr(this.car.body.GetWorldPoint(vec(0, (this.car.height/2+5))));    
+    };
+    
+    return this;
+};
+
+
+gamejs.utils.objects.extend(Oil, Weapon);

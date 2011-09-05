@@ -7,6 +7,9 @@ var GUI=require('./gamejs-gui');
 var skin=require('./skin');
 var combatracer=require('./combatracer');
 var renderer=require('./renderer');
+var leagues=require('./leagues');
+
+var EURO_SYMBOL='\u20AC';
 /*
 var LobbyScene=exports.LobbyScene=function(game, cache, lobby_id){
     LobbyScene.superConstructor.apply(this, [game, cache]);
@@ -113,8 +116,8 @@ var LobbyScene=exports.LobbyScene=function(game, cache, lobby_id){
 };
 gamejs.utils.objects.extend(LobbyScene, ui.UIScene);*/
 
-var GameOverScene=exports.GameOverScene=function(table, win){
-    GameOverScene.superConstructor.apply(this, []);
+var SPGameOverScene=exports.SPGameOverScene=function(table, win, scene){
+    SPGameOverScene.superConstructor.apply(this, []);
     
     this.titlelbl=new GUI.Label({'parent':this.container,
                                 'position':[210, 40],
@@ -125,6 +128,7 @@ var GameOverScene=exports.GameOverScene=function(table, win){
                                 'position':[30, 120],
                                 'text':win ? 'You win! Well done.' : 'You lose! Better luck next time.',
                                 'font':ui.getFont('header')});
+    
     var columns=[{'key':'place', 'label':'Place', 'width':80},
               {'key':'player', 'label':'Player', 'width':200},
               {'key':'kills', 'label':'Kills', 'width':80},
@@ -135,6 +139,45 @@ var GameOverScene=exports.GameOverScene=function(table, win){
                   'position':[30, 200],
                   'columns':columns,
                   'data':table});
+    
+
+        new GUI.Label({'position':[510, 200],
+                      'parent':this.container,
+                      'font':ui.getFont('button2'),
+                      'text':'Reward'});
+        
+    var league=leagues[combatracer.game.player.singleplayer.league];
+    var reward = win ? league.reward : 0;
+    new GUI.Label({'position':[510, 240],
+                  'font':ui.getFont('alias'),
+                  'parent':this.container,
+                  'text':'1st place: '+reward+EURO_SYMBOL});
+    
+    new GUI.Label({'position':[510, 270],
+                 'font':ui.getFont('alias'),
+                 'parent':this.container,
+                 'text':'Kills: '+scene.player_car.kills*100+EURO_SYMBOL});
+    
+    var total=reward+scene.player_car.kills*100;
+    new GUI.Label({'position':[510, 300],
+                 'font':ui.getFont('alias'),
+                 'parent':this.container,
+                 'text':'TOTAL: '+total+EURO_SYMBOL});
+    
+    combatracer.game.player.singleplayer.balance+=total;
+    if(win){
+        combatracer.game.player.singleplayer.completed_tracks.push(scene.level.id);
+    }
+    if(win && (combatracer.game.player.singleplayer.completed_tracks.length>=league.tracks.length)){
+        if(leagues[combatracer.game.player.singleplayer.league+1]){
+            combatracer.game.player.singleplayer.league++;
+            combatracer.game.player.singleplayer.completed_tracks=[];
+            this.alert('You have advanced to '+leagues[combatracer.game.player.singleplayer.league].name+'!');
+        }else{
+            this.alert('No more leagues, you win!');
+        }
+    }
+    
     
     var btn=new ui.Button({'parent':this.container,
                    'position':[800-150, 500],
@@ -147,7 +190,7 @@ var GameOverScene=exports.GameOverScene=function(table, win){
 
 };
 
-gamejs.utils.objects.extend(GameOverScene, ui.UIScene);
+gamejs.utils.objects.extend(SPGameOverScene, ui.UIScene);
 
 /*
 var JoinLobbyScene2=exports.JoinLobbyScene2=function(game, cache){

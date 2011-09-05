@@ -15,6 +15,7 @@ var box2d=require('./box2d');
 var gamejs=require('gamejs');
 var sounds=require('./sounds');
 var renderer=require('./renderer');
+var buffs=require('./buffs');
 var vectors = gamejs.utils.vectors;
 var math = gamejs.utils.math;
 radians=math.radians;
@@ -38,11 +39,8 @@ var ContactListener=exports.ContactListener=function(world){
     };
     
     this.EndContact=function(){};
-    
-    this.PreSolve=function(){};
-    
+    this.PreSolve=function(){}; 
     this.PostSolve=function(){};
-
     return this;   
 }
 
@@ -90,13 +88,14 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
         queue is needed, because physical objects cannot be destroyed during physics calculations.
         
         */
-        this.destroy_queue[this.destroy_queue.length]=this.object_by_id[id];
+        this.destroy_queue.push(this.object_by_id[id]);
     };
     
     this.destroyQueued=function(){
         this.destroy_queue.forEach(function(obj){
             utils.removeObjFromList(obj, this.objects[obj.type]);
             delete this.object_by_id[obj.id];
+            if(obj.destroy)obj.destroy();
             if(obj.body)this.b2world.DestroyBody(obj.body);
         }, this);
         this.destroy_queue=[];
@@ -144,6 +143,11 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
         if(follow_obj) pars['follow_obj']=follow_obj.id;
         this.event('create', {'type':'animation', 'obj_name':animation, 'pars':pars});  
     };
+    
+    this.createBuff=function(buff, car, pars){
+        pars.car=car.id;
+        this.event('create', {'type':'buff', 'obj_name':buff, 'pars':pars});
+    }
     
     this.playSound=function(sound, position){
         this.event('create', {'type':'sound', 'obj_name':sound, 'pars':{'position':position}})  
@@ -249,6 +253,12 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
                 this.sound_queue.push({'filename':descr.obj_name,
                                        'position':descr.pars.position});
             }
+        }
+        else if(type=='buff'){
+            var pars={};
+            utils.copy(descr.pars, pars);
+            pars.car=this.getObjectById(descr.pars.car)
+            obj=new buffs[descr.obj_name](pars);
         }
         
         if(obj) this.addObject(obj);

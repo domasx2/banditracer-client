@@ -9,6 +9,7 @@ var weapon_descriptions=require('./weapon_descriptions');
 var levels=require('./levels');
 var utils=require('./utils');
 var sounds=require('./sounds');
+var leagues=require('./leagues');
 
 exports.fonts={};
 
@@ -344,15 +345,22 @@ TrackSelector=exports.TrackSelector=function(pars){
                                        'position':[0, 0]});
     
     var ti;
-    for(var track in levels){
-        if(levels[track].title){
+    var league=leagues[combatracer.game.player.singleplayer.league];
+    
+    new GUI.Label({'parent':this.tbg1,
+                  'position':[10, 0],
+                  'font':getFont('alias'),
+                  'text':league.name});
+    
+    league.tracks.forEach(function(track){
+        if(levels[track].title && (!utils.inArray(combatracer.game.player.singleplayer.completed_tracks, track))){
             ti=new TrackSelectorItem({'parent':this.tbg1,
                                      'track':track,
                                      'position':[0, 0]});
             ti.on('track_select', this.select, this);
         }
-    };
-    GUI.layout.vertical(this.tbg1.children, 16);    
+    }, this);
+    GUI.layout.vertical(this.tbg1.children, 5);    
 };
 
 gamejs.utils.objects.extend(TrackSelector, GUI.View);
@@ -360,7 +368,7 @@ gamejs.utils.objects.extend(TrackSelector, GUI.View);
 TrackSelector.prototype.select=function(event){
     this.track=event.track;
     this.tbg1.children.forEach(function(item){
-        if(item.track!=this.track)item.deselect();
+        if(item.deselect && (item.track!=this.track))item.deselect();
     }, this);
     this.trackdisplay.setTrack(this.track);
 };
@@ -369,7 +377,7 @@ var TrackDisplay=exports.TrackDisplay=function(pars){
     this.track=null;
     this.img=null;
     this.lbl=null;
-    pars.size=[310, 320];
+    pars.size=[316, 320];
     TrackDisplay.superConstructor.apply(this, [pars]);
     if(pars.track) this.setTrack(pars.track);
     this.lbl2=new GUI.Label({'parent':this,

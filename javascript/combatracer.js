@@ -18,9 +18,7 @@ var getDefCarDescr=exports.getDefCarDescr=function(car){
             'front_weapon':{'type':'HomingMissiles',
                             'ammo_upgrades':0,
                             'damage_upgrades':0},
-            'util':{'type':'Shockwave',
-                            'ammo_upgrades':5,
-                            'damage_upgrades':0},
+            'util':null,
             'rear_weapon':{'type':'MineLauncher',
                             'ammo_upgrades':0,
                             'damage_upgrades':0},
@@ -209,7 +207,9 @@ var Game=exports.Game=function(){
                  'uid':null,
                  'singleplayer':{
                     'balance':10000,
-                    'car':getDefCarDescr()
+                    'car':getDefCarDescr(),
+                    'league':0,
+                    'completed_tracks':[]
                     }
                 };
 
@@ -263,8 +263,8 @@ var Game=exports.Game=function(){
         return;
     };
 
-    this.showGameOver=function(table, win){
-        this.director.replaceScene(new uiscenes.GameOverScene(table, win));
+    this.showSPGameOver=function(table, win, scene){
+        this.director.replaceScene(new uiscenes.SPGameOverScene(table, win, scene));
     };
     
     this.showEditor=function(){

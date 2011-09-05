@@ -47,7 +47,7 @@ exports.Bandit={'width':1.7,
                 'filenames':['bandit_yellow.png', 'bandit_green.png', 'bandit_blue.png', 'bandit_red.png'],
                 'art_filename':'bandit_big.png',
                 'power':105,
-                'max_speed':115,
+                'max_speed':110,
                 'max_steer_angle':17,
                 'health':80,
                 
@@ -61,7 +61,7 @@ exports.Bandit={'width':1.7,
                 'armor_stars':1,
                 'handling_stars':4,
                 
-                'price':1600,
+                'price':3000,
                 
                 'main_weapon':'Machinegun',
                 'wheels':[{'x':-0.85, 'y':-1, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
@@ -79,7 +79,7 @@ exports.Sandbug={'id':'Sandbug',
                'art_filename':'sandbug_big.png',
                'power':75,
                'max_steer_angle':15,
-               'max_speed':110,
+               'max_speed':100,
                'health':100,
                
                'power_upgrade':5,
@@ -123,7 +123,7 @@ exports.Racer={'width':2,
                 'armor_stars':2,
                 'handling_stars':3,
                 
-                'price':2000,
+                'price':4500,
                 
                 'main_weapon':'Machinegun',
                 'wheels':[{'x':-1, 'y':-1.2, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
@@ -132,6 +132,38 @@ exports.Racer={'width':2,
                           {'x':1, 'y':1.2, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'}]
                 
             };
+            
+exports.Hillbilly={'width':2.4,
+                'height':5,
+                'id':'Hillbilly',
+                'name':'Hillbilly',
+                'description':'Sturdy, lots of space in the back',
+                'filenames':['samaritan_yellow.png', 'samaritan_green.png', 'samaritan_blue.png', 'samaritan_red.png'],
+                'art_filename':'samaritan_big.png',
+                'power':120,
+                'max_steer_angle':16,
+                'max_speed':115,
+                'health':140,
+                
+                'power_upgrade':7,
+                'speed_upgrade':5,
+                'armor_upgrade':10,
+                'upgrade_price':600,
+                
+                'speed_stars':2,
+                'armor_stars':3,
+                'acceleration_stars':1,
+                'handling_stars':2,
+                
+                'price':4000,
+                
+                'wheels':[{'x':-1, 'y':-1.7, 'width':0.6, 'length':1.2, 'revolving':true, 'powered':true, 'filename':'big_wheel.png'},
+                          {'x':1, 'y':-1.7, 'width':0.6, 'length':1.2, 'revolving':true, 'powered':true, 'filename':'big_wheel.png'},
+                          {'x':-0.9, 'y':1.6, 'width':0.6, 'length':1.2, 'revolving':false, 'powered':false, 'filename':'big_wheel.png'},
+                          {'x':0.9, 'y':1.6, 'width':0.6, 'length':1.2, 'revolving':false, 'powered':false, 'filename':'big_wheel.png'}]
+                };
+            
+            
 exports.Brawler={'width':3,
                 'height':6,
                 'id':'Brawler',
@@ -142,19 +174,19 @@ exports.Brawler={'width':3,
                 'power':150,
                 'max_steer_angle':16,
                 'max_speed':120,
-                'health':160,
+                'health':180,
                 
                 'power_upgrade':8,
                 'speed_upgrade':5,
-                'armor_upgrade':10,
+                'armor_upgrade':15,
                 'upgrade_price':600,
                 
-                'speed_stars':2,
+                'speed_stars':3,
                 'armor_stars':4,
                 'acceleration_stars':1,
                 'handling_stars':1,
                 
-                'price':2400,
+                'price':6000,
                 
                 'main_weapon':'MissileLauncher',
                 'wheels':[{'x':-1.25, 'y':-2, 'width':0.6, 'length':1.2, 'revolving':true, 'powered':true, 'filename':'big_wheel.png'},

@@ -182,7 +182,7 @@ var Car = exports.Car = function(pars){
     this.car_type=pars.type;
     this.descr=car_descriptions[this.car_type];
     this.next_buff_id=1;
-    this.buffs={};
+    this.buffs=[];
 
     //STATE
     this.max_health=pars.health+pars.armor_upgrades * this.descr.armor_upgrade;
@@ -277,6 +277,31 @@ var Car = exports.Car = function(pars){
         if(this.front_weapon)this.front_weapon.reload();
         if(this.rear_weapon)this.rear_weapon.reload();
         if(this.util)this.util.reload();
+    };
+    
+    this.getPower=function(){
+        var power=this.power;
+        this.buffs.forEach(function(buff){
+            if(buff.effect==buffs.EFFECT_ENGINE){          
+                power+=buff.value;
+            }
+        }, this);
+        
+        if(this.hasEffect(buffs.EFFECT_NO_GRIP)){
+            power=power*0.3;
+        }
+        
+        return parseInt(power);
+    };
+    
+    this.getMaxSpeed=function(){
+        var max_speed=this.max_speed;
+        this.buffs.forEach(function(buff){
+            if(buff.effect==buffs.EFFECT_ENGINE){
+                max_speed+=buff.value;
+            }
+        }, this);
+        return parseInt(max_speed);
     };
 
     this.updateCheckpoint=function(){
@@ -407,8 +432,8 @@ var Car = exports.Car = function(pars){
     };
     
     this.hasEffect=function(effect){
-        for(var id in this.buffs){
-            if(this.buffs[id].effect==effect){
+        for(var i=0;i<this.buffs.length;i++){
+            if(this.buffs[i].effect==effect){
                 return true;
             }
         }
@@ -416,15 +441,11 @@ var Car = exports.Car = function(pars){
     };
     
     this.clearBuffs=function(){
-        this.buffs={};  
+        this.buffs.forEach(function(buff){
+            this.world.destroyObj(buff.id);
+        }, this);
     };
     
-    this.updateBuffs=function(msDuration){
-        for(var id in this.buffs){
-            this.buffs[id]._update(msDuration);
-        }
-    };
-
     this.getSpeedKMH=function(){
         var velocity=arr(this.body.GetLinearVelocity());
         var len=vectors.len(velocity);
@@ -525,7 +546,6 @@ var Car = exports.Car = function(pars){
 
     this.updateAlive=function(msDuration){
         this.updateCheckpoint();
-        this.updateBuffs(msDuration);
         var steer=this.steer;
         var acceleration=this.accelerate;
         var speed=this.getSpeedKMH();
@@ -565,7 +585,7 @@ var Car = exports.Car = function(pars){
         
         //apply engine force
         var base_vect;
-        if((acceleration==ACC_ACCELERATE) && (speed < max_speed)) base_vect=[0, -1];
+        if((acceleration==ACC_ACCELERATE) && (speed < this.getMaxSpeed())) base_vect=[0, -1];
         else if(acceleration==ACC_BRAKE){
             //braking, lotsa force
             if(this.getLocalVelocity()[1]<0) base_vect=[0, 1.2];
@@ -573,7 +593,7 @@ var Car = exports.Car = function(pars){
             else base_vect=[0, 0.7];
         }
         else base_vect=[0, 0];
-        var fvect=vectors.multiply(base_vect, this.power);
+        var fvect=vectors.multiply(base_vect, this.getPower());
         this.getPoweredWheels().forEach(function(wheel){
            var position=wheel.body.GetWorldCenter();
            wheel.body.ApplyForce(wheel.body.GetWorldVector(vec(fvect)), position);
@@ -587,17 +607,17 @@ var Car = exports.Car = function(pars){
         //fire weapons
         if(this.front_weapon){
             this.front_weapon.update(msDuration);
-            if(this.fire_front_weapon)this.front_weapon.fire();
+            if(this.fire_front_weapon)this.front_weapon._fire();
         }
 
         if(this.rear_weapon){
             this.rear_weapon.update(msDuration);
-            if(this.fire_rear_weapon)this.rear_weapon.fire();
+            if(this.fire_rear_weapon)this.rear_weapon._fire();
         }
         
         if(this.util){
             this.util.update(msDuration);
-            if(this.fire_util)this.util.fire();
+            if(this.fire_util)this.util._fire();
         }
 
         //spawn smoke if health <40

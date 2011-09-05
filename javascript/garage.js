@@ -305,7 +305,7 @@ var WeaponInfoBuySpace=function(pars){
                              'text':'0',
                              'font':ui.getFont(skin.garage.weapon_label_font)});
     
-    new GUI.Image({'parent':this,
+    this.damage_icon=new GUI.Image({'parent':this,
                   'position':[85, 8],
                   'image':renderer.cache['static']['ico_damage.png']});
     
@@ -429,7 +429,15 @@ WeaponInfo.prototype.setItem=function(item){
         this.price_label.show();
         this.price_label.setText(descr.price+' '+EURO_SYMBOL);
         this.buy_s.ammo_label.setText(String(descr.ammo_capacity));
-        this.buy_s.damage_label.setText(String(descr.damage));
+        
+        if(descr.damage_upgrade){
+            this.buy_s.damage_label.show();
+            this.buy_s.damage_icon.show();
+            this.buy_s.damage_label.setText(String(descr.damage));
+        }else{
+            this.buy_s.damage_label.hide();
+            this.buy_s.damage_icon.hide();
+        }
     }
     else if(item.type=='equipment_slot'){
         this.buy_s.hide();       
@@ -438,8 +446,12 @@ WeaponInfo.prototype.setItem=function(item){
             descr=weapon_descriptions[this.scene.player_data.car[item.slot_type].type];
             this.ammo_upgrade.show();
             this.ammo_upgrade.setDescr(this.scene.player_data.car[item.slot_type]);
-            this.damage_upgrade.show();
-            this.damage_upgrade.setDescr(this.scene.player_data.car[item.slot_type]);
+            if(descr.damage_upgrade){
+                this.damage_upgrade.show();
+                this.damage_upgrade.setDescr(this.scene.player_data.car[item.slot_type]);
+            }else{
+                this.damage_upgrade.hide();
+            }
         }else{
             this.ammo_upgrade.hide();
             this.damage_upgrade.hide();
@@ -795,10 +807,10 @@ BuyCarScene.prototype.paint=function(){
 BuyCarScene.prototype.buy=function(){
     if(this.carinfo.descr){
         if(this.credit(this.carinfo.descr.price)){
-            this.player_data.car=combatracer.getDefCarDescr(this.carinfo.descr.id);
-            this.player_data.car.front_weapon=null;
-            this.player_data.car.rear_weapon=null;
-            this.player_data.car.util=null;
+            this.player_data.car.type=this.carinfo.descr.id;
+            this.player_data.car.acc_upgrades=0;
+            this.player_data.car.speed_upgrades=0;
+            this.player_data.car.armor_upgrades=0;
             this.game.showGarage(this.player_data);
         }
     };

@@ -9,6 +9,7 @@ var GUI = require('./gamejs-gui');
 var vec=utils.vec;
 var arr=utils.arr;
 var ui=require('./ui');
+var leagues=require('./leagues');
 
 var vectors = gamejs.utils.vectors;
 var math = gamejs.utils.math;
@@ -331,15 +332,17 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(level, ai_tes
     if(!this.test_ai) this.controllers.push(new controllers.PlayerCarController(this.player_car));
     else this.controllers.push(new controllers.AIController(this.player_car, this.world, this));
 
+
+    var league=leagues[this.game.player.singleplayer.league];
     if(!this.test_ai){
     //BUILD AI CARS
         var aicar;
         for(i=1;i<4;i++){
             if(this.world.start_positions[i+1]){
-                var descr=bots.generateBotCarDescr();
+                var descr=bots[league.bots[i-1]];
                 var evdescr=cars.carEventFromDescription([this.world.start_positions[i+1].x, this.world.start_positions[i+1].y],this.world.start_positions[i+1].angle,
                                                             descr,
-                                                            bots.names[i],
+                                                            descr.name,
                                                             false);
                 aicar=this.world.event('create', evdescr);
                 this.controllers.push(new controllers.AIController(aicar, this.world, this));
@@ -372,7 +375,8 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(level, ai_tes
 
         //if we reached max laps, end race
         if(this.player_car.lap > this.max_laps){        
-            this.game.showGameOver(this.genScoreTable(), this.player_car.getRacePosition()==1, 'singleplayer');
+            this.game.showSPGameOver(this.genScoreTable(), this.player_car.getRacePosition()==1, this);
+            return;
         };
     };
 
@@ -437,7 +441,7 @@ function SinglePlayerDialog(pars){
     
     this.quitbtn.onClick(function(){
         this.close();      
-        this.scene.game.showGameOver(this.scene.genScoreTable());
+        this.scene.game.showSPGameOver(this.scene.genScoreTable(), false, this.scene);
     }, this);
     
     

@@ -18,3 +18,84 @@ exports.generateBotCarDescr=function(){
     
     return retv;
 };
+
+//LEAGUE 1
+
+exports.CatLady={'type':'Sandbug',
+                    'name':'Cat Lady',
+                    'front_weapon':{'type':'Machinegun',
+                                    'ammo_upgrades':0,
+                                    'damage_upgrades':0},
+                    'util':null,
+                    'rear_weapon':{'type':'MineLauncher',
+                                    'ammo_upgrades':0,
+                                    'damage_upgrades':0},
+                    'acc_upgrades':0,
+                    'speed_upgrades':0,
+                    'armor_upgrades':0};
+                    
+                    
+exports.Bob={'type':'Hillbilly',
+                    'name':'Bob',
+                    'front_weapon':{'type':'MissileLauncher',
+                                    'ammo_upgrades':1,
+                                    'damage_upgrades':1},
+                    'util':null,
+                    'rear_weapon':null,
+                    'acc_upgrades':2,
+                    'speed_upgrades':0,
+                    'armor_upgrades':0};
+                    
+                    
+exports.Dominator={'type':'Sandbug',
+                      'name':'The Dominator',
+                      'front_weapon':{'type':'Machinegun',
+                                    'ammo_upgrades':3,
+                                    'damage_upgrades':0},
+                    'util':{'type':'Shockwave',
+                                    'ammo_upgrades':2,
+                                    'damage_upgrades':0},
+                    'rear_weapon':null,
+                    'acc_upgrades':0,
+                    'speed_upgrades':0,
+                    'armor_upgrades':2};
+                    
+//LEAGUE 2             
+exports.HotShot={'type':'Racer',
+                    'name':'HotShot',
+                    'front_weapon':{'type':'Machinegun',
+                                    'ammo_upgrades':5,
+                                    'damage_upgrades':3},
+                    'util':{'type':'Shockwave',
+                                    'ammo_upgrades':4,
+                                    'damage_upgrades':0},
+                    'rear_weapon':null,
+                    'acc_upgrades':0,
+                    'speed_upgrades':0,
+                    'armor_upgrades':0};
+                    
+                    
+exports.TheDude={'type':'Hillbilly',
+                    'name':'The Dude',
+                    'front_weapon':{'type':'HomingMissiles',
+                                    'ammo_upgrades':1,
+                                    'damage_upgrades':1},
+                    'util':null,
+                    'rear_weapon':null,
+                    'acc_upgrades':2,
+                    'speed_upgrades':2,
+                    'armor_upgrades':0};
+                    
+                    
+exports.Ratman={'type':'Bandit',
+                      'name':'Ratman',
+                      'front_weapon':{'type':'MissileLauncher',
+                                    'ammo_upgrades':2,
+                                    'damage_upgrades':0},
+                    'util':{'type':'RepairKit',
+                                    'ammo_upgrades':2,
+                                    'damage_upgrades':0},
+                    'rear_weapon':null,
+                    'acc_upgrades':0,
+                    'speed_upgrades':2,
+                    'armor_upgrades':2};
