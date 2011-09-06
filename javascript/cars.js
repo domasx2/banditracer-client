@@ -109,7 +109,6 @@ var Wheel = exports.Wheel = function(pars){
                         [(a1[0]+p[0])*ps, (a1[1]+p[1])*ps],
                         [(a2[0]+p[0])*ps, (a2[1]+p[1])*ps],
                         [(a2[0]+pp[0])*ps, (a2[1]+pp[1])*ps]];
-            console.log(points);
             gamejs.draw.polygon(renderer.background, '#282828', points)
       };
        

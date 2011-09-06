@@ -56,6 +56,7 @@ var Projectile=exports.Projectile=function(pars){
     fixdef.restitution=1; //positively bouncy!
     fixdef.density=0.00001;
     fixdef.friction=0;
+    fixdef.isSensor=pars.sensor==undefined ? false : pars.sensor;
    // fixdef.isSensor=true;
     this.body.CreateFixture(fixdef);
 
@@ -107,7 +108,10 @@ var Projectile=exports.Projectile=function(pars){
     };
 
     this.update=function(msDuration){
-        //this.setSpeed(this.speed);
+        var pos=arr(this.body.GetPosition());
+        if((pos[0]<0) || (pos[1]<0) || (pos[0]>this.car.world.width) || (pos[1] > this.car.world.height)){
+            this.car.world.event('destroy', this.id);
+        }
     };
 
     return this;
@@ -359,6 +363,51 @@ var Bullet=exports.Bullet=function(pars){
 
 gamejs.utils.objects.extend(Bullet, Projectile);
 
+
+
+var PlasmaProjectile=exports.PlasmaProjectile=function(pars){
+    /*
+    pars:
+    car   - car obj
+    position - [x, y]
+    angle    - degrees
+    */
+    pars.width=0.6;
+    pars.height=2.5;
+    pars.sensor=true;
+    Bullet.superConstructor.apply(this, [pars]);
+
+    this.impact=function(obj, cpoint, direction){
+        if((obj.type=='car' || obj.type=='prop')){     
+            if(obj.type=='car'){
+                obj.hit(this.damage, this.car);
+            }
+            if(this.onimpact) this.onimpact(obj);
+        }
+    };
+
+    this.onimpact=function(obj){     
+        var pos=arr(this.body.GetPosition());
+        this.car.world.spawnAnimation('small_explosion', pos);
+        if(obj.type=='car'){
+            this.car.world.playSound('bullet_impact_metal.wav', pos);
+        }else if(obj.type=='prop'){
+            this.car.world.playSound('bullet_impact_soft.wav', pos);
+        }
+    };
+
+    this.draw=function(renderer, msDuration){
+        if(!this.spent) renderer.drawCar('plasma_projectile.png', arr(this.body.GetPosition()), degrees(this.body.GetAngle()));
+    };
+
+    this.destroy=function(){
+        this.car.world.destroyObj(this.id);
+    };
+    return this;
+};
+
+gamejs.utils.objects.extend(Bullet, Projectile);
+
 var Weapon=exports.Weapon=function(pars){
     /*
     pars:
@@ -451,6 +500,39 @@ var Machinegun=exports.Machinegun=function(pars){
 };
 
 gamejs.utils.objects.extend(Machinegun, Weapon);
+
+
+var PlasmaCannon=exports.PlasmaCannon=function(pars){
+    /*
+    pars:
+    car - car object this weapon belongs to
+    */
+    this.type='plasmacannon';
+    PlasmaCannon.superConstructor.apply(this, [pars]);
+
+    this.fire=function(){
+        var pos = arr(this.car.body.GetWorldPoint(vec(-0.6, -(this.car.height/2+3))));
+        this.car.world.event('create', {'type':'weapon', 'obj_name':this.projectile, 'pars':{'position':pos,
+                                                                                             'damage':this.damage,
+                                                                                             'speed':this.speed,
+                                                                                            'angle':this.car.getAngle(),
+                                                                                            'car':this.car.id}});
+        if(this.ammo){
+            var pos = arr(this.car.body.GetWorldPoint(vec(0.6, -(this.car.height/2+3))));
+            this.car.world.event('create', {'type':'weapon', 'obj_name':this.projectile, 'pars':{'position':pos,
+                                                                                             'damage':this.damage,
+                                                                                             'speed':this.speed,
+                                                                                            'angle':this.car.getAngle(),
+                                                                                           'car':this.car.id}});
+            this.ammo--;
+        }
+        this.ofst_x=this.ofst_x* -1;       
+    };
+
+    return this;
+};
+
+gamejs.utils.objects.extend(PlasmaCannon, Weapon);
 
 var NOS=exports.NOS=function(pars){
     NOS.superConstructor.apply(this, [pars]);
