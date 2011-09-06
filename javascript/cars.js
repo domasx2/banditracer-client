@@ -44,6 +44,7 @@ var Wheel = exports.Wheel = function(pars){
     this.powered=pars.powered;
     this.filename=pars.filename;
     this.type='wheel';
+    this.prev_position=null;
     
     //initialize body
     var def=new box2d.b2BodyDef();
@@ -92,6 +93,27 @@ var Wheel = exports.Wheel = function(pars){
 
     this.draw=function(renderer){
        renderer.drawCar(this.filename, arr(this.car.body.GetWorldPoint(vec([this.x, this.y]))), degrees(this.body.GetAngle()));
+       
+       //if car has no grip, draw skidmarks
+      // if(this.car.hasEffect(buffs.EFFECT_NO_GRIP)&&this.prev_position){
+        if(gamejs.utils.vectors.angle(arr(this.body.GetLinearVelocity()), arr(this.body.GetWorldVector(vec([0, -1]))))>gamejs.utils.math.radians(20)){
+            var ps=this.car.world.phys_scale;
+            var pp=this.prev_position;
+            var p=arr(this.body.GetPosition());
+            var a1=[-this.width/2, 0];
+            var a2=[this.width/2, 0];
+            var angle=this.body.GetAngle();
+            a1=gamejs.utils.vectors.rotate(a1, angle);
+            a2=gamejs.utils.vectors.rotate(a2, angle);
+            var points=[[(a1[0]+pp[0])*ps, (a1[1]+pp[1])*ps],
+                        [(a1[0]+p[0])*ps, (a1[1]+p[1])*ps],
+                        [(a2[0]+p[0])*ps, (a2[1]+p[1])*ps],
+                        [(a2[0]+pp[0])*ps, (a2[1]+pp[1])*ps]];
+            console.log(points);
+            gamejs.draw.polygon(renderer.background, '#282828', points)
+      };
+       
+       this.prev_position=arr(this.body.GetPosition());
     };
 
     this.getLocalVelocity=function(){

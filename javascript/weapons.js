@@ -476,7 +476,7 @@ var ShockwaveGenerator=exports.ShockwaveGenerator=function(pars){
                 var d=vectors.distance(tp, cp);
                 if(d<=12){
                     car.hit(this.damage, this.car);
-                    this.car.world.createBuff('SlipDebuff', this.car, {'duration':500});
+                    this.car.world.createBuff('SlipDebuff', car, {'duration':500});
                     var fvect=vectors.unit(vectors.substract(cp, tp));
                     fvect=vectors.multiply(fvect, 400);
                     car.body.ApplyImpulse(vec(fvect), car.body.GetPosition());
