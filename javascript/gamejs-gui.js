@@ -312,6 +312,15 @@ View.prototype.getRect=function(){
 };
 
 /**
+ *right align element to this x coordinate
+ *@function
+ *@param {Number} x xcoordinate
+ */
+View.prototype.rightAlign=function(x){
+    this.move([x-this.getSize()[0], this.getPosition()[1]]);
+};
+
+/**
  *add child to this view
  *@param {View} child view to add as a child of this view
  */

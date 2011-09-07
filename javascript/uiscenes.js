@@ -151,18 +151,36 @@ var SPGameOverScene=exports.SPGameOverScene=function(table, win, scene){
     new GUI.Label({'position':[510, 240],
                   'font':ui.getFont('alias'),
                   'parent':this.container,
-                  'text':'1st place: '+reward+EURO_SYMBOL});
+                  'text':'1st place:'});
+    
+    var lbl= new GUI.Label({'position':[510, 240],
+                  'font':ui.getFont('alias'),
+                  'parent':this.container,
+                  'text':String(reward)+EURO_SYMBOL});
+    lbl.rightAlign(730);
     
     new GUI.Label({'position':[510, 270],
                  'font':ui.getFont('alias'),
                  'parent':this.container,
-                 'text':'Kills: '+scene.player_car.kills*100+EURO_SYMBOL});
+                 'text':'Kills:'});
+    
+    lbl= new GUI.Label({'position':[510, 270],
+                  'font':ui.getFont('alias'),
+                  'parent':this.container,
+                  'text':String(scene.player_car.kills*100)+EURO_SYMBOL});
+    lbl.rightAlign(730);
     
     var total=reward+scene.player_car.kills*100;
     new GUI.Label({'position':[510, 300],
                  'font':ui.getFont('alias'),
                  'parent':this.container,
-                 'text':'TOTAL: '+total+EURO_SYMBOL});
+                 'text':'TOTAL:'});
+    
+    lbl= new GUI.Label({'position':[510, 300],
+                  'font':ui.getFont('alias'),
+                  'parent':this.container,
+                  'text':String(total)+EURO_SYMBOL});
+    lbl.rightAlign(730);
     
     combatracer.game.player.singleplayer.balance+=total;
     if(win){

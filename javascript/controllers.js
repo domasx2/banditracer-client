@@ -83,22 +83,10 @@ exports.AIController=function(car, world, scene){
             else this.car.steer=STEER_LEFT;
         }else this.car.steer=STEER_NONE;
 
-        //try and fire machinegun if something is in front
-        if(this.car.front_weapon && ( this.car.front_weapon.type=='machinegun' || this.car.front_weapon.type=='missilelauncher')){
-            this.car.fire_front_weapon=false;
-            var i, c;
-            for(i=0;i<this.world.objects['car'].length;i++){
-                c=this.world.objects['car'][i];
-                if(c!=this.car){
-                    len=vectors.distance(arr(this.car.body.GetPosition()), arr(c.body.GetPosition()));
-                    angle=degrees(vectors.angle([0, -1], arr(this.car.body.GetLocalPoint(c.body.GetPosition()))));
-                    if(len<50 && angle<15){
-                        this.car.fire_front_weapon=true;
-                        break;
-                    }
-                }
-            }
-        }
+        //fire weapons if needed
+        (['front_weapon', 'util', 'rear_weapon']).forEach(function(wtype){
+            if(this.car[wtype]) this.car['fire_'+wtype]=this.car[wtype].AI();
+        }, this);
     }
 
     return this;

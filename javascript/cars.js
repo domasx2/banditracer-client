@@ -322,7 +322,7 @@ var Car = exports.Car = function(pars){
                 max_speed+=buff.value;
             }
         }, this);
-        return parseInt(max_speed);
+        return parseInt(max_speed+this.mod_speed);
     };
 
     this.updateCheckpoint=function(){
@@ -571,7 +571,8 @@ var Car = exports.Car = function(pars){
         var acceleration=this.accelerate;
         var speed=this.getSpeedKMH();
         var local_velocity=arr(this.body.GetLocalVector(this.body.GetLinearVelocity()));
-        var max_speed=(local_velocity[1]>0 ? 0.5*this.max_speed : this.max_speed)+this.mod_speed;
+        var max_speed=this.getMaxSpeed();
+        max_speed=(local_velocity[1]>0 ? 0.5*max_speed : max_speed);
 
         //kill sideways velocity
         if(!this.hasEffect(buffs.EFFECT_NO_GRIP)){
@@ -606,7 +607,7 @@ var Car = exports.Car = function(pars){
         
         //apply engine force
         var base_vect;
-        if((acceleration==ACC_ACCELERATE) && (speed < this.getMaxSpeed())) base_vect=[0, -1];
+        if((acceleration==ACC_ACCELERATE) && (speed < max_speed)) base_vect=[0, -1];
         else if(acceleration==ACC_BRAKE){
             //braking, lotsa force
             if(this.getLocalVelocity()[1]<0) base_vect=[0, 1.2];

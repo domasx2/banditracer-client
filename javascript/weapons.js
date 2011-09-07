@@ -472,6 +472,12 @@ var RepairKit=exports.RepairKit=function(pars){
     Machinegun.superConstructor.apply(this, [pars])
     this.type='repairkit';
     
+    this.AI=function(){
+        if(this.car.health<=this.car.max_health/2){
+            return true;
+        }
+        return false;
+    }
     this.fire=function(){
         if(this.car.health<this.car.max_health){
             this.car.hit(-this.damage, this.car);
@@ -490,7 +496,7 @@ var Machinegun=exports.Machinegun=function(pars){
     this.type='machinegun';
     Machinegun.superConstructor.apply(this, [pars]);
     this.ofst_x=-0.5;
-
+    this.AI=fireAtFrontTargets;
     this.getFirePos=function(){
         this.ofst_x=this.ofst_x* -1;
         return arr(this.car.body.GetWorldPoint(vec(this.ofst_x, -(this.car.height/2+0.8))));    
@@ -509,6 +515,8 @@ var PlasmaCannon=exports.PlasmaCannon=function(pars){
     */
     this.type='plasmacannon';
     PlasmaCannon.superConstructor.apply(this, [pars]);
+
+    this.AI=fireAtFrontTargets;
 
     this.fire=function(){
         var pos = arr(this.car.body.GetWorldPoint(vec(-0.6, -(this.car.height/2+3))));
@@ -539,6 +547,13 @@ var NOS=exports.NOS=function(pars){
     this.duration=pars.duration;
     this.type='nos';
     
+    this.AI=function(){
+        if(this.car.getSpeedKMH()>this.car.getMaxSpeed()-10){
+            return true;
+        }
+        return false;
+    }
+    
     this.fire=function(){
         this.car.world.createBuff('EngineBuff', this.car, {'duration':this.duration,
                                                            'value':this.damage});
@@ -550,6 +565,9 @@ gamejs.utils.objects.extend(NOS, Weapon);
 var ShockwaveGenerator=exports.ShockwaveGenerator=function(pars){
     ShockwaveGenerator.superConstructor.apply(this, [pars]);
     this.type='shockwave';
+    
+    this.AI=fireAtNearbyTargets;
+    
     this.fire=function(){
         this.car.world.objects.car.forEach(function(car){
             if(car.id!=this.car.id){
@@ -582,6 +600,8 @@ var MineLauncher=exports.MineLauncher=function(pars){
 
     MineLauncher.superConstructor.apply(this, [pars]);
     
+    this.AI=fireAtRearTargets;
+    
     this.getFirePos=function(){
         return arr(this.car.body.GetWorldPoint(vec(0, (this.car.height/2+3))));  
     };
@@ -592,6 +612,8 @@ gamejs.utils.objects.extend(MineLauncher, Weapon);
 var MissileLauncher=exports.MissileLauncher=function(pars){
     this.type='missilelauncher';
     MineLauncher.superConstructor.apply(this, [pars]);
+    
+    this.AI=fireAtFrontTargets;
     
     this.getFirePos=function(){
         return arr(this.car.body.GetWorldPoint(vec(0, -(this.car.height/2+3))));    
@@ -607,7 +629,7 @@ gamejs.utils.objects.extend(MissileLauncher, Weapon);
 var Oil=exports.Oil=function(pars){
     this.type='oil';
     Oil.superConstructor.apply(this, [pars]);
-    
+    this.AI=fireAtRearTargets;
     this.getFirePos=function(){
         return arr(this.car.body.GetWorldPoint(vec(0, (this.car.height/2+5))));    
     };
@@ -617,3 +639,48 @@ var Oil=exports.Oil=function(pars){
 
 
 gamejs.utils.objects.extend(Oil, Weapon);
+
+var fireAtNearbyTargets=function(){
+    var i, c;
+    for(i=0;i<this.car.world.objects['car'].length;i++){
+        c=this.car.world.objects['car'][i];
+        if(c.id!=this.car.id){
+            len=vectors.distance(arr(this.car.body.GetPosition()), arr(c.body.GetPosition()));
+            if(len<=10){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+var fireAtRearTargets=function(){
+    var i, c;
+    for(i=0;i<this.car.world.objects['car'].length;i++){
+        c=this.car.world.objects['car'][i];
+        if(c.id!=this.car.id){
+            len=vectors.distance(arr(this.car.body.GetPosition()), arr(c.body.GetPosition()));
+            angle=degrees(vectors.angle([0, 1], arr(this.car.body.GetLocalPoint(c.body.GetPosition()))));
+            if(len<20 && angle<15){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+var fireAtFrontTargets=function(){
+    var i, c;
+    for(i=0;i<this.car.world.objects['car'].length;i++){
+        c=this.car.world.objects['car'][i];
+        if(c.id!=this.car.id){
+            len=vectors.distance(arr(this.car.body.GetPosition()), arr(c.body.GetPosition()));
+            angle=degrees(vectors.angle([0, -1], arr(this.car.body.GetLocalPoint(c.body.GetPosition()))));
+            if(len<50 && angle<15){
+                return true;
+            }
+        }
+    }
+    return false;
+    
+}
