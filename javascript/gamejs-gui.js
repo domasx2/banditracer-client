@@ -644,7 +644,7 @@ var Label=exports.Label=function(pars){
     pars.size=[1, 1];
     Label.superConstructor.apply(this, [pars]);
     if(!pars.text) throw "Label: label text must be provided!"
-    this.setText(pars.text);
+    this.setText(String(pars.text));
     this.type='label'; 
 };
 

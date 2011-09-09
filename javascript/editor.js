@@ -30,6 +30,7 @@ var getLevelTemplate=function(size){
             'bgtile':'sand.png',
             'props':[],
             'decals':[],
+            'laps':3,
             'ai_waypoints':[],
             'checkpoints':[],
             'start_positions':[]};
@@ -62,6 +63,7 @@ function structifyLevel(level){
     retv.size=level.size;
     retv.bgtile=level.bgtile;
     retv.title=level.title;
+    retv.laps=level.laps;
     retv.dict={};
     var revdict={};
     var i=1;
@@ -284,12 +286,12 @@ gamejs.utils.objects.extend(MarkerView, GUI.View)
 var PropertiesView=exports.PropertiesView=function(pars){
     PropertiesView.superConstructor.apply(this, [pars]);
     this.scene=pars.scene;
-    var lbl=new GUI.Label({'parent':this,
+    var lbl=new GUI.Label({'parent':this.scw,
                     'font':ui.getFont('16_33'),
                     'text':'Title',
                     'position':[100, 2]});
     
-    this.title=new GUI.TextInput({'parent':this,
+    this.title=new GUI.TextInput({'parent':this.scw,
                                  'font':ui.getFont('16_33'),
                                  'text':this.scene.level.title,
                                  'position':[40, 50],
@@ -297,18 +299,18 @@ var PropertiesView=exports.PropertiesView=function(pars){
     
     this.title.on(GUI.EVT_CHANGE, this.titleChange, this);
     
-    new GUI.Label({'parent':this,
+    new GUI.Label({'parent':this.scw,
                     'font':ui.getFont('16_33'),
                     'text':'Width, PX',
-                    'position':[280, 2]});
+                    'position':[260, 2]});
     
-    this.widthlbl=new GUI.Label({'parent':this,
+    this.widthlbl=new GUI.Label({'parent':this.scw,
                                 'font':ui.getFont('16_33'),
                                 'text':String(this.scene.level.size[0]),
-                                'position':[280, 50]});
+                                'position':[260, 50]});
     
-    this.width_up_btn=new ui.IncrementButton({'parent':this,
-                                          'position':[380, 20],
+    this.width_up_btn=new ui.IncrementButton({'parent':this.scw,
+                                          'position':[350, 20],
                                           'size':[40, 40],
                                           'direction':'up'});
     
@@ -317,8 +319,8 @@ var PropertiesView=exports.PropertiesView=function(pars){
         this.scene.resizeLevelView();
     }, this);
     
-    this.width_down_btn=new ui.IncrementButton({'parent':this,
-                                          'position':[380, 70],
+    this.width_down_btn=new ui.IncrementButton({'parent':this.scw,
+                                          'position':[350, 70],
                                           'size':[40, 40],
                                           'direction':'down'});
     
@@ -328,18 +330,18 @@ var PropertiesView=exports.PropertiesView=function(pars){
     }, this);
     
     
-    new GUI.Label({'parent':this,
+    new GUI.Label({'parent':this.scw,
                     'font':ui.getFont('16_33'),
                     'text':'Height, PX',
-                    'position':[460, 2]});
+                    'position':[420, 2]});
     
-    this.heightlbl=new GUI.Label({'parent':this,
+    this.heightlbl=new GUI.Label({'parent':this.scw,
                                 'font':ui.getFont('16_33'),
                                 'text':String(this.scene.level.size[1]),
-                                'position':[460, 50]});
+                                'position':[420, 50]});
     
-    this.height_up_btn=new ui.IncrementButton({'parent':this,
-                                          'position':[560, 20],
+    this.height_up_btn=new ui.IncrementButton({'parent':this.scw,
+                                          'position':[520, 20],
                                           'size':[40, 40],
                                           'direction':'up'});
     
@@ -348,8 +350,8 @@ var PropertiesView=exports.PropertiesView=function(pars){
         this.scene.resizeLevelView();
     }, this);
     
-    this.height_down_btn=new ui.IncrementButton({'parent':this,
-                                          'position':[560, 70],
+    this.height_down_btn=new ui.IncrementButton({'parent':this.scw,
+                                          'position':[520, 70],
                                           'size':[40, 40],
                                           'direction':'down'});
     this.height_down_btn.onClick(function(){
@@ -357,8 +359,41 @@ var PropertiesView=exports.PropertiesView=function(pars){
         this.scene.resizeLevelView();
     }, this);
     
+    
+    new GUI.Label({'parent':this.scw,
+                    'font':ui.getFont('16_33'),
+                    'text':'Laps',
+                    'position':[590, 2]});
+    
+    this.lapslbl=new GUI.Label({'parent':this.scw,
+                                'font':ui.getFont('16_33'),
+                                'text':String(this.scene.level.laps),
+                                'position':[600, 50]});
+    
+    this.laps_up_btn=new ui.IncrementButton({'parent':this.scw,
+                                          'position':[700, 20],
+                                          'size':[40, 40],
+                                          'direction':'up'});
+    
+    this.laps_up_btn.onClick(function(){
+        this.scene.level.laps=Math.max(1, this.scene.level.laps+1);
+        this.lapslbl.setText(String(this.scene.level.laps));
+    }, this);
+    
+    this.laps_down_btn=new ui.IncrementButton({'parent':this.scw,
+                                          'position':[700, 70],
+                                          'size':[40, 40],
+                                          'direction':'down'});
+    this.laps_down_btn.onClick(function(){
+        this.scene.level.laps=Math.max(1, this.scene.level.laps-1);
+        this.lapslbl.setText(String(this.scene.level.laps));
+    }, this);
+    
+    this.scw.autoSetScrollableArea();
+    
+    
 }
-gamejs.utils.objects.extend(PropertiesView, GUI.View)
+gamejs.utils.objects.extend(PropertiesView, ToolView)
 
 PropertiesView.prototype.titleChange=function(event){
     this.scene.level.title=event.value;  
@@ -1399,7 +1434,9 @@ EditorScene.prototype.loadLevel=function(level){
     this.level=getLevelTemplate(level.size);
     this.level.bgtile=level.bgtile;
     this.level.title=level.title;
+    if(level.laps) this.level.laps=level.laps;
     this.properties_view.title.setText(level.title);
+    this.properties_view.lapslbl.setText(String(this.level.laps));
     this.resizeLevelView();
     this.level_view.children=[];
     

@@ -27,6 +27,7 @@ exports.fonts={'hud':['30px maass', 'red'],         //in game hud
                'alias':['23px maass', '#333333'],  //ingame multiplayer player alias
                '16_33':['16px maass', '#333333'],
                '13_1a':['13px maass', '#1A1A1A'],
+               '13_green':['13px maass', '#00BC12'],
                'alias_label':['40px maass', '#FFFFFF'],
                'button':['25px maass', '#000'],
                'button2':['30px maass', '#333333'],

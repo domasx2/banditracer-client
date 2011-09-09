@@ -25,6 +25,10 @@ exports.AIController=function(car, world, scene){
     this.car=car;
     this.world=world;
     this.cur_wp=1;
+    this.ceasfire=false;
+    this.ceasfire_cur_cooldown=0;
+    this.ceasfire_cooldown=1000;
+    
     this.stationary=0; //how many seconds is this car stationary?
 
     this.update=function(keys_down, ms){
@@ -83,9 +87,19 @@ exports.AIController=function(car, world, scene){
             else this.car.steer=STEER_LEFT;
         }else this.car.steer=STEER_NONE;
 
-        //fire weapons if needed
+        
+        
+        //is this bot shooting?
+        if(this.ceasfire_cur_cooldown<=0){
+            this.ceasfire=Math.random()>0.5 ? true : false;
+            this.ceasfire_cur_cooldown=this.ceasfire_cooldown;
+        }else{
+            this.ceasfire_cur_cooldown-=ms;
+        }
+        
+        //fire weapons if needed        
         (['front_weapon', 'util', 'rear_weapon']).forEach(function(wtype){
-            if(this.car[wtype]) this.car['fire_'+wtype]=this.car[wtype].AI();
+            if(this.car[wtype]) this.car['fire_'+wtype]=this.ceasfire ? false : this.car[wtype].AI();
         }, this);
     }
 

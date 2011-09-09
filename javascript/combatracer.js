@@ -15,7 +15,7 @@ var garage=require('./garage');
 
 var getDefCarDescr=exports.getDefCarDescr=function(car){
     return {'type':car ? car : 'Sandbug',
-            'front_weapon':{'type':'HomingMissiles',
+            'front_weapon':{'type':'Machinegun',
                             'ammo_upgrades':0,
                             'damage_upgrades':0},
             'util':null,
@@ -203,10 +203,11 @@ var Game=exports.Game=function(){
     if(settings.get('SOUND')) sounds.init();
     ui.init();
     this.socket=null;
+    this.tried_loading=false;
     this.player={'alias':'Player',
                  'uid':null,
                  'singleplayer':{
-                    'balance':10000,
+                    'balance':2000,
                     'car':getDefCarDescr(),
                     'league':0,
                     'completed_tracks':[]
@@ -235,6 +236,10 @@ var Game=exports.Game=function(){
 
     this.showTitle=function(){
        this.director.replaceScene(this.title_scene);
+    };
+    
+    this.showCongratulations=function(){
+        this.director.replaceScene(new uiscenes.CongratulationsScene());
     };
 
     this.createLobby=function(){
@@ -303,5 +308,32 @@ var Game=exports.Game=function(){
          this.return_to=return_to;
          if(splash) this.director.replaceScene(new uiscenes.ControlsSplash(this, this.cache, this.level_scene));
          else this.director.replaceScene(this.level_scene);
+    };
+    
+    this.haveSave=function(){
+        if(utils.supports_html5_storage()){
+            if(localStorage.getItem('banditracer_save')) return true;
+        }
+        return false;
+    };
+    
+    this.load=function(){
+        if(utils.supports_html5_storage() && localStorage.getItem('banditracer_save')){
+            var data=JSON.parse(localStorage.getItem('banditracer_save'));
+            this.player.alias=data.alias;
+            this.player.singleplayer=data.singleplayer;
+            return true;
+        }
+        return false;
+    };
+    
+    this.save=function(){
+        if(utils.supports_html5_storage()){
+            var data=JSON.stringify({'alias':this.player.alias,
+                             'singleplayer':this.player.singleplayer});
+            localStorage.setItem('banditracer_save', data);
+            return true;
+        }
+        return false;
     };
 };

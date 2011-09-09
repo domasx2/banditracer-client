@@ -96,7 +96,8 @@ var Wheel = exports.Wheel = function(pars){
        
        //if car has no grip, draw skidmarks
       // if(this.car.hasEffect(buffs.EFFECT_NO_GRIP)&&this.prev_position){
-        if(gamejs.utils.vectors.angle(arr(this.body.GetLinearVelocity()), arr(this.body.GetWorldVector(vec([0, -1]))))>gamejs.utils.math.radians(20)){
+      
+        if(this.prev_position&&(gamejs.utils.vectors.angle(arr(this.body.GetLinearVelocity()), arr(this.body.GetWorldVector(vec([0, -1]))))>gamejs.utils.math.radians(20))){
             var ps=this.car.world.phys_scale;
             var pp=this.prev_position;
             var p=arr(this.body.GetPosition());
@@ -143,6 +144,7 @@ var Wheel = exports.Wheel = function(pars){
     this.die=function(){
         this.alive=false;
         this.body.SetLinearVelocity(vec(0, 0));
+        this.prev_position=null;
     };
 
     this.respawn=function(){
@@ -308,9 +310,9 @@ var Car = exports.Car = function(pars){
             }
         }, this);
         
-        if(this.hasEffect(buffs.EFFECT_NO_GRIP)){
-            power=power*0.3;
-        }
+       // if(this.hasEffect(buffs.EFFECT_NO_GRIP)){
+        //    power=power*0.3;
+       // }
         
         return parseInt(power);
     };
@@ -667,9 +669,9 @@ exports.carEventFromDescription=function(position, angle, carpars, alias, engine
                   'acc_upgrades':carpars.acc_upgrades,
                   'speed_upgrades':carpars.speed_upgrades,
                   'armor_upgrades':carpars.armor_upgrades,
-                  'front_weapon':carpars.front_weapon,
-                  'util':carpars.util,
-                  'rear_weapon':carpars.rear_weapon}
+                  'front_weapon':carpars.front_weapon ? utils.copy(carpars.front_weapon, {}) : null,
+                  'util':carpars.util ? utils.copy(carpars.util, {}) : null,
+                  'rear_weapon':carpars.rear_weapon ? utils.copy(carpars.rear_weapon, {}) : null}
     };
     return retv;
 };

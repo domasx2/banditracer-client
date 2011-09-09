@@ -207,6 +207,39 @@ Button.prototype.paint=function(){
     else gamejs.draw.polygon(this.surface, color, [[0, 0], [this.size[0]-10, 0], [this.size[0], this.size[1]], [0, this.size[1]]]);
 };
 
+var YesNoDialog=exports.YesNoDialog=function(pars){
+    YesNoDialog.superConstructor.apply(this, [pars]);
+    this.label=new GUI.Label({'position':[0, 0],
+                             'parent':this,
+                             'font':getFont(skin.dialog.font),
+                             'text':pars.text || 'b'});
+    
+    this.yes= new Button({'position':[0, 0],
+                         'size':[150, 50],
+                         'parent':this,
+                         'lean':'both',
+                         'text':'Yes'});
+    this.no=new Button({'position':[0, 0],
+                         'size':[150, 50],
+                         'parent':this,
+                         'lean':'both',
+                         'text':'No'});
+    
+    this.center(this.yes);
+    this.center(this.no);
+    this.center(this.label);
+    this.label.move([this.label.getPosition()[0], this.label.getPosition()[1]-30]);
+    this.yes.move([this.yes.position[0]-80, this.yes.position[1]+30]);
+    this.no.move([this.no.position[0]+80, this.no.position[1]+30]);
+    this.yes.onClick(function(){
+        this.close();
+    }, this);
+    this.no.onClick(function(){
+        this.close();
+    }, this);
+}
+gamejs.utils.objects.extend(YesNoDialog, GUI.Dialog);
+
 var Dialog=exports.Dialog = function(pars){
     Dialog.superConstructor.apply(this, [pars]);
     this.label=new GUI.Label({'position':[0, 0],

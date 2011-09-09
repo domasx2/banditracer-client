@@ -3,7 +3,7 @@ var utils = require('./utils');
 var vec=utils.vec;
 var arr=utils.arr;
 var weapon_descriptions=require('./weapon_descriptions');
-
+var combatracer=require('./combatracer');
 var car_descriptions=require('./car_descriptions');
 var cars=require('./cars');
 var particles = require('./particles');

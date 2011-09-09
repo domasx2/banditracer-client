@@ -88,3 +88,11 @@ exports.inArray=function(haystack, needle){
     }
     return false;
 };
+
+exports.supports_html5_storage=function() {
+  try {
+    return 'localStorage' in window && window['localStorage'] !== null;
+  } catch (e) {
+    return false;
+  }
+}

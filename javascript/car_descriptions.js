@@ -52,7 +52,7 @@ exports.Bandit={'width':1.7,
                 'health':80,
                 
                 'power_upgrade':5,
-                'speed_upgrade':5,
+                'speed_upgrade':4,
                 'armor_upgrade':10,
                 'upgrade_price':600,
                 
@@ -83,7 +83,7 @@ exports.Sandbug={'id':'Sandbug',
                'health':100,
                
                'power_upgrade':5,
-               'speed_upgrade':5,
+               'speed_upgrade':4,
                'armor_upgrade':10,
                'upgrade_price':300,
                
@@ -114,7 +114,7 @@ exports.Racer={'width':2,
                 'health':100,
                 
                 'power_upgrade':5,
-                'speed_upgrade':5,
+                'speed_upgrade':4,
                 'armor_upgrade':10,
                 'upgrade_price':600,
                 
@@ -146,7 +146,7 @@ exports.Hillbilly={'width':2.4,
                 'health':140,
                 
                 'power_upgrade':7,
-                'speed_upgrade':5,
+                'speed_upgrade':4,
                 'armor_upgrade':10,
                 'upgrade_price':600,
                 
@@ -177,7 +177,7 @@ exports.Brawler={'width':3,
                 'health':180,
                 
                 'power_upgrade':8,
-                'speed_upgrade':5,
+                'speed_upgrade':4,
                 'armor_upgrade':15,
                 'upgrade_price':600,
                 

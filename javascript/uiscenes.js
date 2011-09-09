@@ -116,6 +116,30 @@ var LobbyScene=exports.LobbyScene=function(game, cache, lobby_id){
 };
 gamejs.utils.objects.extend(LobbyScene, ui.UIScene);*/
 
+
+var CongratulationsScene=exports.CongratulationsScene=function(){
+    CongratulationsScene.superConstructor.apply(this, []);
+    
+    this.titlelbl=new GUI.Label({'parent':this.container,
+                                'position':[210, 40],
+                                'text':'Congratulations',
+                                'font':ui.getFont('header_black')});
+    
+    this.label=new GUI.Label({'parent':this.container,
+                                'position':[30, 120],
+                                'text':'You won the game!',
+                                'font':ui.getFont('header')});
+    
+    this.text=new GUI.Text({'parent':this.container,
+                            'position':[30, 180],
+                            'font':ui.getFont('16_33'),
+                            'width':500,
+                            'text':'There are no more leagues yet, which means you win!\nCheck back soon for more cars, weapons and tracks. Follow BanditRacer on twitter!'});
+
+}
+
+gamejs.utils.objects.extend(CongratulationsScene, ui.UIScene);
+
 var SPGameOverScene=exports.SPGameOverScene=function(table, win, scene){
     SPGameOverScene.superConstructor.apply(this, []);
     
@@ -141,10 +165,10 @@ var SPGameOverScene=exports.SPGameOverScene=function(table, win, scene){
                   'data':table});
     
 
-        new GUI.Label({'position':[510, 200],
-                      'parent':this.container,
-                      'font':ui.getFont('button2'),
-                      'text':'Reward'});
+    new GUI.Label({'position':[510, 200],
+                  'parent':this.container,
+                  'font':ui.getFont('button2'),
+                  'text':'Reward'});
         
     var league=leagues[combatracer.game.player.singleplayer.league];
     var reward = win ? league.reward : 0;
@@ -181,19 +205,32 @@ var SPGameOverScene=exports.SPGameOverScene=function(table, win, scene){
                   'parent':this.container,
                   'text':String(total)+EURO_SYMBOL});
     lbl.rightAlign(730);
-    
+
     combatracer.game.player.singleplayer.balance+=total;
+    
     if(win){
         combatracer.game.player.singleplayer.completed_tracks.push(scene.level.id);
-    }
-    if(win && (combatracer.game.player.singleplayer.completed_tracks.length>=league.tracks.length)){
-        if(leagues[combatracer.game.player.singleplayer.league+1]){
-            combatracer.game.player.singleplayer.league++;
-            combatracer.game.player.singleplayer.completed_tracks=[];
-            this.alert('You have advanced to '+leagues[combatracer.game.player.singleplayer.league].name+'!');
-        }else{
-            this.alert('No more leagues, you win!');
+    
+        if(combatracer.game.player.singleplayer.completed_tracks.length>=league.tracks.length){
+            if(leagues[combatracer.game.player.singleplayer.league+1]){
+                combatracer.game.player.singleplayer.league++;
+                combatracer.game.player.singleplayer.completed_tracks=[];
+                this.alert('You have advanced to '+leagues[combatracer.game.player.singleplayer.league].name+'!');
+            }else{
+                this.congratulate=true;
+                return;
+            }
         }
+    
+        if(!(combatracer.game.return_to=='editor')){
+            if(combatracer.game.save()){
+                new GUI.Text({'position':[30, 510],
+                      'font':ui.getFont('13_green'),
+                      'parent':this.container,
+                      'width':460,
+                      'text':'Game saved to HTML5 storage. You will be able to load it next time you play Bandit Racer on this browser.'});
+            }
+        }   
     }
     
     
@@ -205,6 +242,11 @@ var SPGameOverScene=exports.SPGameOverScene=function(table, win, scene){
     btn.onClick(function(){
         this.game.returnTo();
     }, this);
+    
+    this.update=function(ms){
+        new ui.UIScene().update.apply(this, [ms]);
+        if(this.congratulate)this.game.showCongratulations();
+    };
 
 };
 
@@ -436,6 +478,24 @@ var TitleScene=exports.TitleScene=function(game, cache){
                                         'parent':this.container});
     
     this.btn_editor.onClick(this.editTrack, this);
+    
+    if(!this.game.tried_loading){
+        if(this.game.haveSave()){
+            this.yes_no_dialog=new ui.YesNoDialog({'parent':this.gui,
+                                     'size':[550, 150],
+                                     'text':'Saved game found. Do you want to load?'});
+            this.yes_no_dialog.yes.onClick(function(){
+                this.yes_no_dialog.close();
+                if(this.game.load())this.nameinput.setText(combatracer.game.player.alias);
+            }, this);
+            
+            this.yes_no_dialog.no.onClick(function(){
+                this.yes_no_dialog.close();
+            }, this);
+            this.yes_no_dialog.show();
+        }
+        this.game.tried_loading=true;
+    }
 };
 
 gamejs.utils.objects.extend(TitleScene, ui.UIScene);

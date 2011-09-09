@@ -32,7 +32,7 @@ var LevelScene=exports.LevelScene=function(level){
     this.controllers=[];
     this.keys_down={};
     this.started=false;
-    this.max_laps=3;
+    this.max_laps=level.laps? level.laps : 3;
     this.gui=new GUI.GUI(this.game.display);
     var i;
     //BUILD BACKGROUND FROM TILES
@@ -323,12 +323,13 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(level, ai_tes
 
     //PLAYER CAR
     //carEventFromDescription=function(position, carpars, alias, engine_sound){
+    
     var evdescr=cars.carEventFromDescription([this.world.start_positions[1].x, this.world.start_positions[1].y],this.world.start_positions[1].angle,
                                                                   combatracer.game.player.singleplayer.car,
                                                                   combatracer.game.player.alias,
                                                                   true);
     this.player_car=this.world.event('create', evdescr);
-
+    
     if(!this.test_ai) this.controllers.push(new controllers.PlayerCarController(this.player_car));
     else this.controllers.push(new controllers.AIController(this.player_car, this.world, this));
 
