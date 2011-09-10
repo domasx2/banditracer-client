@@ -208,6 +208,11 @@ var SPGameOverScene=exports.SPGameOverScene=function(table, win, scene){
 
     combatracer.game.player.singleplayer.balance+=total;
     
+    this.update=function(ms){
+        new ui.UIScene().update.apply(this, [ms]);
+        if(this.congratulate)this.game.showCongratulations();
+    };
+    
     if(win){
         combatracer.game.player.singleplayer.completed_tracks.push(scene.level.id);
     
@@ -243,10 +248,7 @@ var SPGameOverScene=exports.SPGameOverScene=function(table, win, scene){
         this.game.returnTo();
     }, this);
     
-    this.update=function(ms){
-        new ui.UIScene().update.apply(this, [ms]);
-        if(this.congratulate)this.game.showCongratulations();
-    };
+    
 
 };
 

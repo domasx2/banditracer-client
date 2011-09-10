@@ -207,7 +207,7 @@ var Game=exports.Game=function(){
     this.player={'alias':'Player',
                  'uid':null,
                  'singleplayer':{
-                    'balance':2000,
+                    'balance':3000,
                     'car':getDefCarDescr(),
                     'league':0,
                     'completed_tracks':[]

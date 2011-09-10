@@ -72,7 +72,7 @@ exports.NOS={'damage':15,
 
 exports.Shockwave={'damage':10,
                     'type':'util',
-                    'fire_rate':500,
+                    'fire_rate':1500,
                     'ammo_capacity':3,
                     'ammo_upgrade':1,
                     'ammo_upgrade_price':1300,

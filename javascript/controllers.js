@@ -43,14 +43,14 @@ exports.AIController=function(car, world, scene){
         var player_pos=this.scene.player_car.getRacePosition();
         var mypos=this.car.getRacePosition();
 
-        //if player is ahead, gradually increase speed to up to extra 20 km/h
+        //if player is ahead, gradually increase speed to up to extra 10 km/h
         if(player_pos<mypos){
             if(car.mod_speed<10){
                 car.mod_speed+=5*(ms/1000);
             }
         }else if(player_pos>mypos){
-            //if car is ahead, gradually decrease speed down to -10 km/h
-            if(car.mod_speed > -20){
+            //if car is ahead, gradually decrease speed down to -25 km/h
+            if(car.mod_speed > -25){
                 car.mod_speed-=5*(ms/1000);
             }
         }
