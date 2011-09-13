@@ -456,8 +456,7 @@ var Weapon=exports.Weapon=function(pars){
                                                                                              'damage':this.damage,
                                                                                              'speed':this.speed,
                                                                                             'angle':this.car.getAngle(),
-                                                                                            'car':this.car.id}});
-        this.ofst_x=this.ofst_x* -1;       
+                                                                                            'car':this.car.id}});      
     };
     
     this.getFirePos=function(){
@@ -477,13 +476,19 @@ var RepairKit=exports.RepairKit=function(pars){
             return true;
         }
         return false;
-    }
-    this.fire=function(){
-        if(this.car.health<this.car.max_health){
-            this.car.hit(-this.damage, this.car);
+    };
+    
+    this._fire=function(){
+        if(this.ammo&&(this.cooldown<=0) && (this.car.health<this.car.max_health)){
+            this.fire();
             this.ammo--;
             this.cooldown=this.fire_rate;
         }
+    };
+    
+    this.fire=function(){
+        this.car.world.spawnAnimation('heal',arr(this.car.body.GetPosition()), this.car);
+        this.car.hit(-this.damage, this.car);
     };
 };
 gamejs.utils.objects.extend(RepairKit, Weapon);
@@ -497,6 +502,7 @@ var Machinegun=exports.Machinegun=function(pars){
     Machinegun.superConstructor.apply(this, [pars]);
     this.ofst_x=-0.5;
     this.AI=fireAtFrontTargets;
+    
     this.getFirePos=function(){
         this.ofst_x=this.ofst_x* -1;
         return arr(this.car.body.GetWorldPoint(vec(this.ofst_x, -(this.car.height/2+0.8))));    
