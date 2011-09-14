@@ -140,7 +140,7 @@ var CongratulationsScene=exports.CongratulationsScene=function(){
 
 gamejs.utils.objects.extend(CongratulationsScene, ui.UIScene);
 
-var SPGameOverScene=exports.SPGameOverScene=function(table, win, scene){
+var SPGameOverScene=exports.SPGameOverScene=function(table, place, scene){
     SPGameOverScene.superConstructor.apply(this, []);
     
     this.titlelbl=new GUI.Label({'parent':this.container,
@@ -171,48 +171,68 @@ var SPGameOverScene=exports.SPGameOverScene=function(table, win, scene){
                   'text':'Reward'});
         
     var league=leagues[combatracer.game.player.singleplayer.league];
-    var reward = win ? league.reward : 0;
-    new GUI.Label({'position':[510, 240],
-                  'font':ui.getFont('alias'),
-                  'parent':this.container,
-                  'text':'1st place:'});
+    var win=place==1;
     
-    var lbl= new GUI.Label({'position':[510, 240],
-                  'font':ui.getFont('alias'),
-                  'parent':this.container,
-                  'text':String(reward)+EURO_SYMBOL});
-    lbl.rightAlign(730);
+    //REWARD
+    if(!(combatracer.game.return_to=='editor')){
+        var reward = 0;
+        if(place>0&&place<4) reward=league['reward_'+place];
+        
     
-    new GUI.Label({'position':[510, 270],
-                 'font':ui.getFont('alias'),
-                 'parent':this.container,
-                 'text':'Kills:'});
+        if(place>0){
+            var l;
+            if(place==1)l='1st place:';
+            else if(place==2)l='2nd place:';
+            else if(place==3)l='3d place:';
+            else{
+                l='4th place:';
+            }
+            new GUI.Label({'position':[510, 240],
+                          'font':ui.getFont('alias'),
+                          'parent':this.container,
+                          'text':l});
+            
+            var lbl= new GUI.Label({'position':[510, 240],
+                          'font':ui.getFont('alias'),
+                          'parent':this.container,
+                          'text':String(reward)+EURO_SYMBOL});
+            lbl.rightAlign(730);
+        }
+        
+        new GUI.Label({'position':[510, 270],
+                     'font':ui.getFont('alias'),
+                     'parent':this.container,
+                     'text':'Kills:'});
+        
+        lbl= new GUI.Label({'position':[510, 270],
+                      'font':ui.getFont('alias'),
+                      'parent':this.container,
+                      'text':String(scene.player_car.kills*100)+EURO_SYMBOL});
+        lbl.rightAlign(730);
+        
+        var total=reward+scene.player_car.kills*100;
+        new GUI.Label({'position':[510, 300],
+                     'font':ui.getFont('alias'),
+                     'parent':this.container,
+                     'text':'TOTAL:'});
+        
+        lbl= new GUI.Label({'position':[510, 300],
+                      'font':ui.getFont('alias'),
+                      'parent':this.container,
+                      'text':String(total)+EURO_SYMBOL});
+        lbl.rightAlign(730);
     
-    lbl= new GUI.Label({'position':[510, 270],
-                  'font':ui.getFont('alias'),
-                  'parent':this.container,
-                  'text':String(scene.player_car.kills*100)+EURO_SYMBOL});
-    lbl.rightAlign(730);
+        combatracer.game.player.singleplayer.balance+=total;
+    }
     
-    var total=reward+scene.player_car.kills*100;
-    new GUI.Label({'position':[510, 300],
-                 'font':ui.getFont('alias'),
-                 'parent':this.container,
-                 'text':'TOTAL:'});
     
-    lbl= new GUI.Label({'position':[510, 300],
-                  'font':ui.getFont('alias'),
-                  'parent':this.container,
-                  'text':String(total)+EURO_SYMBOL});
-    lbl.rightAlign(730);
-
-    combatracer.game.player.singleplayer.balance+=total;
-    
+    //dirty hax, show congratulate scene if no more tracks/leagues remain
     this.update=function(ms){
         new ui.UIScene().update.apply(this, [ms]);
         if(this.congratulate)this.game.showCongratulations();
     };
     
+    //HANDLE WIN
     if(win){
         combatracer.game.player.singleplayer.completed_tracks.push(scene.level.id);
     
@@ -226,17 +246,18 @@ var SPGameOverScene=exports.SPGameOverScene=function(table, win, scene){
                 return;
             }
         }
-    
-        if(!(combatracer.game.return_to=='editor')){
-            if(combatracer.game.save()){
-                new GUI.Text({'position':[30, 510],
-                      'font':ui.getFont('13_green'),
-                      'parent':this.container,
-                      'width':460,
-                      'text':'Game saved to HTML5 storage. You will be able to load it next time you play Bandit Racer on this browser.'});
-            }
-        }   
     }
+    
+    //SAVE GAME
+    if(!(combatracer.game.return_to=='editor')){
+        if(combatracer.game.save()){
+            new GUI.Text({'position':[30, 510],
+                  'font':ui.getFont('13_green'),
+                  'parent':this.container,
+                  'width':460,
+                  'text':'Game saved to HTML5 storage. You will be able to load it next time you play Bandit Racer on this browser.'});
+        }
+    }  
     
     
     var btn=new ui.Button({'parent':this.container,
@@ -577,6 +598,10 @@ var SinglePlayerScene=exports.SinglePlayerScene=function(){
     
     this.track_selector=new ui.TrackSelector({'position':[254, 160],
                                             'parent':this.container});
+    
+    this.diff_selector=new ui.DifficultySelect({'position':[14, 431],
+                                               'parent':this.container,
+                                               'size':[210, 65]});
     
 };
 gamejs.utils.objects.extend(SinglePlayerScene, ui.UIScene);

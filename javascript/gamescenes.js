@@ -376,7 +376,7 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(level, ai_tes
 
         //if we reached max laps, end race
         if(this.player_car.lap > this.max_laps){        
-            this.game.showSPGameOver(this.genScoreTable(), this.player_car.getRacePosition()==1, this);
+            this.game.showSPGameOver(this.genScoreTable(), this.player_car.getRacePosition(), this);
             return;
         };
     };
@@ -442,7 +442,7 @@ function SinglePlayerDialog(pars){
     
     this.quitbtn.onClick(function(){
         this.close();      
-        this.scene.game.showSPGameOver(this.scene.genScoreTable(), false, this.scene);
+        this.scene.game.showSPGameOver(this.scene.genScoreTable(), 0, this.scene);
     }, this);
     
     

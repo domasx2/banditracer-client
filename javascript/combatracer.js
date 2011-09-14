@@ -208,6 +208,7 @@ var Game=exports.Game=function(){
                  'uid':null,
                  'singleplayer':{
                     'balance':3000,
+                    'difficulty':2,
                     'car':getDefCarDescr(),
                     'league':0,
                     'completed_tracks':[]
@@ -322,6 +323,7 @@ var Game=exports.Game=function(){
             var data=JSON.parse(localStorage.getItem('banditracer_save'));
             this.player.alias=data.alias;
             this.player.singleplayer=data.singleplayer;
+            if(!this.player.singleplayer.difficulty)this.player.singleplayer.difficulty=2;
             return true;
         }
         return false;

@@ -1,6 +1,7 @@
 var gamejs=require('gamejs');
 var vectors=require('gamejs/utils/vectors');
 var utils=require('./utils');
+var combatracer=require('./combatracer');
 var vec=utils.vec;
 var arr=utils.arr;
 
@@ -17,10 +18,20 @@ var ACC_NONE=exports.ACC_NONE=0;
 var ACC_ACCELERATE=exports.ACC_ACCELERATE=1;
 var ACC_BRAKE=exports.ACC_BRAKE=2;
 
+var DIFFICULTY={1:{'FIRE_CHANCE':0.20,
+                   'MAX_SPEED_BUFF':0,
+                   'MAX_SPEED_DEBUFF':30},
+                 2:{'FIRE_CHANCE':0.5,
+                   'MAX_SPEED_BUFF':10,
+                   'MAX_SPEED_DEBUFF':25},
+                3:{'FIRE_CHANCE':0.6,
+                   'MAX_SPEED_BUFF':20,
+                   'MAX_SPEED_DEBUFF':10}}
 
 exports.AIController=function(car, world, scene){
     car.max_steer_angle=car.max_steer_angle*1.1;
     car.turn_msec=50;
+    this.difficulty=DIFFICULTY[combatracer.game.player.singleplayer.difficulty];
     this.scene=scene;
     this.car=car;
     this.world=world;
@@ -30,7 +41,6 @@ exports.AIController=function(car, world, scene){
     this.ceasfire_cooldown=1000;
     
     this.stationary=0; //how many seconds is this car stationary?
-
     this.update=function(keys_down, ms){
         if(!this.car.alive)return;
          this.car.accelerate=ACC_ACCELERATE;
@@ -45,12 +55,12 @@ exports.AIController=function(car, world, scene){
 
         //if player is ahead, gradually increase speed to up to extra 10 km/h
         if(player_pos<mypos){
-            if(car.mod_speed<10){
+            if(car.mod_speed<this.difficulty.MAX_SPEED_BUFF){
                 car.mod_speed+=5*(ms/1000);
             }
         }else if(player_pos>mypos){
             //if car is ahead, gradually decrease speed down to -25 km/h
-            if(car.mod_speed > -25){
+            if(car.mod_speed > -this.difficulty.MAX_SPEED_DEBUFF){
                 car.mod_speed-=5*(ms/1000);
             }
         }
@@ -91,7 +101,7 @@ exports.AIController=function(car, world, scene){
         
         //is this bot shooting?
         if(this.ceasfire_cur_cooldown<=0){
-            this.ceasfire=Math.random()>0.5 ? true : false;
+            this.ceasfire=Math.random()>this.difficulty.FIRE_CHANCE ? true : false;
             this.ceasfire_cur_cooldown=this.ceasfire_cooldown;
         }else{
             this.ceasfire_cur_cooldown-=ms;

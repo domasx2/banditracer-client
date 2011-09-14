@@ -297,6 +297,52 @@ GoToGarage.prototype.paint=function(){
     gamejs.draw.rect(this.surface, this.isHovered() ? skin.garage_btn.bg_color_hover : skin.garage_btn.bg_color, new gamejs.Rect([0, 0], [this.size[0], 126]));
 };
 
+var DifficultySelect=exports.DifficultySelect=function(pars){
+    DifficultySelect.superConstructor.apply(this, [pars]);
+    
+    this.difficulties=['Easy', 'Medium', 'Hard'];
+    
+    new GUI.Label({'parent':this,
+                  'position':[10, 6],
+                  'font':getFont(skin.sp_car_display.font1),
+                  'text':'Difficulty:'});
+    
+    this.difflbl=new GUI.Label({'parent':this,
+                                'position':[27, 17],
+                                'font':getFont(skin.sp_car_display.font2),
+                                 'text':this.difficulties[combatracer.game.player.singleplayer.difficulty-1]});
+    
+    this.left=new IncrementButton({'parent':this,
+                                   'position':[5, 28],
+                                   'size':[16, 25],
+                                   'direction':'left'});
+    
+    this.left.onClick(function(){
+        combatracer.game.player.singleplayer.difficulty--;
+        if(combatracer.game.player.singleplayer.difficulty==0) combatracer.game.player.singleplayer.difficulty=3;
+        this.difflbl.setText(this.difficulties[combatracer.game.player.singleplayer.difficulty-1]);
+    }, this);
+    
+    this.right=new IncrementButton({'parent':this,
+                                   'position':[210-20-5, 28],
+                                   'size':[16, 25],
+                                   'direction':'right'});
+    
+    this.right.onClick(function(){
+        combatracer.game.player.singleplayer.difficulty++;
+        if(combatracer.game.player.singleplayer.difficulty==4) combatracer.game.player.singleplayer.difficulty=1;
+        this.difflbl.setText(this.difficulties[combatracer.game.player.singleplayer.difficulty-1]);
+    }, this);
+    
+};
+gamejs.utils.objects.extend(DifficultySelect, GUI.View);
+
+DifficultySelect.prototype.paint=function(){
+    gamejs.draw.polygon(this.surface, skin.sp_car_display.bg_color,
+                        [[0, 0], [this.size[0]-20, 0], [this.size[0], 20],
+                         [this.size[0], this.size[1]], [0, this.size[1]]]);
+};
+
 
 var CarDisplay=exports.CarDisplay=function(pars){
     pars.size=[210, 65];
