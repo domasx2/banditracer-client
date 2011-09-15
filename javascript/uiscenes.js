@@ -142,7 +142,7 @@ gamejs.utils.objects.extend(CongratulationsScene, ui.UIScene);
 
 var SPGameOverScene=exports.SPGameOverScene=function(table, place, scene){
     SPGameOverScene.superConstructor.apply(this, []);
-    
+    var win=place==1;
     this.titlelbl=new GUI.Label({'parent':this.container,
                                 'position':[210, 40],
                                 'text':'Race Over',
@@ -165,17 +165,20 @@ var SPGameOverScene=exports.SPGameOverScene=function(table, place, scene){
                   'data':table});
     
 
-    new GUI.Label({'position':[510, 200],
-                  'parent':this.container,
-                  'font':ui.getFont('button2'),
-                  'text':'Reward'});
+    
         
     var league=leagues[combatracer.game.player.singleplayer.league];
-    var win=place==1;
+    
     
     //REWARD
     if(!(combatracer.game.return_to=='editor')){
         var reward = 0;
+        
+        new GUI.Label({'position':[510, 200],
+                  'parent':this.container,
+                  'font':ui.getFont('button2'),
+                  'text':'Reward'});
+        
         if(place>0&&place<4) reward=league['reward_'+place];
         
     
