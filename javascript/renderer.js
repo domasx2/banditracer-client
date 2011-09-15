@@ -107,9 +107,9 @@ var ImageCache=exports.ImageCache = function(){
     }, this);
     
     //load cars
-    resources.cars.forEach(function(f){
-        this.cars[f]=sprite2rotarray(gamejs.image.load('images/cars/'+f), 2);
-    }, this);
+    //resources.cars.forEach(function(f){
+    //    this.cars[f]=sprite2rotarray(gamejs.image.load('images/cars/'+f), 2);
+    //}, this);
     
     //cache props
     resources.props.forEach(function(f){
@@ -167,6 +167,9 @@ var ImageCache=exports.ImageCache = function(){
     };
     
     this.getCarSprite=function(filename, angle){
+        if(!this.cars[filename]){
+            this.cars[filename]=sprite2rotarray(gamejs.image.load('images/cars/'+filename), 2);
+        }
         return this.getSpriteFromRotarray(this.cars[filename], angle);  
     };
     

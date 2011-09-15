@@ -842,7 +842,7 @@ var CarListItem=function(pars){
     var w=this.getSize()[0];
     var h=this.getSize()[1];
     
-    var img=renderer.cache['cars'][this.descr.filenames[0]].orig;
+    var img=renderer.cache.getCarSprite(this.descr.filenames[0], 0);
     new GUI.Image({'parent':this,
                     'image':img,
                     'position':[5+parseInt(((50)-img.getSize()[0])/2), 5+parseInt(((h-10)-img.getSize()[1])/2)]});
