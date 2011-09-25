@@ -13,6 +13,21 @@ var sounds=require('./sounds');
 var editor=require('./editor');
 var garage=require('./garage');
 
+var requestAnimationFrame=(function(){
+    //Check for each browser
+    //@paul_irish function
+    //Globalises this function to work on any browser as each browser has a different namespace for this
+    return  window.requestAnimationFrame       ||  //Chromium 
+            window.webkitRequestAnimationFrame ||  //Webkit
+            window.mozRequestAnimationFrame    || //Mozilla Geko
+            window.oRequestAnimationFrame      || //Opera Presto
+            window.msRequestAnimationFrame     || //IE Trident?
+            function(callback, element){ //Fallback function
+                window.setTimeout(callback, 1000/settings.get('FPS'));                
+            }
+     
+})()
+
 var getDefCarDescr=exports.getDefCarDescr=function(car){
     return {'type':car ? car : 'Sandbug',
             'front_weapon':{'type':'Machinegun',
@@ -70,10 +85,17 @@ var Director=exports.Director= function Director (display) {
     var onAir = false;
     var activeScene = null;
     this.display=display;
+    var last_t;
  
-    function tick(msDuration){
-        tick_logic(msDuration);
-        tick_render(msDuration);
+    function tick(t){
+        t=t || (new Date()).getTime();
+        msDuration=t-last_t;
+        last_t=t;
+        if(activeScene){
+            tick_logic(msDuration);
+            tick_render(msDuration);
+        }
+        requestAnimationFrame(tick, gamejs.display.getCanvas());
     }
  
     function tick_logic(msDuration){
@@ -110,8 +132,10 @@ var Director=exports.Director= function Director (display) {
     this.getScene = function() {
        return activeScene;
     };
-    //gamejs.time.fpsCallback(tick_logic, this, logic_fps);
-    gamejs.time.fpsCallback(tick, this, settings.get('FPS'));
+    
+    tick(0);
+    
+    
     return this;
 };
 
