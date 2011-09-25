@@ -1,9 +1,11 @@
 var settings=exports.settings={SCREEN_WIDTH:800,  //screen width in pixels
                                 SCREEN_HEIGHT:600, //screen height in pixels
-                                LOGIC_FPS:60,        //logic updates per second
-                                RENDER_FPS:60,        //renders per second
-                                TILE_SCALE:50,     //tile height/width in pixels
+                                FPS:60,        //logic updates per second
                                 PHYS_SCALE:10,    //pixels in a meter
+                                STARTING_BALANCE:100000, //default 3000
+                                MAX_INDIVIDUAL_SOUND_CHANNELS:4,
+                                MAX_GLOBAL_SOUND_CHANNELS:8,
+                                STARTING_LEAGUE:0,
                                 SERVER:'ws://www.banditracer.eu:8000',
                                 DEBUG:true,
                                 SOUND:true};     //game server

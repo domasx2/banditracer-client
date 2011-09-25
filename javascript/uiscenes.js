@@ -8,6 +8,7 @@ var skin=require('./skin');
 var combatracer=require('./combatracer');
 var renderer=require('./renderer');
 var leagues=require('./leagues');
+var sounds=require('./sounds');
 
 var EURO_SYMBOL='\u20AC';
 /*
@@ -592,6 +593,7 @@ var SinglePlayerScene=exports.SinglePlayerScene=function(){
                                        'parent':this.container});
     this.gotogarage.on(GUI.EVT_MOUSE_DOWN, function(){
         this.game.return_to='singleplayer';
+        sounds.play({'filename':'button_click.wav'});
         this.game.showSPGarage();
     }, this);
     

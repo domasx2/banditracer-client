@@ -90,7 +90,7 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
     this.upds_stacked=0;
     this.time=0;
     this.delta=0;
-    this.last_t=null;;
+    this.last_t=null;
     this.deltas=[];
     this.delta_q=0;
     this.states={};
@@ -456,8 +456,6 @@ function SinglePlayerDialog(pars){
         this.close();
         this.scene.paused=false;
     }, this);
-    
-    
     
 };
 

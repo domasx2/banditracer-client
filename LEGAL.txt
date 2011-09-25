@@ -61,6 +61,13 @@ sounds/fx/machinegun_shot.wav:
     By tcpp (http://www.freesound.org/usersViewSingle.php?id=755551)
     G36 (3).wav (http://www.freesound.org/samplesViewSingle.php?id=77389)
     
+sounds/fx/repair.wav:
+     S: Wrenching multi.wav by gelo_papas -- http://www.freesound.org/people/gelo_papas/sounds/63125/
+sounds/fx/shockwave.wav:
+      S: Stomp That.wav by JCambs1990 -- http://www.freesound.org/people/JCambs1990/sounds/38156/
+sounds/fx/plasma_cannon.wav:
+      S: smalllas.wav by inferno -- http://www.freesound.org/people/inferno/sounds/18397/
+    
     
 From http://www.soundsnap.com/, license & terms of use: http://www.soundsnap.com/licence:
 

@@ -3,6 +3,7 @@ var resources=require('./resources');
 var settings=require('./settings');
 var _channels={};
 var _queue=[];
+var _playing=0;
 
 function Channels(filename, count){
     this.audios=[];
@@ -11,14 +12,20 @@ function Channels(filename, count){
     for(var i=0;i<count;i++){
         s=new gamejs.mixer.Sound('sounds/fx/'+filename);
         s.setVolume(0.2);
+        s.audio.addEventListener('ended', function(){
+            if(_playing>0)_playing--;
+        }, true);
         this.audios.push(s);
     }
     
     this.play=function(){
-        var a;
-        this.audios[this.next].play();
-        this.next++;
-        if(this.next==this.audios.length) this.next=0;
+        if(_playing<settings.get('MAX_GLOBAL_SOUND_CHANNELS')){
+            var a;
+            this.audios[this.next].play();
+            _playing++;
+            this.next++;
+            if(this.next==this.audios.length) this.next=0;
+        }
     }
     return this;
 }
@@ -94,6 +101,7 @@ exports.play=function(pars, renderer){
     position - world coordinates, optional. if provided, will not play unless position is within camera view.
     */
     if(!settings.get('SOUND')) return;
+    
     if(pars.position && renderer){
         var lpos=renderer.getScreenPoint(pars.position);
         if((lpos[0]>=0) && (lpos[1]>=0) && (lpos[0]<=renderer.width) && (lpos[1]<=renderer.height)){
@@ -108,7 +116,7 @@ exports.play=function(pars, renderer){
 
 exports.init=function(){
     resources.sound_fx.forEach(function(filename){
-        _channels[filename]=new Channels(filename, 5);
+        _channels[filename]=new Channels(filename, settings.get('MAX_INDIVIDUAL_SOUND_CHANNELS'));
     });
     exports.engine=new Engine();
 };

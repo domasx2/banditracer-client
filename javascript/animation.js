@@ -51,4 +51,6 @@ exports.animations={'small_explosion':{'filename':'explosion_small.png',
                     'shockwave':{'filename':'sw.png',
                                 'duration':200,
                                 'expand_from':40,
-                                'expand_to':200}};
+                                'expand_to':200},
+                    'heal':{'filename':'heal.png',
+                            'duration':500}};

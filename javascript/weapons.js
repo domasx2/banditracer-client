@@ -376,7 +376,7 @@ var PlasmaProjectile=exports.PlasmaProjectile=function(pars){
     pars.height=2.5;
     pars.sensor=true;
     Bullet.superConstructor.apply(this, [pars]);
-
+    
     this.impact=function(obj, cpoint, direction){
         if((obj.type=='car' || obj.type=='prop')){     
             if(obj.type=='car'){
@@ -389,11 +389,6 @@ var PlasmaProjectile=exports.PlasmaProjectile=function(pars){
     this.onimpact=function(obj){     
         var pos=arr(this.body.GetPosition());
         this.car.world.spawnAnimation('small_explosion', pos);
-        if(obj.type=='car'){
-            this.car.world.playSound('bullet_impact_metal.wav', pos);
-        }else if(obj.type=='prop'){
-            this.car.world.playSound('bullet_impact_soft.wav', pos);
-        }
     };
 
     this.draw=function(renderer, msDuration){
@@ -488,6 +483,7 @@ var RepairKit=exports.RepairKit=function(pars){
     
     this.fire=function(){
         this.car.world.spawnAnimation('heal',arr(this.car.body.GetPosition()), this.car);
+        this.car.world.playSound('repair.wav', arr(this.car.body.GetPosition()));
         this.car.hit(-this.damage, this.car);
     };
 };
@@ -540,7 +536,7 @@ var PlasmaCannon=exports.PlasmaCannon=function(pars){
                                                                                            'car':this.car.id}});
             this.ammo--;
         }
-        this.ofst_x=this.ofst_x* -1;       
+        this.car.world.playSound('plasma_cannon.wav', this.position);
     };
 
     return this;
@@ -590,6 +586,7 @@ var ShockwaveGenerator=exports.ShockwaveGenerator=function(pars){
             }
         }, this);
         
+        this.car.world.playSound('shockwave.wav', arr(this.car.body.GetPosition()));
         this.car.world.spawnAnimation('shockwave',arr(this.car.body.GetPosition()), this.car);
         
     };

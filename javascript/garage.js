@@ -2,6 +2,7 @@ var gamejs = require('gamejs');
 var ui=require('./ui');
 var utils=require('./utils');
 var levels=require('./levels');
+var sounds=require('./sounds');
 var car_descriptions=require('./car_descriptions');
 var weapon_descriptions=require('./weapon_descriptions');
 var GUI=require('./gamejs-gui');
@@ -238,6 +239,7 @@ EquipmentSlot=exports.EquipmentSlot=function(pars){
     this.selected=false;
     this.scene=pars.scene;
     this.on(GUI.EVT_MOUSE_DOWN, this.select, this);
+    this.on(GUI.EVT_MOUSE_DOWN, function(){sounds.play({'filename':'button_click.wav'})});
 }
 gamejs.utils.objects.extend(EquipmentSlot, GUI.View);
 
@@ -568,6 +570,7 @@ var ShopItem=exports.ShopItem=function(pars){
     this.img=renderer.cache['static'][this.descr.icon];
     this.selected=false;
     this.on(GUI.EVT_MOUSE_DOWN, this.select, this);
+    this.on(GUI.EVT_MOUSE_DOWN, function(){sounds.play({'filename':'button_click.wav'})});
 };
 gamejs.utils.objects.extend(ShopItem, GUI.View);
 
@@ -866,6 +869,7 @@ var CarListItem=function(pars){
     lbl.move([this.getSize()[0]-lbl.getSize()[0]-10, lbl.getPosition()[1]]);
     
     this.on(GUI.EVT_MOUSE_DOWN, function(){
+        sounds.play({'filename':'button_click.wav'});
         this.parent.parent.scene.carinfo.setDescr(this.descr);
     }, this);
     

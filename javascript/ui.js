@@ -388,6 +388,7 @@ gamejs.utils.objects.extend(TrackSelectorItem, GUI.View);
 TrackSelectorItem.prototype.select=function(){
     this.selected=true;
     this.refresh();
+    sounds.play({'filename':'button_click.wav'});
     this.despatchEvent({'type':'track_select', 'track':this.track});
 };
 
