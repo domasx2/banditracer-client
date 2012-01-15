@@ -95,7 +95,7 @@ var Director=exports.Director= function Director (display) {
             tick_logic(msDuration);
             tick_render(msDuration);
         }
-        requestAnimationFrame(tick, gamejs.display.getCanvas());
+        requestAnimationFrame(tick, display._canvas);
     }
  
     function tick_logic(msDuration){

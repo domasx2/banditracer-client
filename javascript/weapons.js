@@ -536,7 +536,7 @@ var PlasmaCannon=exports.PlasmaCannon=function(pars){
                                                                                            'car':this.car.id}});
             this.ammo--;
         }
-        this.car.world.playSound('plasma_cannon.wav', this.position);
+        //this.car.world.playSound('plasma_cannon.wav', this.position);
     };
 
     return this;
