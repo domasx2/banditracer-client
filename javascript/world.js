@@ -136,7 +136,7 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
     
     this.destroyObj=function(id){
         this.event('destroy', id);
-    }
+    };
     
     this.spawnAnimation=function(animation, position, follow_obj){
         var pars={'position':position};
@@ -147,17 +147,17 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
     this.createBuff=function(buff, car, pars){
         pars.car=car.id;
         this.event('create', {'type':'buff', 'obj_name':buff, 'pars':pars});
-    }
+    };
     
     this.playSound=function(sound, position){
-        this.event('create', {'type':'sound', 'obj_name':sound, 'pars':{'position':position}})  
+        this.event('create', {'type':'sound', 'obj_name':sound, 'pars':{'position':position}});
     };
     
     this.handleEvent=function(type, descr){
         if(type=='create'){
-            return this.create(descr)
+            return this.create(descr);
         }else if(type=='destroy'){
-            return this.destroy(descr)
+            return this.destroy(descr);
         }
         return null;
     };

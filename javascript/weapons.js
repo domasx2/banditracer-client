@@ -63,7 +63,7 @@ var Projectile=exports.Projectile=function(pars){
     this.getState=function(){
         return {'p':arr(this.body.GetPosition()),
                 'a':degrees(this.body.GetAngle()),
-                'lv':arr(this.body.GetLinearVelocity())}
+                'lv':arr(this.body.GetLinearVelocity())};
     };
 
     this.interpolate=function(s1, s2, q){
@@ -115,7 +115,7 @@ var Projectile=exports.Projectile=function(pars){
     };
 
     return this;
-}
+};
 
 
 
@@ -180,6 +180,50 @@ var Mine=exports.Mine=function(pars){
     };
 
     return this;
+};
+
+var StaticListener=exports.StaticListener=function(pars){
+	/*
+    pars:
+    car   - car object
+    position - [x, y]
+    weapon
+    width
+    height
+    damage
+    position
+    */
+    this.position=pars.position;
+    this.car=pars.car;
+    this.width=pars.width;
+    this.height=pars.height;
+    this.damage=pars.damage;
+    this.world=this.car.world;
+    this.weapon=pars.weapon;
+    
+    //initialize body
+    var bdef=new box2d.b2BodyDef();
+    bdef.position=vec(this.position);
+    bdef.angle=0;
+    bdef.fixedRotation=true;
+    bdef.linearDamping=0;
+    bdef.angularDamping=0;
+    this.body=this.world.CreateBody(bdef);
+    this.body.SetUserData(this);
+    this.drawn=false;
+    //initialize shape
+    var fixdef=new box2d.b2FixtureDef;
+    fixdef.shape=new box2d.b2PolygonShape();
+    fixdef.shape.SetAsBox(this.width/2, this.height/2);
+    fixdef.isSensor=true;    
+    this.body.CreateFixture(fixdef);
+
+    this.getState=function(){
+        return null;
+    };
+
+    this.setState=function(state){};
+	
 };
 
 
@@ -257,7 +301,7 @@ var Missile=exports.Missile=function(pars){
     };
 
     this.onimpact=function(){
-        var pos=arr(this.body.GetPosition())
+        var pos=arr(this.body.GetPosition());
         this.car.world.spawnAnimation('explosion',pos);
         this.car.world.playSound('explosion.wav', pos);
     };
@@ -276,8 +320,61 @@ var Missile=exports.Missile=function(pars){
     };
 
     return this;
-}
+};
+
 gamejs.utils.objects.extend(Missile, Projectile);
+
+var NapalmFlame=exports.NapalmFlame=function(pars){
+	this.burn_cooldown=200; //how often damage can be reapplied on the same flame
+	pars.width=4;
+	pars.height=4;
+	this.life=6000;
+	NapalmFlame.superConstructor.apply(this, [pars]);
+	this.burning={};
+	this.collapse=false;
+	this.animation=new animation.Animation({'filename':'fire64.png',
+											'duration':800,
+											'repeat':true,
+											'expand_from':30,
+											'expand_to':64,
+											'position':arr(this.body.GetPosition())});
+											
+	
+	this.impact=function(obj, cpoint, direction){
+        if((obj.type=='car')){
+            if(!this.burning[obj.id]){
+            	obj.hit(this.damage, this.car);
+            	this.burning[obj.id]=this.burn_cooldown;
+            }
+        }
+    };
+    
+    this.update=function(msDuration){
+    	for(var id in this.burning){
+    		this.burning[id]-=msDuration;
+    		if(this.burning[id]<0){
+    			delete this.burning[id];
+    		}
+    	}
+    	this.animation.update(msDuration);
+    	this.life-=msDuration;
+    	if(this.life<=800 && (!this.collapse)){
+    		this.animation.age=0;
+    		this.animation.expand_from=64;
+    		this.animation.expand_to=30;
+    		this.collapse=true;
+    	}
+    	
+    	if(this.life<0)this.car.world.event('destroy', this.id);
+    };
+    
+    this.draw=function(renderer, msDuration){
+        this.animation.draw(renderer);
+    };
+		
+};
+
+gamejs.utils.objects.extend(NapalmFlame, StaticListener);
 
 
 var HomingMissile=exports.HomingMissile=function(pars){
@@ -430,7 +527,7 @@ var Weapon=exports.Weapon=function(pars){
     };
 
     this.getState=function(){
-        return {'a':this.ammo}
+        return {'a':this.ammo};
     };
 
     this.setState=function(state){
@@ -457,13 +554,13 @@ var Weapon=exports.Weapon=function(pars){
     this.getFirePos=function(){
         var retv= arr(this.car.body.GetWorldPoint(vec(0, -(this.car.height/2+3))));
         return retv;
-    }
+    };
 
     return this;
 };
 
 var RepairKit=exports.RepairKit=function(pars){
-    Machinegun.superConstructor.apply(this, [pars])
+    Machinegun.superConstructor.apply(this, [pars]);
     this.type='repairkit';
     
     this.AI=function(){
@@ -554,12 +651,12 @@ var NOS=exports.NOS=function(pars){
             return true;
         }
         return false;
-    }
+    };
     
     this.fire=function(){
         this.car.world.createBuff('EngineBuff', this.car, {'duration':this.duration,
                                                            'value':this.damage});
-    }
+    };
 };
 
 gamejs.utils.objects.extend(NOS, Weapon);
@@ -655,7 +752,7 @@ var fireAtNearbyTargets=function(){
         }
     }
     return false;
-}
+};
 
 var fireAtRearTargets=function(){
     var i, c;
@@ -670,7 +767,7 @@ var fireAtRearTargets=function(){
         }
     }
     return false;
-}
+};
 
 var fireAtFrontTargets=function(){
     var i, c;

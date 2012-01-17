@@ -8,6 +8,7 @@ var Animation=exports.Animation=function(pars){
     position
     duration
     world
+    repeat
     */
     this.position=utils.arr(pars.position);
     this.filename=pars.filename;
@@ -18,7 +19,7 @@ var Animation=exports.Animation=function(pars){
     this.follow_obj=pars.follow_obj;
     this.expand_from=pars.expand_from;
     this.expand_to=pars.expand_to;
-
+    this.repeat=pars.repeat ? true : false;
     this.getState=function(){return null;};
     this.interpolate=function(){};
     this.setState=function(){};
@@ -26,7 +27,13 @@ var Animation=exports.Animation=function(pars){
     this.update=function(msDuration){
         this.age+=msDuration;
         if(this.age>this.duration){
-           this.world.destroyObj(this.id);
+           if(!this.repeat){
+        	   this.world.destroyObj(this.id);
+           }else{
+        	   this.age=0;
+        	   this.expand_from=0;
+        	   this.expand_to=0;
+           }
         }
     };
 
@@ -40,7 +47,7 @@ var Animation=exports.Animation=function(pars){
         renderer.drawAnimation(this.filename, position, Math.min(parseInt(this.age/(this.duration/frames)), frames-1), sz);
     };
     return this;
-}
+};
 
 exports.animations={'small_explosion':{'filename':'explosion_small.png',
                                         'duration':500},
@@ -53,4 +60,7 @@ exports.animations={'small_explosion':{'filename':'explosion_small.png',
                                 'expand_from':40,
                                 'expand_to':200},
                     'heal':{'filename':'heal.png',
-                            'duration':500}};
+                            'duration':500},
+                    'fire':{'filename':'fire64.png',
+                    		'duration':500}
+                    };

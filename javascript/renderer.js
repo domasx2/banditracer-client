@@ -411,7 +411,7 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
         pos - position in world coordinates
         angle - angle, degrees
         */
-        var sprite=this.cache.getPropSprite(filename, angle ? angle : 0)
+        var sprite=this.cache.getPropSprite(filename, angle ? angle : 0);
         var ofst=sprite.getSize()[0]/2;
         pos=this.getScreenPoint(pos);
         this.surface.blit(sprite, [pos[0]-ofst, pos[1]-ofst]);  
@@ -433,7 +433,7 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
         pos - position in world coordinates
         angle - angle, degrees
         */
-        var sprite=this.cache.getCarSprite(filename, angle ? angle : 0)
+        var sprite=this.cache.getCarSprite(filename, angle ? angle : 0);
         var ofst=sprite.getSize()[0]/2;
         pos=this.getScreenPoint(pos);
         this.surface.blit(sprite, [pos[0]-ofst, pos[1]-ofst]);
@@ -456,7 +456,7 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
         var h=sheet.getSize()[1];
         sz=sz ? sz : h;
         pos=this.getScreenPoint(pos);
-        this.surface.blit(sheet, new gamejs.Rect([pos[0]-sz/2, pos[1]-sz/2], [sz, sz]), new gamejs.Rect([frame*h, 0], [h, h]))
+        this.surface.blit(sheet, new gamejs.Rect([pos[0]-sz/2, pos[1]-sz/2], [sz, sz]), new gamejs.Rect([frame*h, 0], [h, h]));
     };
     
     this.renderHUD=function(display,  pars){
@@ -530,5 +530,5 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
     };  
     
     return this;
-}
+};
 gamejs.utils.objects.extend(RaceRenderer, Renderer);

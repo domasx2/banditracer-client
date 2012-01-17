@@ -118,8 +118,8 @@ exports.MineLauncher={'damage':30,
                        'icon':'icon_mine.png',
                        'price':800,
                        'description':'Discourage tailgating with anti-vehicle mines'};
-                       
-                       
+
+                 
 exports.Oil={'damage':0,
              'type':'rear_weapon',
              'fire_rate':500,
@@ -135,6 +135,22 @@ exports.Oil={'damage':0,
              'launcher':'Oil',
              'projectile':'OilPuddle',
              'description':'Leave slippery puddles of finest grade oil'};
+
+exports.Napalm={'damage':10,
+		'type':'rear_weapon',
+		'launcher':'MineLauncher',
+		'projectile':'NapalmFlame',
+		'fire_rate':80,
+		'ammo_capacity':20,
+		'ammo_upgrade':5,
+		'ammo_upgrade_price':1000,
+		'damage_upgrade':2,
+		'damage_upgrade_price':1000,
+		'name':'Napalm',
+		'icon':'icon_flame.png',
+		'price':2500,
+		'description':'Burn your opponents to a crisp'
+};
                        
                        
 exports.PlasmaCannon={'damage':12,
@@ -152,4 +168,4 @@ exports.PlasmaCannon={'damage':12,
                       'icon':'icon_plasma.png',
                       'price':3000,
                       'description':'Fires super heated blobs of pure plasma that will burn through anything'
-                      }
+                      };

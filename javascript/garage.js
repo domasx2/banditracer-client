@@ -148,7 +148,7 @@ GarageScene.prototype.buyItem=function(){
             'type':this.selected_item.weapon,
             'ammo_upgrades':0,
             'damage_upgrades':0
-        }
+        };
         this.selected_slot.deselect();
         this.selected_slot.select();
     }
@@ -570,7 +570,7 @@ var ShopItem=exports.ShopItem=function(pars){
     this.img=renderer.cache['static'][this.descr.icon];
     this.selected=false;
     this.on(GUI.EVT_MOUSE_DOWN, this.select, this);
-    this.on(GUI.EVT_MOUSE_DOWN, function(){sounds.play({'filename':'button_click.wav'})});
+    this.on(GUI.EVT_MOUSE_DOWN, function(){sounds.play({'filename':'button_click.wav'});});
 };
 gamejs.utils.objects.extend(ShopItem, GUI.View);
 
@@ -603,7 +603,7 @@ var TuningUpgradeSpace=function(pars){
     this.upgrade_type=pars.upgrade_type;
     this.descr=car_descriptions[this.scene.player_data.car.type];
     TuningUpgradeSpace.superConstructor.apply(this, [pars]);
-    
+   
     new GUI.Label({'parent':this,
                   'position':[20, 0],
                   'parent':this,
