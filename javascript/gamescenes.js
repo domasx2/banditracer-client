@@ -350,6 +350,7 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(level, ai_tes
             }
         }
     }
+    
 
     this.renderer.follow(this.player_car);
 

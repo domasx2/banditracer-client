@@ -246,7 +246,7 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
                       'position':descr.pars.position};
             if(descr.pars.follow_obj)pars.follow_obj=this.getObjectById(descr.pars.follow_obj);
             utils.copy(animation.animations[descr.obj_name], pars);
-            obj=new animation.Animation(pars);
+            obj=new animation.AnimationObject(pars);
         }
         else if(type=='sound'){
             if(settings.get('SOUND')){

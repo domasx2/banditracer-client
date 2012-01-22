@@ -619,9 +619,22 @@ SinglePlayerScene.prototype.race=function(){
     if(!this.track_selector.track){
         this.alert('You must select a track first!', true); 
     }else{
-        this.game.playLevel(levels[this.track_selector.track], false, true, 'singleplayer');
+        this.game.playLevel(levels[this.track_selector.track], false, 'singleplayer');
     }
 };
+
+var LoadingScene=exports.LoadingScene=function(game, cache, next_scene){
+    LoadingScene.superConstructor.apply(this, [game, cache]);
+    this.container.destroy();
+    var lbl=new GUI.Label({'position':[0, 0],
+                     'parent':this.gui,
+                      'text':'Loading, please wait...',
+                      'font':ui.getFont('25_66')});
+    this.gui.center(lbl);
+    this.next_scene=next_scene;
+};
+
+gamejs.utils.objects.extend(LoadingScene, ui.UIScene);
 
 var ControlsSplash=exports.ControlsSplash=function(game, cache, next_scene){
     ControlsSplash.superConstructor.apply(this, [game, cache]);
@@ -665,17 +678,34 @@ var ControlsSplash=exports.ControlsSplash=function(game, cache, next_scene){
                           'text':'Menu'});
     y+=62;
     
-    var lbl=new GUI.Label({'position':[x-60, y],
-                          'parent':this.gui,
-                      'text':'Press any key or click to continue...',
-                      'font':ui.getFont('25_66')});
-
-    this.gui.despatchEvent({'type':GUI.EVT_FOCUS});
-    this.gui.on(GUI.EVT_MOUSE_DOWN, this.next, this);
-    this.gui.on(GUI.EVT_KEY_DOWN, this.next, this);
+    
+    
+   this.lbl=new GUI.Label({'position':[x-30, y],
+                            'parent':this.gui,
+                            'text':'Loading. Please wait...',
+                            'font':ui.getFont('25_66')});
+   this.loaded=false;
+   this.first=false;
+   
+   this.update=function(msDuration){
+        ui.UIScene().update.apply(this, [msDuration]);
+        if(!this.first){
+            this.first=true;
+        }else{
+            if(!this.loaded){
+                this.game.cacheCarSprites(this.next_scene);
+                this.lbl.setText('Press any key or click to continue...');
+                this.gui.despatchEvent({'type':GUI.EVT_FOCUS});
+                this.gui.on(GUI.EVT_MOUSE_DOWN, this.next, this);
+                this.gui.on(GUI.EVT_KEY_DOWN, this.next, this);
+                this.loaded=true;
+            }
+        }
+   }
 };
 
 gamejs.utils.objects.extend(ControlsSplash, ui.UIScene);
+
 
 ControlsSplash.prototype.next=function(){
     this.game.director.replaceScene(this.next_scene);  

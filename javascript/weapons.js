@@ -336,8 +336,7 @@ var NapalmFlame=exports.NapalmFlame=function(pars){
 											'duration':800,
 											'repeat':true,
 											'expand_from':30,
-											'expand_to':64,
-											'position':arr(this.body.GetPosition())});
+											'expand_to':64});
 											
 	
 	this.impact=function(obj, cpoint, direction){
@@ -369,7 +368,7 @@ var NapalmFlame=exports.NapalmFlame=function(pars){
     };
     
     this.draw=function(renderer, msDuration){
-        this.animation.draw(renderer);
+        this.animation.draw(renderer, arr(this.body.GetPosition()));
     };
 		
 };
@@ -517,6 +516,7 @@ var Weapon=exports.Weapon=function(pars){
     this.damage=pars.damage+(pars.damage_upgrades*pars.damage_upgrade);
     this.speed=pars.speed;
     this.projectile=pars.projectile;
+    this.pars=pars;
 
     this.update=function(msDuration){
         if(this.cooldown>0)this.cooldown-=msDuration;

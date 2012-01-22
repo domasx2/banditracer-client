@@ -154,8 +154,7 @@ var ImageCache=exports.ImageCache = function(){
         for(var i=0;i<this.alphabet.length;i++){
             c=this.alphabet[i];
             this.fonts[name][c]=font.render(c, color);
-        }
-        
+        } 
     };
     
     this.getDecalSprite=function(filename, angle){
@@ -166,9 +165,15 @@ var ImageCache=exports.ImageCache = function(){
         return this.getSpriteFromRotarray(this.props[filename], angle);
     };
     
-    this.getCarSprite=function(filename, angle){
+    this.cacheCarSprite=function(filename){
         if(!this.cars[filename]){
             this.cars[filename]=sprite2rotarray(gamejs.image.load('images/cars/'+filename), 2);
+        }
+    };
+    
+    this.getCarSprite=function(filename, angle){
+        if(!this.cars[filename]){
+            this.cacheCarSprite(filename);
         }
         return this.getSpriteFromRotarray(this.cars[filename], angle);  
     };
@@ -177,7 +182,6 @@ var ImageCache=exports.ImageCache = function(){
         return this.tiles[filename];
     };
     
-   
     this.getLetter=function(font, letter){
         return this.fonts[font][letter];  
     };
@@ -225,7 +229,6 @@ var ImageCache=exports.ImageCache = function(){
     //init fonts
     this.initFont('hud', skin.fonts['hud'][0], skin.fonts['hud'][1]);
     
-
     return this;
 };
 
@@ -237,8 +240,7 @@ exports.init=function(){
 };
 
 
-var Renderer=exports.Renderer=function(width, height, cache){
-    
+var Renderer=exports.Renderer=function(width, height, cache){ 
     this.width=width;
     this.height=height;
     this.cache=cache;

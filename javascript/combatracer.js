@@ -328,11 +328,26 @@ var Game=exports.Game=function(){
         this.director.replaceScene(this.level_scene);
     };
 
-    this.playLevel=function(level, ai_test, splash, return_to){
+    this.playLevel=function(level, ai_test, return_to){
          this.level_scene=new gamescenes.SingleplayerLevelScene(level, ai_test);
          this.return_to=return_to;
-         if(splash) this.director.replaceScene(new uiscenes.ControlsSplash(this, this.cache, this.level_scene));
-         else this.director.replaceScene(this.level_scene);
+         this.director.replaceScene(new uiscenes.ControlsSplash(this, this.cache, this.level_scene));
+    };
+    
+    this.cacheCarSprites=function(level){
+        this.cache.cacheCarSprite('wheel.png');
+        this.cache.cacheCarSprite('big_wheel.png');
+        level.controllers.forEach(function(controller){
+            var car=controller.car;
+            this.cache.cacheCarSprite(car.filename);
+            ([car.front_weapon, car.rear_weapon, car.util]).forEach(function(weapon){
+                if(weapon && weapon.pars.preload){
+                    weapon.pars.preload.forEach(function(filename){
+                        this.cache.cacheCarSprite(filename);
+                    }, this);
+                }
+            }, this);
+        }, this);
     };
     
     this.haveSave=function(){
