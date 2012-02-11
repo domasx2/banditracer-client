@@ -268,8 +268,8 @@ var Car = exports.Car = function(pars){
     fixdef.friction = 0.3; //friction when rubbing agaisnt other shapes
     fixdef.restitution = 0.4;  //amount of force feedback when hitting something. >0 makes the car bounce off, it's fun!
     fixdef.shape=new box2d.b2PolygonShape;
-   // fixdef.shape.SetAsBox(pars.width/2, pars.length/2);
-    var w=this.width/2;
+   	// fixdef.shape.SetAsBox(pars.width/2, pars.length/2);
+	var w=this.width/2;
     var h=this.height/2;
     fixdef.shape.SetAsArray([vec(w,h),
                             vec(-w,h),
@@ -454,7 +454,16 @@ var Car = exports.Car = function(pars){
         if(this.util && state.wu) this.util.setState(wu);
     };
     
-    this.hasEffect=function(effect){
+    this.getBuff = function(effect){
+    	for(var i=0;i<this.buffs.length;i++){
+            if(this.buffs[i].effect == effect){
+                return this.buffs[i];
+            }
+        }
+    	return null;
+    };
+    
+    this.hasEffect = function(effect){
         for(var i=0;i<this.buffs.length;i++){
             if(this.buffs[i].effect==effect){
                 return true;
@@ -463,7 +472,7 @@ var Car = exports.Car = function(pars){
         return false;
     };
     
-    this.clearBuffs=function(){
+    this.clearBuffs = function(){
         this.buffs.forEach(function(buff){
             this.world.destroyObj(buff.id);
         }, this);
@@ -535,8 +544,13 @@ var Car = exports.Car = function(pars){
     };
 
     this.hit=function(damage, owner){
-      // owner - car that hit this car
-        this.hits.push({'damage':damage, 'owner':owner});
+  		var hit_data={'damage':damage, 'owner':owner};
+  		
+  		for(var i=0;i<this.buffs.length;i++){
+            if(!this.buffs[i].process_hit(hit_data)) return;
+        }
+  		
+		this.hits.push(hit_data);
     };
 
     this.processHits=function(){

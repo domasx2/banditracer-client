@@ -8,6 +8,7 @@ var arr=utils.arr;
 var weapon_descriptions=require('./weapon_descriptions');
 var vectors = gamejs.utils.vectors;
 var math = gamejs.utils.math;
+var buffs = require('./buffs');
 radians=math.radians;
 degrees=math.degrees;
 
@@ -56,7 +57,7 @@ var Projectile=exports.Projectile=function(pars){
     fixdef.restitution=1; //positively bouncy!
     fixdef.density=0.00001;
     fixdef.friction=0;
-    fixdef.isSensor=pars.sensor==undefined ? false : pars.sensor;
+    fixdef.isSensor= pars.sensor == undefined ? false : pars.sensor;
    // fixdef.isSensor=true;
     this.body.CreateFixture(fixdef);
 
@@ -334,9 +335,8 @@ var NapalmFlame=exports.NapalmFlame=function(pars){
 	this.collapse=false;
 	this.animation=new animation.Animation({'filename':'fire64.png',
 											'duration':800,
-											'repeat':true,
-											'expand_from':30,
-											'expand_to':64});
+											'repeat':true});
+	this.animation.resize(30, 64, 800);
 											
 	
 	this.impact=function(obj, cpoint, direction){
@@ -358,9 +358,7 @@ var NapalmFlame=exports.NapalmFlame=function(pars){
     	this.animation.update(msDuration);
     	this.life-=msDuration;
     	if(this.life<=800 && (!this.collapse)){
-    		this.animation.age=0;
-    		this.animation.expand_from=64;
-    		this.animation.expand_to=30;
+    		this.animation.resize(64, 30, 800);
     		this.collapse=true;
     	}
     	
@@ -431,35 +429,33 @@ var Bullet=exports.Bullet=function(pars){
     position - [x, y]
     angle    - degrees
     */
-    pars.width=0.3;
-    pars.height=0.8;
+    pars.width = 0.3;
+    pars.height = 0.8;
     Bullet.superConstructor.apply(this, [pars]);
-    this.color='#FFD800';
+    this.color = '#FFD800';
     this.car.world.playSound('machinegun_shot.wav', this.position);
 
-    this.onimpact=function(obj){     
-        var pos=arr(this.body.GetPosition());
+    this.onimpact = function(obj){     
+        var pos = arr(this.body.GetPosition());
         this.car.world.spawnAnimation('small_explosion', pos);
-        if(obj.type=='car'){
+        if(obj.type == 'car'){
             this.car.world.playSound('bullet_impact_metal.wav', pos);
         }else if(obj.type=='prop'){
             this.car.world.playSound('bullet_impact_soft.wav', pos);
         }
     };
 
-    this.draw=function(renderer, msDuration){
+    this.draw = function(renderer, msDuration){
         if(!this.spent) renderer.drawCar('bullet.png', arr(this.body.GetPosition()), degrees(this.body.GetAngle()));
     };
 
-    this.destroy=function(){
+    this.destroy = function(){
         this.car.world.destroyObj(this.id);
     };
     return this;
 };
 
 gamejs.utils.objects.extend(Bullet, Projectile);
-
-
 
 var PlasmaProjectile=exports.PlasmaProjectile=function(pars){
     /*
@@ -560,7 +556,7 @@ var Weapon=exports.Weapon=function(pars){
 };
 
 var RepairKit=exports.RepairKit=function(pars){
-    Machinegun.superConstructor.apply(this, [pars]);
+    RepairKit.superConstructor.apply(this, [pars]);
     this.type='repairkit';
     
     this.AI=function(){
@@ -781,6 +777,86 @@ var fireAtFrontTargets=function(){
             }
         }
     }
-    return false;
+    return false;  
+};
+
+
+var Shield=exports.Shield=function(pars){
+    Shield.superConstructor.apply(this, [pars]);
+    this.duration = pars.duration;
+    this.type='shield';
     
-}
+    this.AI=function(){
+        if(this.car.health<=this.car.max_health/3){
+            return true;
+        }
+        return false;
+    };
+    
+    this._fire=function(){
+        if(this.ammo&&(this.cooldown<=0)){
+            this.fire();
+            this.ammo--;
+            this.cooldown=this.fire_rate;
+        }
+    };
+    
+    this.fire=function(){
+        this.car.world.createBuff('InvulnerabilityBuff', this.car);
+    };
+};
+gamejs.utils.objects.extend(Shield, Weapon);
+
+
+var TankShell = exports.TankShell = function(pars){
+    /*
+    pars:
+    car   - car obj
+    position - [x, y]
+    angle    - degrees
+    */
+    pars.width = 0.8;
+    pars.height = 1.5;
+    TankShell.superConstructor.apply(this, [pars]);
+	
+	
+	this.impact=function(obj, cpoint, direction){
+        if((obj.type=='car' || obj.type=='prop') && (!this.spent)){
+            this.car.world.event('destroy', this.id);
+            
+            this.car.world.objects.car.forEach(function(car){
+	            if(car.id!=this.car.id){
+	                var tp=arr(this.body.GetPosition());
+	                var cp=arr(car.body.GetPosition());
+	                var d=vectors.distance(tp, cp);
+	                if(d <= 5){
+	                    car.hit(this.damage, this.car);
+	                    this.car.world.createBuff('SlipDebuff', car, {'duration':500});
+	                    var fvect=vectors.unit(vectors.substract(cp, tp));
+	                    fvect=vectors.multiply(fvect, 200);
+	                    car.body.ApplyImpulse(vec(fvect), car.body.GetPosition());
+	                };
+	            }
+	        }, this);
+            
+            this.spent=true;
+            this.car.world.spawnAnimation('explosion2', arr(this.body.GetPosition()));
+        }
+    };
+
+    this.onimpact = function(obj){     
+        var pos = arr(this.body.GetPosition());
+        
+    };
+
+    this.draw = function(renderer, msDuration){
+        if(!this.spent) renderer.drawCar('cannon_shell.png', arr(this.body.GetPosition()), degrees(this.body.GetAngle()));
+    };
+
+    this.destroy = function(){
+        this.car.world.destroyObj(this.id);
+    };
+    return this;
+};
+
+gamejs.utils.objects.extend(TankShell, Projectile);

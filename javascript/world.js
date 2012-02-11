@@ -145,6 +145,7 @@ var World=exports.World=function(width, height, width_px, height_px, ai_waypoint
     };
     
     this.createBuff=function(buff, car, pars){
+    	if (!pars) pars = {};
         pars.car=car.id;
         this.event('create', {'type':'buff', 'obj_name':buff, 'pars':pars});
     };

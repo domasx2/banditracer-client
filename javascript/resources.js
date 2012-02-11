@@ -1,16 +1,18 @@
 exports.props=['9tires.png','3tires.png', 'tire.png'];
 exports.cars=['bandit_blue.png','bandit_green.png','bandit_red.png','bandit_yellow.png',
-              'big_wheel.png',
+              'big_wheel.png', 'cannon_shell.png',
               'brawler_blue.png','brawler_green.png','brawler_red.png','brawler_yellow.png','bullet.png','missile.png',
               'racer_blue.png','racer_green.png','racer_red.png','racer_yellow.png','wheel.png',
               'sandbug_blue.png','sandbug_green.png','sandbug_red.png','sandbug_yellow.png', 'missile_homing.png',
               'samaritan_blue.png','samaritan_green.png','samaritan_red.png','samaritan_yellow.png', 'plasma_projectile.png'];
 exports.tiles=['sand.png','grass.png', 'snow.png'];
-exports.animations=['explosion.png','explosion_small.png', 'sw.png', 'smoke.png', 'heal.png', 'fire64.png'];
+exports.animations=['explosion.png','explosion_small.png', 'sw.png', 'smoke.png', 'heal.png', 'fire64.png',
+					'forcefield.png', 'explosion2.png'];
 exports.ui=['controls.png','garage.png','guncar.png','logo.png','key_bg.png'];
 exports.statics=['mine.png', 'samaritan_big.png', 'brawler_big.png', 'racer_big.png', 'bandit_big.png', 'icon_machinegun.png', 'icon_mine.png', 'icon_missiles.png', 'ico_damage.png', 'ico_ammo.png',
                  '0stars.png', '1stars.png', '2stars.png', '3stars.png', '4stars.png', '5stars.png', 'sandbug_big.png', 'icon_fix.png', 'icon_sw.png', 'icon_missiles_homing.png',
-                 'ico_nos.png', 'ico_oil.png', 'oil_spill.png', 'icon_plasma.png', 'icon_flame.png'];
+                 'ico_nos.png', 'ico_oil.png', 'oil_spill.png', 'icon_plasma.png', 'icon_flame.png',
+                 'icon_shield.png', 'icon_cannon.png'];
 exports.levels=['snowpeakcircuit', 'drycircuit', 'deathvalley', 'spiralraceway', 'greenring', 'frogfoot', '2_icemanloops', '2_vultureplains', '2_queersands', '1_bloodbathlane'];
 exports.decals=[,'dideliskampas.png','ilgas.png','trumpas.png','issisakojimas.png','kryzius.png','lenktas.png',
                 'paprastas.png','siauras.png','siaurasiplatu.png','siaurejantis1.png','siaurejantis2.png','sonaslenktas1.png',

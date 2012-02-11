@@ -38,7 +38,6 @@ exports.MissileLauncher={'damage':25,
                          
   
 
-
 exports.RepairKit={'damage':30,
                     'type':'util',
                     'launcher':'RepairKit',
@@ -103,7 +102,6 @@ exports.HomingMissiles={'damage':18,
                         'price':1300,
                         'icon':'icon_missiles_homing.png',
                         'description':'Heat seeking missiles, a blind drivers favourite weapon'};
-                         
                          
 
 
@@ -173,3 +171,34 @@ exports.PlasmaCannon={'damage':12,
                       'price':3000,
                       'description':'Fires super heated blobs of pure plasma that will burn through anything'
                       };
+                      
+exports.Shield = {'damage':0,
+				 'type':'util',
+				 'launcher':'Shield',
+				 'fire_rate':2000,
+				 'ammo_capacity':2,
+				 'ammo_upgrade':1,
+				 'ammo_upgrade_price':1000,
+				 'name':'Force Shield',
+				 'icon':'icon_shield.png',
+				 'price':2000,
+				 'duration':2000,
+				 'description':'Puts up a forcefield that absorbs 3 hits before disintegrating'};
+				 
+
+exports.Cannon = {'damage':60,
+				  'preload':['cannon_shell.png'],
+				 'type':'front_weapon',
+				 'launcher':'MissileLauncher',
+				 'projectile':'TankShell',
+				 'fire_rate':600,				 'speed':500,
+				 'ammo_capacity':8,
+				 'ammo_upgrade':2,
+				 'ammo_upgrade_price':1500,
+				 'damage_upgrade':10,
+				 'damage_upgrade_price':1500,
+				 'name':'Cannon',
+				 'icon':'icon_cannon.png',
+				 'price':4000,
+				 'description':"Guns don't get bigger than this massive anti-tank cannon"};                        
+
