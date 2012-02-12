@@ -36,7 +36,7 @@ exports.fonts={'hud':['30px maass', 'red'],         //in game hud
                '40_black':['40px maass', '#000'],
                '13_grayish':['13px maass', '#383736'],
                '25_66':['25px maass', '#666666'],
-               'sp_btn':['34px maass', '#FFF'],
+               'sp_btn':['30px maass', '#FFF'],
                'header_black':['56px maass', '#333333'],
                'header_brown':['56px maass', '#A67C52'],
                'editor_ai_wp':['19px maass', '#0094FF'],

@@ -355,7 +355,7 @@ var CarDisplay=exports.CarDisplay=function(pars){
                   'text':'Current Car:'});
     
     this.carlbl=new GUI.Label({'parent':this,
-                              'position':[20, 17],
+                              'position':[16, 17],
                               'font':getFont(skin.sp_car_display.font2),
                               'text':car_descriptions[this.gameinfo.car.type].name});
     

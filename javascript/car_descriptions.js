@@ -96,9 +96,39 @@ exports.Sandbug={'id':'Sandbug',
                'wheels':[{'x':-0.9, 'y':-1.2, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
                           {'x':0.9, 'y':-1.2, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
                           {'x':-0.9, 'y':1.2, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'},
-                          {'x':0.9, 'y':1.2, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'}]};
+                          {'x':0.9, 'y':1.2, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'}]
+                };
                
-                
+exports.Thunderbolt = {'width':2.1,
+                       'height':4.5,
+                       'id':'Thunderbolt',
+                       'name':'Thunderbolt',
+                       'description':'A powerful muscle car',
+                       'filenames':['thunderbolt_yellow.png', 'thunderbolt_green.png', 'thunderbolt_blue.png', 'thunderbolt_red.png'],
+                       'art_filename':'thunderbolt_big.png',
+                       'power':140,
+                       'max_steer_angle':13,
+                       'max_speed':135,
+                       'health':140,
+                       
+                       'power_upgrade':9,
+                       'speed_upgrade':5,
+                       'armor_upgrade':25,
+                       'upgrade_price':1200,
+                       
+                       'speed_stars':4,
+                       'acceleration_stars':4,
+                       'armor_stars':3,
+                       'handling_stars':1,
+                       
+                       'price':7000,
+                       
+                       'wheels':[{'x':-1, 'y':-1.4, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
+		                          {'x':1, 'y':-1.4, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
+		                          {'x':-1, 'y':1.4, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'},
+		                          {'x':1, 'y':1.4, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'}]
+                       
+                       }  ;             
                 
                 
 exports.Racer={'width':2,
@@ -125,7 +155,6 @@ exports.Racer={'width':2,
                 
                 'price':4500,
                 
-                'main_weapon':'Machinegun',
                 'wheels':[{'x':-1, 'y':-1.2, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
                           {'x':1, 'y':-1.2, 'width':0.4, 'length':0.8, 'revolving':true, 'powered':true, 'filename':'wheel.png'},
                           {'x':-1, 'y':1.2, 'width':0.4, 'length':0.8, 'revolving':false, 'powered':false, 'filename':'wheel.png'},
