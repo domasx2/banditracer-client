@@ -235,6 +235,7 @@ var Game=exports.Game=function(){
                     'difficulty':2,
                     'car':getDefCarDescr(),
                     'league':settings.get('STARTING_LEAGUE'),
+                    'completed':false,
                     'completed_tracks':[]
                     }
                 };

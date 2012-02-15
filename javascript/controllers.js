@@ -21,10 +21,13 @@ var ACC_BRAKE=exports.ACC_BRAKE=2;
 var DIFFICULTY={1:{'FIRE_CHANCE':0.20,
                    'MAX_SPEED_BUFF':0,
                    'MAX_SPEED_DEBUFF':30},
-                 2:{'FIRE_CHANCE':0.5,
+             	2:{'FIRE_CHANCE':0.5,
                    'MAX_SPEED_BUFF':10,
                    'MAX_SPEED_DEBUFF':25},
                 3:{'FIRE_CHANCE':0.6,
+                   'MAX_SPEED_BUFF':20,
+                   'MAX_SPEED_DEBUFF':10},
+                4:{'FIRE_CHANCE':0.6,
                    'MAX_SPEED_BUFF':20,
                    'MAX_SPEED_DEBUFF':10}}
 

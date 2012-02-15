@@ -15,7 +15,9 @@ exports.statics=['mine.png', 'samaritan_big.png', 'brawler_big.png', 'racer_big.
                  '0stars.png', '1stars.png', '2stars.png', '3stars.png', '4stars.png', '5stars.png', 'sandbug_big.png', 'icon_fix.png', 'icon_sw.png', 'icon_missiles_homing.png',
                  'ico_nos.png', 'ico_oil.png', 'oil_spill.png', 'icon_plasma.png', 'icon_flame.png',
                  'icon_shield.png', 'icon_cannon.png', 'thunderbolt_big.png'];
-exports.levels=['snowpeakcircuit', 'drycircuit', 'deathvalley', 'spiralraceway', 'greenring', 'frogfoot', '2_icemanloops', '2_vultureplains', '2_queersands', '1_bloodbathlane'];
+exports.levels=['snowpeakcircuit', 'drycircuit', 'deathvalley', 'spiralraceway', 'greenring', 
+			   'frogfoot', '2_icemanloops', '2_vultureplains', '2_queersands', '1_bloodbathlane',
+			   '3_bullpen', '3_hunter_end', '3_lullabycircuit', '3_peril_flats', '3_radiator'];
 exports.decals=[,'dideliskampas.png','ilgas.png','trumpas.png','issisakojimas.png','kryzius.png','lenktas.png',
                 'paprastas.png','siauras.png','siaurasiplatu.png','siaurejantis1.png','siaurejantis2.png','sonaslenktas1.png',
                 'sonaslenktas2.png','startbar.png','susikerta.png','uglyduckling.png', 'white_bar.png',

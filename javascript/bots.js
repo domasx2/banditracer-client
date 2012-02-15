@@ -65,7 +65,7 @@ exports.HotShot={'type':'Racer',
                                     'ammo_upgrades':5,
                                     'damage_upgrades':3},
                     'util':{'type':'Shockwave',
-                                    'ammo_upgrades':4,
+                                    'ammo_upgrades':0,
                                     'damage_upgrades':0},
                     'rear_weapon':null,
                     'acc_upgrades':0,
@@ -99,3 +99,55 @@ exports.Ratman={'type':'Bandit',
                     'acc_upgrades':0,
                     'speed_upgrades':2,
                     'armor_upgrades':2};
+                    
+
+//league three
+
+exports.Bulldog = {'type':'Brawler',
+				   'name':'Brawler',
+				   'front_weapon':{'type':'MissileLauncher',
+				   				   'ammo_upgrades':4,
+				   				   'damage_upgrades':3},
+				   'util':{'type':'NOS',
+				   		   'ammo_upgrades':1,
+				   		   'damage_upgrades':0},
+				   	'rear_weapon':{'type':'Oil',
+                                    'ammo_upgrades':1,
+                                    'damage_upgrades':1},
+				   	'acc_upgrades':2,
+				   	'speed_upgrades':1,
+				   	'armor_upgrades':2};
+				   	
+exports.JC={'type':'Bandit',
+              'name':'JC',
+              'front_weapon':{'type':'Machinegun',
+                                'ammo_upgrades':2,
+                                'damage_upgrades':3},
+	           'util':{'type':'Shield',
+	                    'ammo_upgrades':0,
+	                    'damage_upgrades':0},
+	           'rear_weapon':{'type':'Napalm',
+	                          'ammo_upgrades':2,
+	                          'damage_upgrades':1},
+	           'acc_upgrades':0,
+	           'speed_upgrades':3,
+	           'armor_upgrades':1};
+	           
+exports.PainKid={'type':'Racer',
+	                'name':'Pain Kid',
+	                'front_weapon':{'type':'Machinegun',
+	                                'ammo_upgrades':5,
+	                                'damage_upgrades':3},
+	                'util':{'type':'Shockwave',
+	                                'ammo_upgrades':1,
+	                                'damage_upgrades':0},
+	                'rear_weapon':{'type':'MineLauncher',
+	                                'ammo_upgrades':2,
+	                                'damage_upgrades':4},
+	                'acc_upgrades':0,
+	                'speed_upgrades':2,
+	                'armor_upgrades':2};
+                    	           
+                    
+				   	
+				

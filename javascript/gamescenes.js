@@ -33,6 +33,7 @@ var LevelScene=exports.LevelScene=function(level){
     this.keys_down={};
     this.started=false;
     this.max_laps=level.laps? level.laps : 3;
+    
     this.gui=new GUI.GUI(this.game.display);
     var i;
     //BUILD BACKGROUND FROM TILES
@@ -345,6 +346,20 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(level, ai_tes
                                                             descr,
                                                             descr.name,
                                                             false);
+                                                            
+                //hell difficulty: buff all stats & weapons
+			    if(combatracer.game.player.singleplayer.difficulty == 4){
+			    	evdescr.pars.acc_upgrades = 5;
+			    	evdescr.pars.speed_upgrades = 5;
+			    	evdescr.pars.armor_upgrades = 5;
+			    	(['util', 'rear_weapon', 'front_weapon']).forEach(function(t){
+			    		if(this[t]){
+			    			this[t].ammo_upgrades = Math.min(this[t].ammo_upgrades+2, 5);
+			    			this[t].damage_upgrades = Math.min(this[t].damage_upgrades+2, 5);
+			    		}
+			    	}, evdescr.pars);
+			    }                                            
+                                                            
                 aicar=this.world.event('create', evdescr);
                 this.controllers.push(new controllers.AIController(aicar, this.world, this));
             }

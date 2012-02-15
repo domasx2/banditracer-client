@@ -68,7 +68,7 @@ var UIScene=exports.UIScene=function(){
     this.ms_to_ping=10000;
 
     this.dialog=new Dialog({'parent':this.gui,
-                           'size':[450, 150]});
+                           'size':[600, 150]});
 
     this.alert=function(text, button){
         this.dialog.show(text, button);
@@ -302,6 +302,9 @@ var DifficultySelect=exports.DifficultySelect=function(pars){
     
     this.difficulties=['Easy', 'Medium', 'Hard'];
     
+    if (combatracer.game.player.singleplayer.completed) 
+    	this.difficulties.push('Hell');
+    
     new GUI.Label({'parent':this,
                   'position':[10, 6],
                   'font':getFont(skin.sp_car_display.font1),
@@ -319,7 +322,7 @@ var DifficultySelect=exports.DifficultySelect=function(pars){
     
     this.left.onClick(function(){
         combatracer.game.player.singleplayer.difficulty--;
-        if(combatracer.game.player.singleplayer.difficulty==0) combatracer.game.player.singleplayer.difficulty=3;
+        if(combatracer.game.player.singleplayer.difficulty==0) combatracer.game.player.singleplayer.difficulty = this.difficulties.length;
         this.difflbl.setText(this.difficulties[combatracer.game.player.singleplayer.difficulty-1]);
     }, this);
     
@@ -330,7 +333,7 @@ var DifficultySelect=exports.DifficultySelect=function(pars){
     
     this.right.onClick(function(){
         combatracer.game.player.singleplayer.difficulty++;
-        if(combatracer.game.player.singleplayer.difficulty==4) combatracer.game.player.singleplayer.difficulty=1;
+        if(combatracer.game.player.singleplayer.difficulty == this.difficulties.length+1) combatracer.game.player.singleplayer.difficulty=1;
         this.difflbl.setText(this.difficulties[combatracer.game.player.singleplayer.difficulty-1]);
     }, this);
     

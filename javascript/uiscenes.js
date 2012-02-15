@@ -243,11 +243,13 @@ var SPGameOverScene=exports.SPGameOverScene=function(table, place, scene){
         if(combatracer.game.player.singleplayer.completed_tracks.length>=league.tracks.length){
             if(leagues[combatracer.game.player.singleplayer.league+1]){
                 combatracer.game.player.singleplayer.league++;
-                combatracer.game.player.singleplayer.completed_tracks=[];
+                combatracer.game.player.singleplayer.completed_tracks = [];
                 this.alert('You have advanced to '+leagues[combatracer.game.player.singleplayer.league].name+'!');
             }else{
-                this.congratulate=true;
-                return;
+                this.alert('You win the tournament! Hell difficulty unlocked.')
+                combatracer.game.player.singleplayer.league = 0;
+                combatracer.game.player.singleplayer.completed_tracks = [];
+                combatracer.game.player.singleplayer.completed = true;
             }
         }
     }

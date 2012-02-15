@@ -4,6 +4,7 @@ var utils = require('./utils');
 var sounds = require('./sounds');
 var buffs=require('./buffs');
 var car_descriptions = require('./car_descriptions');
+var combatracer=require('./combatracer');
 var vec=utils.vec;
 var arr=utils.arr;
 
@@ -687,5 +688,6 @@ exports.carEventFromDescription=function(position, angle, carpars, alias, engine
                   'util':carpars.util ? utils.copy(carpars.util, {}) : null,
                   'rear_weapon':carpars.rear_weapon ? utils.copy(carpars.rear_weapon, {}) : null}
     };
+    
     return retv;
 };
