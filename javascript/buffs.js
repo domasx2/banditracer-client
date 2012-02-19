@@ -1,5 +1,5 @@
 var gamejs = require('gamejs');
-var animation = require('animation');
+var animation = require('./animation');
 var utils = require('./utils');
 var vec=utils.vec;
 var arr=utils.arr;

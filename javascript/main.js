@@ -29,7 +29,7 @@ function main(){
    
    function loadTick(){
       var display_size=display.getSize()
-      gamejs.draw.rect(display, skin.ui_background, new gamejs.Rect([0, 0], display_size));
+      gamejs.draw.rect(display, '#FFF', new gamejs.Rect([0, 0], display_size));
       var loading_pt=[display_size[0]/2-loading_img_size[0]/2, display_size[1]/2-loading_img_size[1]/2-100];
       display.blit(loading_img, loading_pt);
       if(progfn){
