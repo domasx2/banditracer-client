@@ -12,7 +12,6 @@
         body{
            background:#fff;
            color:#222;
-           margin:1em 0 2em 6em;
            padding:0;
         }
         #gjs-loader {
@@ -32,13 +31,16 @@
     <script>
         require.setModuleRoot('./javascript/');
         require.run('main')
+        $(document).ready(function(){
+        	$('#wo').css('display', 'none');
+        });
     </script>
 </head>
 <!-- Html -->
 <body>
     <div>
         <canvas id="gjs-canvas" ></canvas>
-        <p style="font-family:maass;">
+        <p id="wo" style="font-family:maass;">
         Powered by <a href="http://gamejs.org">GameJs</a>.
         </p>
     </div>
