@@ -114,7 +114,6 @@ var Director=exports.Director= function Director (display) {
     }
  
     function tick_render(msDuration){
-        //console.log(display);
         if(activeScene.draw) activeScene.draw(display, msDuration);
     }
  
@@ -243,17 +242,17 @@ var Game=exports.Game=function(){
     this.communicator=null;
     this.acquainted=false; //receved a player id from server?
 
-    this.getCommunicator=function(){
+    this.getCommunicator = function(){
          if(!this.communicator)this.communicator=new Communicator(this);
          return this.communicator;
     };
 
-    this.start=function(display){
+    this.start = function(display){
         this.display=display;
         this.director=new Director(display);
         this.title_scene=new uiscenes.TitleScene(this, this.cache);
         this.director.start(this.title_scene);
-        //this.playLevel(levels.trbryraceway, 'Bandit', true);
+        //this.playLevel(levels.drycircuit, false, true);
     };
 
     this.showEndGameScene=function(position){
@@ -339,7 +338,7 @@ var Game=exports.Game=function(){
         this.cache.cacheCarSprite('wheel.png');
         this.cache.cacheCarSprite('big_wheel.png');
         level.controllers.forEach(function(controller){
-            var car=controller.car;
+            var car = controller.car;
             this.cache.cacheCarSprite(car.filename);
             ([car.front_weapon, car.rear_weapon, car.util]).forEach(function(weapon){
                 if(weapon && weapon.pars.preload){
@@ -360,10 +359,10 @@ var Game=exports.Game=function(){
     
     this.load=function(){
         if(utils.supports_html5_storage() && localStorage.getItem('banditracer_save')){
-            var data=JSON.parse(localStorage.getItem('banditracer_save'));
-            this.player.alias=data.alias;
-            this.player.singleplayer=data.singleplayer;
-            if(!this.player.singleplayer.difficulty)this.player.singleplayer.difficulty=2;
+            var data = JSON.parse(localStorage.getItem('banditracer_save'));
+            this.player.alias = data.alias;
+            this.player.singleplayer = data.singleplayer;
+            if(!this.player.singleplayer.difficulty)this.player.singleplayer.difficulty = 2;
             return true;
         }
         return false;

@@ -1,6 +1,7 @@
 var gamejs=require('gamejs');
 var math=gamejs.utils.math;
-var box2d=require('./box2d');
+var box2d=require('./engine').box2d;
+var buffs=require('./buffs');
 var settings=require('./settings');
 var vectors = gamejs.utils.vectors;
 var renderer=require('./renderer');
@@ -95,4 +96,13 @@ exports.supports_html5_storage=function() {
   } catch (e) {
     return false;
   }
+}
+
+exports.push = function(obj, obj_from, force_multiplier, debuff_duration){
+    if(obj.has_tag('car') && debuff_duration)
+        obj.world.create(buffs.SlipDebuff, {'duration':debuff_duration,
+                                             'object':obj});
+    var fvect = vectors.unit(vectors.substract(obj.get_position(), obj_from.get_position()));
+    fvect = vectors.multiply(fvect, obj.get_mass()*force_multiplier);
+    obj.apply_impulse(fvect, obj.get_position());
 }

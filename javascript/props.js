@@ -1,14 +1,14 @@
 var gamejs=require('gamejs');
 var utils=require('./utils');
-var box2d=require('./box2d');
 var vec=utils.vec;
 var arr=utils.arr;
 var vectors = gamejs.utils.vectors;
 var math = gamejs.utils.math;
+var engine = require('./engine');
 
 exports.rotarrays={};
 
-var BoxProp = exports.BoxProp = function(pars){
+var BoxProp = exports.BoxProp = function(parameters){
     /*
      pars:
      filename
@@ -17,42 +17,19 @@ var BoxProp = exports.BoxProp = function(pars){
      position
      angle
     */
-    //width, height, filename, world, position, angle
-    this.size=pars.size;
-    this.width=this.size[0];
-    this.height=this.size[1];
-    this.angle= pars.angle ? pars.angle: 0;
-    this.world=pars.world;
-    this.position = pars.position;
-    this.filename=pars.filename;
-    this.type='prop';
-
-    this.getAngle=function(){
-        return utils.degrees(this.body.GetAngle());
-    };
-
-    this.getState=function(){return null;};
-    this.setState=function(state){};
     
-    //initialize body
-    var bdef=new box2d.b2BodyDef();
-    bdef.position=vec(this.position);
-    bdef.angle=math.radians(pars.angle);
-    bdef.fixedRotation=true;
-    this.body=this.world.CreateBody(bdef);
-    this.body.SetUserData(this);
+    var par_list = ['filename'];
     
-    //initialize shape
-    var fixdef=new box2d.b2FixtureDef;
-    fixdef.shape=new box2d.b2PolygonShape();
-    fixdef.shape.SetAsBox(this.width/2, this.height/2);
-    fixdef.restitution=0.4; //positively bouncy!
-    this.body.CreateFixture(fixdef);
-
-    this.getAngle=function(){
-        return this.angle;
-    };
-
-    this.draw=null;
-    return this;
+    engine.utils.process_parameters(parameters, par_list);
+    
+    this.filename = parameters.filename;
+    
+    parameters.fixed_rotation = true;
+    parameters.body_type = engine.box2d.b2Body.b2_staticBody;
+    BoxProp.superConstructor.apply(this, [parameters]);
+    this.add_tag('prop');
 };
+
+gamejs.utils.objects.extend(BoxProp, engine.Entity);
+
+engine.register_class(BoxProp);

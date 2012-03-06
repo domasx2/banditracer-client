@@ -32,47 +32,48 @@ var DIFFICULTY={1:{'FIRE_CHANCE':0.20,
                    'MAX_SPEED_DEBUFF':10}}
 
 exports.AIController=function(car, world, scene){
-    car.max_steer_angle=car.max_steer_angle*1.1;
+    car.max_steer_angle = car.max_steer_angle*1.1;
     car.turn_msec=50;
     this.difficulty=DIFFICULTY[combatracer.game.player.singleplayer.difficulty];
-    this.scene=scene;
-    this.car=car;
-    this.world=world;
-    this.cur_wp=1;
-    this.ceasfire=false;
-    this.ceasfire_cur_cooldown=0;
-    this.ceasfire_cooldown=1000;
+    this.scene = scene;
+    this.car = car;
+    this.world = world;
+    this.cur_wp = 1;
+    this.ceasfire = false;
+    this.ceasfire_cur_cooldown = 0;
+    this.ceasfire_cooldown = 1000;
     
     this.stationary=0; //how many seconds is this car stationary?
+    
     this.update=function(keys_down, ms){
         if(!this.car.alive)return;
          this.car.accelerate=ACC_ACCELERATE;
-        var wp=this.world.ai_waypoints[this.cur_wp];
-        var nwp=this.world.ai_waypoints[this.cur_wp<this.world.max_waypoint ? this.cur_wp+1 : 1];
+        var wp = this.world.ai_waypoints[this.cur_wp];
+        var nwp = this.world.ai_waypoints[this.cur_wp < this.world.max_waypoint ? this.cur_wp + 1 : 1];
 
-        var speed=this.car.getSpeedKMH();
+        var speed=this.car.get_speed_KMH();
 
         //cheats
-        var player_pos=this.scene.player_car.getRacePosition();
-        var mypos=this.car.getRacePosition();
+        var player_pos = this.scene.player_car.get_race_position();
+        var mypos = this.car.get_race_position();
 
         //if player is ahead, gradually increase speed to up to extra 10 km/h
-        if(player_pos<mypos){
-            if(car.mod_speed<this.difficulty.MAX_SPEED_BUFF){
-                car.mod_speed+=5*(ms/1000);
+        if(player_pos < mypos){
+            if(car.mod_speed < this.difficulty.MAX_SPEED_BUFF){
+                car.mod_speed += 5*(ms/1000);
             }
-        }else if(player_pos>mypos){
+        }else if(player_pos > mypos){
             //if car is ahead, gradually decrease speed down to -25 km/h
             if(car.mod_speed > -this.difficulty.MAX_SPEED_DEBUFF){
-                car.mod_speed-=5*(ms/1000);
+                car.mod_speed -= 5 * (ms / 1000);
             }
         }
 
         //if car speed is below 6 km/h for 3 seconds, most likely it is stuck. teleport it to next waypoint
-        if(speed<6){
+        if(speed < 6){
             if(this.car.alive){
-                this.stationary+=ms;
-                if(this.stationary>3000){
+                this.stationary += ms;
+                if(this.stationary > 3000){
                     this.car.teleport([wp.x, wp.y]);
                     this.stationary=0;
                 }
@@ -80,8 +81,8 @@ exports.AIController=function(car, world, scene){
         }
         else this.stationary=0;
 
-        var carpos=arr(this.car.body.GetPosition());
-        var lp=arr(this.car.body.GetLocalPoint(vec(wp.x, wp.y)));
+        var carpos = this.car.get_position();
+        var lp = this.car.get_local_point([wp.x, wp.y]);
         var len=vectors.distance(carpos, [wp.x, wp.y]);
         var len2=vectors.distance(carpos, [nwp.x, nwp.y]);
 
@@ -89,30 +90,30 @@ exports.AIController=function(car, world, scene){
           1)closer than 5 meters to it
           2)it is behind the car, but closer than 35 meters
         */
-        var angle=degrees(vectors.angle([0, -1], lp));
-        if(len<10 || (lp.y>0 && len <35)){
-            if(this.cur_wp<this.world.max_waypoint)this.cur_wp++;
-            else this.cur_wp=1;
-            wp=this.world.ai_waypoints[this.cur_wp];
+        var angle = degrees(vectors.angle([0, -1], lp));
+        if(len < 10 || (lp[1] > 0 && len < 35)){
+            if(this.cur_wp < this.world.max_waypoint) this.cur_wp++;
+            else this.cur_wp = 1;
+            wp =this.world.ai_waypoints[this.cur_wp];
         }
-        if(angle>10){
-            if(lp[0]>0)this.car.steer=STEER_RIGHT;
-            else this.car.steer=STEER_LEFT;
-        }else this.car.steer=STEER_NONE;
+        if(angle > 10){
+            if(lp[0] > 0)this.car.steer=STEER_RIGHT;
+            else this.car.steer = STEER_LEFT;
+        }else this.car.steer = STEER_NONE;
 
         
         
         //is this bot shooting?
-        if(this.ceasfire_cur_cooldown<=0){
-            this.ceasfire=Math.random()>this.difficulty.FIRE_CHANCE ? true : false;
-            this.ceasfire_cur_cooldown=this.ceasfire_cooldown;
+        if(this.ceasfire_cur_cooldown <= 0){
+            this.ceasfire = Math.random() >this.difficulty.FIRE_CHANCE ? true : false;
+            this.ceasfire_cur_cooldown = this.ceasfire_cooldown;
         }else{
-            this.ceasfire_cur_cooldown-=ms;
+            this.ceasfire_cur_cooldown-= ms;
         }
         
         //fire weapons if needed        
         (['front_weapon', 'util', 'rear_weapon']).forEach(function(wtype){
-            if(this.car[wtype]) this.car['fire_'+wtype]=this.ceasfire ? false : this.car[wtype].AI();
+            if(this.car[wtype]) this.car['fire_'+wtype] = this.ceasfire ? false : this.car[wtype].AI();
         }, this);
     }
 

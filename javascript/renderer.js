@@ -90,147 +90,146 @@ var sprite2rotarray=exports.sprite2rotarray=function(surface, step){
     return retv;
 };
 
-var ImageCache=exports.ImageCache = function(){
-    this.cars={};
-    this.props={};
-    this.decals={};
-    this.tiles={};
-    this.animations={};
-    this.fonts={};
-    this.ui={};
-    this.alphabet='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.,:\/!?"|()';
-    this['static']={};
-    
-    //load tiles    
-    resources.tiles.forEach(function(f){
-      this.tiles[f]=gamejs.image.load('images/tiles/'+f);
+
+var ImageCache = exports.ImageCache = function() {
+    this.cars = {};
+    this.props = {};
+    this.decals = {};
+    this.tiles = {};
+    this.animations = {};
+    this.fonts = {};
+    this.ui = {};
+    this.alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.,:\/!?"|()';
+    this['static'] = {};
+
+    //load tiles
+    resources.tiles.forEach(function(f) {
+        this.tiles[f] = gamejs.image.load('images/tiles/' + f);
     }, this);
-    
     //load cars
     //resources.cars.forEach(function(f){
     //    this.cars[f]=sprite2rotarray(gamejs.image.load('images/cars/'+f), 2);
     //}, this);
-    
+
     //cache props
-    resources.props.forEach(function(f){
-        this.props[f]=sprite2rotarray(gamejs.image.load('images/props/'+f), 5);
+    resources.props.forEach(function(f) {
+        this.props[f] = sprite2rotarray(gamejs.image.load('images/props/' + f), 5);
     }, this);
-    
     //cache decals
-    resources.decals.forEach(function(f){
-        this.decals[f]=sprite2rotarray(gamejs.image.load('images/decals/'+f), 90);
+    resources.decals.forEach(function(f) {
+        this.decals[f] = sprite2rotarray(gamejs.image.load('images/decals/' + f), 90);
     }, this);
-    
     //cache animations
-    resources.animations.forEach(function(f){
-        this.animations[f]=gamejs.image.load('images/animations/'+f);
+    resources.animations.forEach(function(f) {
+        this.animations[f] = gamejs.image.load('images/animations/' + f);
     }, this);
-    
     //cache ui
-    resources.ui.forEach(function(f){
-        this.ui[f]=gamejs.image.load('images/ui/'+f);
+    resources.ui.forEach(function(f) {
+        this.ui[f] = gamejs.image.load('images/ui/' + f);
     }, this);
-    
     //cache static
-    resources['statics'].forEach(function(f){
-        this['static'][f]=gamejs.image.load('images/static/'+f);
-    }, this); 
-    
-/*    //cache fonts
-    var font='hud', letter;
-    
-    this.fonts[font]={};
-    resources.fonts[font].forEach(function(f){
-        letter=f.split('.')[0];
-        this.fonts[font][letter]=gamejs.image.load('images/fonts/'+font+'/'+f);
-    }, this);      */     
-    
-    
-    this.initFont=function(name, fontSettings, color){
-        this.fonts[name]={};
-        var font=new gamejs.font.Font(fontSettings);
-        
+    resources['statics'].forEach(function(f) {
+        this['static'][f] = gamejs.image.load('images/static/' + f);
+    }, this);
+    /*    //cache fonts
+     var font='hud', letter;
+
+     this.fonts[font]={};
+     resources.fonts[font].forEach(function(f){
+     letter=f.split('.')[0];
+     this.fonts[font][letter]=gamejs.image.load('images/fonts/'+font+'/'+f);
+     }, this);      */
+
+    this.initFont = function(name, fontSettings, color) {
+        this.fonts[name] = {};
+        var font = new gamejs.font.Font(fontSettings);
+
         var c;
-        for(var i=0;i<this.alphabet.length;i++){
-            c=this.alphabet[i];
-            this.fonts[name][c]=font.render(c, color);
-        } 
+        for(var i = 0; i < this.alphabet.length; i++) {
+            c = this.alphabet[i];
+            this.fonts[name][c] = font.render(c, color);
+        }
     };
-    
-    this.getDecalSprite=function(filename, angle){
+
+    this.getDecalSprite = function(filename, angle) {
         return this.getSpriteFromRotarray(this.decals[filename], angle);
     };
-    
-    this.getPropSprite=function(filename, angle){
+
+    this.getPropSprite = function(filename, angle) {
         return this.getSpriteFromRotarray(this.props[filename], angle);
     };
-    
-    this.cacheCarSprite=function(filename){
-        if(!this.cars[filename]){
-            this.cars[filename]=sprite2rotarray(gamejs.image.load('images/cars/'+filename), 2);
+
+    this.cacheCarSprite = function(filename) {
+        if(!this.cars[filename]) {
+            this.cars[filename] = sprite2rotarray(gamejs.image.load('images/cars/' + filename), 2);
         }
     };
-    
-    this.getCarSprite=function(filename, angle){
-        if(!this.cars[filename]){
+
+    this.getCarSprite = function(filename, angle) {
+        if(!this.cars[filename]) {
             this.cacheCarSprite(filename);
         }
-        return this.getSpriteFromRotarray(this.cars[filename], angle);  
+        return this.getSpriteFromRotarray(this.cars[filename], angle);
     };
-    
-    this.getTile=function(filename){
+
+    this.getTile = function(filename) {
         return this.tiles[filename];
     };
-    
-    this.getLetter=function(font, letter){
-        return this.fonts[font][letter];  
+
+    this.getLetter = function(font, letter) {
+        return this.fonts[font][letter];
     };
-    
-    this.getTextSize=function(text, font){
-        var w=0, h=0, c, l, sz;
-        if(text){ 
-            for(var i=0;i<text.length;i++){
-                c=text[i];
-                if(c==' ')w+=8;
-                else{
-                    l=this.getLetter(font, c);
-                    if(l){
-                        sz=l.getSize();
-                        w+=sz[0];
-                        h=sz[1];
+
+    this.getTextSize = function(text, font) {
+        var w = 0, h = 0, c, l, sz;
+        if(text) {
+            for(var i = 0; i < text.length; i++) {
+                c = text[i];
+                if(c == ' ')
+                    w += 8;
+                else {
+                    l = this.getLetter(font, c);
+                    if(l) {
+                        sz = l.getSize();
+                        w += sz[0];
+                        h = sz[1];
                     }
                 }
             }
             return [w, h];
-        }else return [0, 0];
+        } else
+            return [0, 0];
     };
-    
-    this.getAnimationFrameCount=function(filename){
-        var sz= this.animations[filename].getSize();
-        return sz[0]/sz[1];
+
+    this.getAnimationFrameCount = function(filename) {
+        var sz = this.animations[filename].getSize();
+        return sz[0] / sz[1];
     };
-    
-    this.getAnimationSheet=function(filename){
-        return this.animations[filename];    
+
+    this.getAnimationSheet = function(filename) {
+        return this.animations[filename];
     };
-    
-    this.getUIImage=function(filename){
-        return this.ui[filename];  
+
+    this.getUIImage = function(filename) {
+        return this.ui[filename];
     };
-    this.getStaticSprite=function(filename){
+    this.getStaticSprite = function(filename) {
         return this['static'][filename];
     };
-    
-    this.getSpriteFromRotarray=function(rotarray, angle){
-        if((angle % rotarray['step'])!=0) angle=math.normaliseDegrees(parseInt(angle/rotarray['step'])*rotarray['step']);
+
+    this.getSpriteFromRotarray = function(rotarray, angle) {
+        angle = math.normaliseDegrees(angle);
+        if((angle % rotarray['step']) != 0)
+            angle = parseInt(angle / rotarray['step']) * rotarray['step'];
         return rotarray[angle];
     };
-    
     //init fonts
     this.initFont('hud', skin.fonts['hud'][0], skin.fonts['hud'][1]);
-    
+
     return this;
 };
+
+
 
 exports.cache=null;
 
@@ -337,25 +336,26 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
     this.zoom=1;
     this.r1=new gamejs.Rect([0, 0], [this.display_width, this.display_height]);
     this.r2=new gamejs.Rect([0, 0], [this.width, this.height]);
+    this.phys_scale = settings.get('PHYS_SCALE');
     
     this.follow=function(obj){
-        this.follow_object=obj;  
+        this.follow_object=obj;
     };
     
     //update camera offset
     this.updateOffset=function(){
         if(this.follow_object){
-            var pos=this.follow_object.alive ? arr(this.follow_object.body.GetPosition()) : this.follow_object.respawn_location;
-            this.offset_x=Math.min(Math.max(0, pos[0]*world.phys_scale-parseInt(this.width/2)), world.width_px-this.width);
-            this.offset_y=Math.min(Math.max(0, pos[1]*world.phys_scale-parseInt(this.height/2)), world.height_px-this.height);
+            var pos = this.follow_object.alive ? this.follow_object.get_position() : this.follow_object.respawn_location;
+            this.offset_x=Math.min(Math.max(0, pos[0] * this.phys_scale-parseInt(this.width/2)), world.width * this.phys_scale - this.width);
+            this.offset_y=Math.min(Math.max(0, pos[1] * this.phys_scale-parseInt(this.height/2)), world.height * this.phys_scale - this.height);
         }
         return false;
     };
        
     //world point 2 screen point
     this.getScreenPoint=function(world_point){
-        world_point=arr(world_point);
-        return [world_point[0]*this.world.phys_scale-this.offset_x, world_point[1]*this.world.phys_scale-this.offset_y];
+        return [world_point[0] * this.phys_scale - this.offset_x,
+                world_point[1] * this.phys_scale - this.offset_y];
     };
     
     this.drawBackground=function(){
@@ -475,30 +475,32 @@ var RaceRenderer = exports.RaceRenderer = function(width, height, world, backgro
 
         this.surface=display;
         this.drawText('FPS: ' + parseInt(1000/pars.msDuration), 'hud', [10, 10]);
-        var size=display.getSize();
+        var size = display.getSize();
         
-        var car=pars.car;
-        if(car){        
-            this.drawText('POS: '+car.getRacePosition()+ '/'+this.world.objects['car'].length, 'hud',[size[0]/2-140,  10]);
+        var car = pars.car;
+
+        if(car) {
+            this.drawText('POS: ' + car.get_race_position() + '/' + this.world.get_objects_by_tag('car').length, 'hud', [size[0] / 2 - 140, 10]);
             //lap
-            this.drawText('LAP: '+car.lap+'/'+pars.max_laps, 'hud', [size[0]/2+20,  10]);
+            this.drawText('LAP: ' + car.lap + '/' + pars.max_laps, 'hud', [size[0] / 2 + 20, 10]);
             //speed
-            this.drawText('SPEED: '+parseInt(car.getSpeedKMH()), 'hud', [10, display.getSize()[1]-40]);
+            this.drawText('SPEED: ' + parseInt(car.get_speed_KMH()), 'hud', [10, display.getSize()[1] - 40]);
             //ammo
-            
-            var x=250;
-            var y=display.getSize()[1]-40;
-            (['front_weapon', 'util', 'rear_weapon']).forEach(function(weapon_type){
-                if(car[weapon_type]){
-                    var descr=weapon_descriptions[car[weapon_type].weapon_id];
-                    var icon=this.cache.getStaticSprite(descr.icon);
-                    this.surface.blit(icon, [x, y-15]);
-                    x+=50;
+
+            var x = 250;
+            var y = display.getSize()[1] - 40;
+            (['front_weapon', 'util', 'rear_weapon']).forEach(function(weapon_type) {
+                if(car[weapon_type]) {
+                    var descr = weapon_descriptions[car[weapon_type].type];
+                    var icon = this.cache.getStaticSprite(descr.icon);
+                    this.surface.blit(icon, [x, y - 15]);
+                    x += 50;
                     this.drawText(String(parseInt(car[weapon_type].ammo)), 'hud', [x, y]);
-                    x+=60;
+                    x += 60;
                 }
             }, this);
         }
+
         
         if(settings.get('DEBUG')){
             if(pars.delta){

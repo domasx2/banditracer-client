@@ -4,7 +4,6 @@ var sounds=require('./sounds');
 var combatracer=require('./combatracer');
 var cars=require('./cars');
 var bots=require('./bots');
-var box2d = require('./box2d');
 var GUI = require('./gamejs-gui');
 var vec=utils.vec;
 var arr=utils.arr;
@@ -33,15 +32,17 @@ var LevelScene=exports.LevelScene=function(level){
     this.keys_down={};
     this.started=false;
     this.max_laps=level.laps? level.laps : 3;
-    
+    this.world = world.build_world(level, world.MODE_STANDALONE);
     this.gui=new GUI.GUI(this.game.display);
     var i;
     //BUILD BACKGROUND FROM TILES
     this.background=utils.renderLevelBackground(level, true);
 
-    this.world=world.buildWorld(level,  world.MODE_STANDALONE);
-    
-    this.renderer=new renderer.RaceRenderer(settings.get('SCREEN_WIDTH'), settings.get('SCREEN_HEIGHT'), this.world, this.background, this.cache);
+    this.renderer=new renderer.RaceRenderer(settings.get('SCREEN_WIDTH'), 
+                                            settings.get('SCREEN_HEIGHT'), 
+                                            this.world, 
+                                            this.background, 
+                                            this.cache);
 
     this.handleEvent=function(event){
         if (event.type === gamejs.event.KEY_DOWN) {
@@ -73,7 +74,7 @@ var LevelScene=exports.LevelScene=function(level){
     };
     
     this.destroy=function(){
-        if(settings.get('SOUND'))sounds.engine.stop();  
+        if(settings.get('SOUND')) sounds.engine.stop();  
     };
 };
 
@@ -324,12 +325,11 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(level, ai_tes
 
     //PLAYER CAR
     //carEventFromDescription=function(position, carpars, alias, engine_sound){
-    
-    var evdescr=cars.carEventFromDescription([this.world.start_positions[1].x, this.world.start_positions[1].y],this.world.start_positions[1].angle,
-                                                                  combatracer.game.player.singleplayer.car,
-                                                                  combatracer.game.player.alias,
-                                                                  true);
-    this.player_car=this.world.event('create', evdescr);
+    var pars = cars.get_car_parameters([this.world.start_positions[1].x, this.world.start_positions[1].y],this.world.start_positions[1].angle,
+                                        combatracer.game.player.singleplayer.car,
+                                        combatracer.game.player.alias,
+                                        true);
+    this.player_car = this.world.create(cars.Car, pars);
     
     if(!this.test_ai) this.controllers.push(new controllers.PlayerCarController(this.player_car));
     else this.controllers.push(new controllers.AIController(this.player_car, this.world, this));
@@ -341,26 +341,26 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(level, ai_tes
         var aicar;
         for(i=1;i<4;i++){
             if(this.world.start_positions[i+1]){
-                var descr=bots[league.bots[i-1]];
-                var evdescr=cars.carEventFromDescription([this.world.start_positions[i+1].x, this.world.start_positions[i+1].y],this.world.start_positions[i+1].angle,
-                                                            descr,
-                                                            descr.name,
-                                                            false);
+                var descr = bots[league.bots[i-1]];
+                var pars = cars.get_car_parameters([this.world.start_positions[i+1].x, this.world.start_positions[i+1].y],this.world.start_positions[i+1].angle,
+                                                    descr,
+                                                    descr.name,
+                                                    false);
                                                             
                 //hell difficulty: buff all stats & weapons
 			    if(combatracer.game.player.singleplayer.difficulty == 4){
-			    	evdescr.pars.acc_upgrades = 5;
-			    	evdescr.pars.speed_upgrades = 5;
-			    	evdescr.pars.armor_upgrades = 5;
+			    	pars.acc_upgrades = 5;
+			    	pars.speed_upgrades = 5;
+			    	pars.armor_upgrades = 5;
 			    	(['util', 'rear_weapon', 'front_weapon']).forEach(function(t){
 			    		if(this[t]){
 			    			this[t].ammo_upgrades = Math.min(this[t].ammo_upgrades+2, 5);
 			    			this[t].damage_upgrades = Math.min(this[t].damage_upgrades+2, 5);
 			    		}
-			    	}, evdescr.pars);
+			    	}, pars);
 			    }                                            
                                                             
-                aicar=this.world.event('create', evdescr);
+                aicar = this.world.create(cars.Car, pars);
                 this.controllers.push(new controllers.AIController(aicar, this.world, this));
             }
         }
@@ -369,7 +369,7 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(level, ai_tes
 
     this.renderer.follow(this.player_car);
 
-    this.update=function(msDuration){
+    this.update = function(msDuration) {
         this.updateZoom(msDuration);
         if(this.time_to_start>-1000){
             this.time_to_start-=msDuration;
@@ -386,25 +386,25 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(level, ai_tes
             this.world.update(msDuration);
         
             //update physics
-            this.world.b2world.Step(msDuration/1000, 10, 8);
-            this.world.b2world.ClearForces();     
+            this.world.b2world.Step(msDuration / 1000, 10, 8);
+            this.world.b2world.ClearForces();
         }
 
         //if we reached max laps, end race
         if(this.player_car.lap > this.max_laps){        
-            this.game.showSPGameOver(this.genScoreTable(), this.player_car.getRacePosition(), this);
+            this.game.showSPGameOver(this.genScoreTable(), this.player_car.get_race_position(), this);
             return;
         };
     };
 
-    this.draw=function(display, msDuration){
+    this.draw = function(display, msDuration) {
         //render world
         this.renderer.render(display);
         
         //play engine sounds
         if(settings.get('SOUND')){            
-            if(this.renderer.follow_object && (this.renderer.follow_object.type=='car'))
-                sounds.engine.play_by_speed(this.renderer.follow_object.getSpeedKMH(), this.renderer.follow_object.max_speed);
+            if(this.renderer.follow_object && (this.renderer.follow_object.has_tag('car')))
+                sounds.engine.play_by_speed(this.renderer.follow_object.get_speed_KMH(), this.renderer.follow_object.max_speed);
                 
             sounds.engine.update(msDuration);
         }
@@ -420,8 +420,8 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(level, ai_tes
    };
    
    this.genScoreTable=function(){
-        var table= this.world.objects.car.map(function(car, idx) {
-             return {'place':car.getRacePosition(),
+        var table= this.world.get_objects_by_tag('car').map(function(car, idx) {
+             return {'place':car.get_race_position(),
                     'id':idx,
                     'player':car.alias,
                     'kills':car.kills,
