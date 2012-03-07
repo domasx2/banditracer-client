@@ -622,7 +622,7 @@ engine.register_class(MineLauncher);
 MineLauncher.prototype.AI = fireAtRearTargets;
     
 MineLauncher.prototype.get_fire_pos=function(){
-    return this.car.get_world_point([0, (this.car.parameters.size[1] / 2 + 2)]);  
+    return this.car.get_world_point([0, (this.car.parameters.size[1] / 2 + 3)]);  
 };
 
 var MissileLauncher = exports.MissileLauncher = function(pars){
