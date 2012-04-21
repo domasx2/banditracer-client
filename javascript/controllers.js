@@ -90,7 +90,8 @@ exports.AIController=function(car, world, scene){
           1)closer than 5 meters to it
           2)it is behind the car, but closer than 35 meters
         */
-        var angle = degrees(vectors.angle([0, -1], lp));
+        var angle = gamejs.utils.math.normaliseDegrees(degrees(vectors.angle([0, -1], lp)));
+
         if(len < 10 || (lp[1] > 0 && len < 35)){
             if(this.cur_wp < this.world.max_waypoint) this.cur_wp++;
             else this.cur_wp = 1;
@@ -99,10 +100,8 @@ exports.AIController=function(car, world, scene){
         if(angle > 10){
             if(lp[0] > 0)this.car.steer=STEER_RIGHT;
             else this.car.steer = STEER_LEFT;
-        }else this.car.steer = STEER_NONE;
+        } else this.car.steer = STEER_NONE;
 
-        
-        
         //is this bot shooting?
         if(this.ceasfire_cur_cooldown <= 0){
             this.ceasfire = Math.random() >this.difficulty.FIRE_CHANCE ? true : false;

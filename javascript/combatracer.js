@@ -215,12 +215,12 @@ var Communicator=exports.Communicator=function(game){
     };
 };
 
-exports.init=function(){
+exports.init = function() {
     exports.game=new Game();
     return exports.game;
 };
 
-var Game=exports.Game=function(){
+var Game = exports.Game = function(){
     this.director=null;
     this.cache=renderer.init();
     if(settings.get('SOUND')) sounds.init();

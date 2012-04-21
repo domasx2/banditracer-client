@@ -151,9 +151,9 @@ Mine.prototype.impact=function(obj, cpoint, direction){
                     if(this.onimpact) this.onimpact();
                 }
             }, this);
-            this.world.destroy(this);
             this.world.spawn_animation('explosion', this.position);
             this.world.play_sound('explosion.wav', this.position);
+            this.world.destroy(this);
         }
     };
 
@@ -708,7 +708,7 @@ TankShell.prototype.impact = function(obj, cpoint, direction){
                     car.apply_damage(this.damage, this.car);
                     this.world.create(buffs.SlipDebuff, {'duration':500,
                                                          'object':car});
-                    var fvect = vectors.unit(vectors.substract(cp, tp));
+                    var fvect = vectors.unit(vectors.subtract(cp, tp));
                     fvect=vectors.multiply(fvect, 200);
                     car.apply_impulse(fvect, car.get_position());
                 };

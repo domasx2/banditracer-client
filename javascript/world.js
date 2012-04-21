@@ -62,8 +62,8 @@ World.prototype.spawn_animation = function(anim_name, position, follow_obj){
                                                                                         'follow_obj':follow_obj}));
 };
 
-World.prototype.play_sound = function(filename){
-//TODO
+World.prototype.play_sound = function(filename, position){
+    this.create(sounds.Sound, {'filename':filename, 'position':position});
 };
 
 

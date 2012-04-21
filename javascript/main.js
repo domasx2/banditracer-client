@@ -45,7 +45,7 @@ function main(){
    gamejs.time.fpsCallback(loadTick, this, 50);
    gamejs.preload(combatracer.getPreloadList());
    levels.init();
-   progfn=gamejs.ready(function(){
+   progfn = gamejs.ready(function(){   
       var game=new combatracer.init();
       gamejs.time.deleteCallback(loadTick, 50);
       game.start(display);

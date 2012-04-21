@@ -102,7 +102,7 @@ exports.push = function(obj, obj_from, force_multiplier, debuff_duration){
     if(obj.has_tag('car') && debuff_duration)
         obj.world.create(buffs.SlipDebuff, {'duration':debuff_duration,
                                              'object':obj});
-    var fvect = vectors.unit(vectors.substract(obj.get_position(), obj_from.get_position()));
+    var fvect = vectors.unit(vectors.subtract(obj.get_position(), obj_from.get_position()));
     fvect = vectors.multiply(fvect, obj.get_mass()*force_multiplier);
     obj.apply_impulse(fvect, obj.get_position());
 }

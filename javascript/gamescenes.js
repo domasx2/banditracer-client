@@ -269,7 +269,7 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
         this.renderer.render(display);
        
         //play engine sounds
-        if(settings.get('SOUND')){
+        if(settings.get('SOUND') && settings.get('ENGINE_SOUND')){
             if(this.renderer.follow_object && (this.renderer.follow_object.type=='car'))
                 sounds.engine.play_by_speed(this.renderer.follow_object.getSpeedKMH(), this.renderer.follow_object.max_speed);
                 
