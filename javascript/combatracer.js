@@ -12,6 +12,7 @@ var gamescenes=require('./gamescenes');
 var sounds=require('./sounds');
 var editor=require('./editor');
 var garage=require('./garage');
+var engine = require('./engine');
 
 var requestAnimationFrame=(function(){
     //Check for each browser
@@ -42,7 +43,10 @@ var getDefCarDescr=exports.getDefCarDescr=function(car){
             'armor_upgrades':0}
 }
 
-exports.getPreloadList=function(){
+exports.image_filenames = [];
+exports.sound_filenames = [];
+
+exports.get_preload_list = function(){
     var retv=new Array();
     var i;
     for(i=0;i<resources.cars.length;i++){
@@ -68,17 +72,23 @@ exports.getPreloadList=function(){
         retv.push('images/decals/'+filename); 
     });
     
+    exports.image_filenames = retv;
+    retv = new Array();
+    
     if(settings.get('SOUND')){
         resources.sound_fx.forEach(function(filename){
            retv.push('sounds/fx/'+filename); 
         });
         
-        resources.sound_engine.forEach(function(filename){
-           retv.push('sounds/engine/'+filename); 
-        });
+        //resources.sound_engine.forEach(function(filename){
+         //  retv.push('sounds/engine/'+filename); 
+        //});
+        
+        exports.sound_filenames = retv;
     }
     
-    return retv;
+    
+    return exports.image_filenames.concat(exports.sound_filenames);
 };
 
 var Director=exports.Director= function Director (display) {
@@ -145,6 +155,7 @@ var Communicator=exports.Communicator=function(game){
     this.next_transaction_id=1;
     this.messages=[];
     this.status='closed';
+    
 
     this.queueMessage=function(cmd, payload){
         /*
@@ -223,7 +234,10 @@ exports.init = function() {
 var Game = exports.Game = function(){
     this.director=null;
     this.cache=renderer.init();
-    if(settings.get('SOUND')) sounds.init();
+    if(settings.get('SOUND')){
+        engine.initialize_sounds(exports.sound_filenames);
+        sounds.init();
+    } 
     ui.init();
     this.socket=null;
     this.tried_loading=false;

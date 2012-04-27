@@ -74,7 +74,7 @@ var LevelScene=exports.LevelScene=function(level){
     };
     
     this.destroy=function(){
-        if(settings.get('SOUND')) sounds.engine.stop();  
+        //if(settings.get('SOUND')) sounds.engine.stop();  
     };
 };
 
@@ -269,12 +269,11 @@ var MultiplayerLevelScene=exports.MultiplayerLevelScene=function(game, level, ca
         this.renderer.render(display);
        
         //play engine sounds
-        if(settings.get('SOUND') && settings.get('ENGINE_SOUND')){
+        /*if(settings.get('SOUND') && settings.get('ENGINE_SOUND')){
             if(this.renderer.follow_object && (this.renderer.follow_object.type=='car'))
                 sounds.engine.play_by_speed(this.renderer.follow_object.getSpeedKMH(), this.renderer.follow_object.max_speed);
                 
-            sounds.engine.update(msDuration);
-        }
+        }*/
 
         //if finished, spectate a live player
         if(this.state==2){
@@ -402,12 +401,11 @@ var SingleplayerLevelScene=exports.SingleplayerLevelScene=function(level, ai_tes
         this.renderer.render(display);
         
         //play engine sounds
-        if(settings.get('SOUND')){            
+       /* if(settings.get('SOUND')){            
             if(this.renderer.follow_object && (this.renderer.follow_object.has_tag('car')))
                 sounds.engine.play_by_speed(this.renderer.follow_object.get_speed_KMH(), this.renderer.follow_object.max_speed);
                 
-            sounds.engine.update(msDuration);
-        }
+        }*/
   
         //render HUD
         this.renderer.renderHUD(display, {'car':this.player_car,

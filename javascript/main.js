@@ -3,13 +3,11 @@ var combatracer=require('./combatracer');
 var settings=require('./settings');
 var skin=require('./skin');
 var levels=require('./levels');
-
+var engine=require('./engine');
 
 gamejs.display.setCaption("Bandit Racer");
 var img;
 
-
-//gamejs.preload(['images/ui/logo.png']);
 function main(){
    
    var canvas = document.createElement('canvas');
@@ -43,7 +41,7 @@ function main(){
    settings.init();
    display=gamejs.display.setMode([settings.get('SCREEN_WIDTH'), settings.get('SCREEN_HEIGHT')]);
    gamejs.time.fpsCallback(loadTick, this, 50);
-   gamejs.preload(combatracer.getPreloadList());
+   gamejs.preload(combatracer.get_preload_list());
    levels.init();
    progfn = gamejs.ready(function(){   
       var game=new combatracer.init();

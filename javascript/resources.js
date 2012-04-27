@@ -22,5 +22,6 @@ exports.decals=[,'dideliskampas.png','ilgas.png','trumpas.png','issisakojimas.pn
                 'paprastas.png','siauras.png','siaurasiplatu.png','siaurejantis1.png','siaurejantis2.png','sonaslenktas1.png',
                 'sonaslenktas2.png','startbar.png','susikerta.png','uglyduckling.png', 'white_bar.png',
                 'arrow2.png', 'arrow3.png', 'arrow4.png', 'arrow5.png', 'arrow.png'];
-exports.sound_fx=['bullet_impact_metal.wav','bullet_impact_soft.wav','button_click.wav','explosion.wav','machinegun_shot.wav','missile_launch.wav','thud.wav', 'shockwave.wav', 'repair.wav'];
-exports.sound_engine=['loop_0.wav', 'loop_1.wav', 'loop_2.wav','loop_3.wav','loop_4.wav','loop_5.wav' ];
+exports.sound_fx=['bullet_impact_metal.wav','bullet_impact_soft.wav','button_click.wav','explosion.wav','machinegun_shot.wav','missile_launch.wav','thud.wav', 'shockwave.wav', 'repair.wav',
+                    'plasma_cannon.wav', 'fire_cannon.wav'];
+//exports.sound_engine=['loop_0.wav', 'loop_1.wav', 'loop_2.wav','loop_3.wav','loop_4.wav','loop_5.wav' ];

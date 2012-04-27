@@ -7,7 +7,7 @@ var settings=exports.settings={SCREEN_WIDTH:800,  //screen width in pixels
                                 SERVER:'ws://www.banditracer.eu:8000',
                                 DEBUG:true,
                                 SOUND:true,
-                                ENGINE_SOUND:true};     //game server
+                                ENGINE_SOUND:false};     //game server
 
 exports.get=function(name){
     return settings[name];

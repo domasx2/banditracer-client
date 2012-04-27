@@ -556,6 +556,7 @@ PlasmaCannon.prototype.fire = function(){
                                             'car':this.car});
         this.ammo--;
     }
+    this.world.play_sound('plasma_cannon.wav');
 };
 
 var NOS = exports.NOS = function(pars){
@@ -690,6 +691,7 @@ var TankShell = exports.TankShell = function(pars){
     pars.size = [0.8, 1.5];
     TankShell.superConstructor.apply(this, [pars]);
 	this.add_tag('tank_shell');
+	this.world.play_sound('fire_cannon.wav', this.position);
 };
 
 gamejs.utils.objects.extend(TankShell, Projectile);
@@ -717,6 +719,7 @@ TankShell.prototype.impact = function(obj, cpoint, direction){
         
         this.spent = true;
         this.world.spawn_animation('explosion2', this.get_position());
+        this.world.play_sound('explosion.wav', this.position);
     }
 };
 

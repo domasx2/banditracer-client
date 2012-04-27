@@ -1,5 +1,6 @@
 var box2d = require('./box2d');
 var game = require('./game');
+var sound = require('./sound');
 
 var gamejs = require('gamejs');
 var vectors = gamejs.utils.vectors;
@@ -184,4 +185,8 @@ World.prototype.draw = function(renderer){
         var obj = this.objects[id];
         obj.draw(renderer);
     }
+};
+
+World.prototype.play_sound = function(filename, position){
+    this.create(sound.SoundObject, {'filename':filename, 'position':position});
 };
