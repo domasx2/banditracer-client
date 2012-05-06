@@ -372,14 +372,14 @@ CarDisplay.prototype.paint=function(){
 };
 
 TrackSelectorItem=exports.TrackSelectorItem=function(pars){
-    pars.size=[226, 22];
+    pars.size=[pars.parent.size[0], 22];
     this.track=pars.track;
     this.track_obj=levels[this.track];
     TrackSelectorItem.superConstructor.apply(this, [pars]);
     this.label=new GUI.Label({'position':[0, 0],
-                         'parent':this,
-                         'font':getFont(skin.track_selector.item_font),
-                         'text':this.track_obj.title});
+                             'parent':this,
+                             'font':getFont(skin.track_selector.item_font),
+                             'text':this.track_obj.title});
     this.center(this.label);
     this.label.move([this.size[0]-this.label.size[0]-16, this.label.position[1]]);
     this.selected=false;
@@ -408,9 +408,23 @@ TrackSelector=exports.TrackSelector=function(pars){
     pars.size=[536, 320];
     TrackSelector.superConstructor.apply(this, [pars]);
     this.track=null;
-    this.tbg1=new GUI.View({'position':[0, 0],
-                           'size':[226, 261],
-                           'parent':this});
+    
+    if(pars.tracks.length <= 7){
+        this.tbg1=new GUI.View({'position':[0, 30],
+                               'size':[226, 231],
+                               'parent':this});
+    } else {
+        this.tbg1 = new GUI.ScrollableView({'position':[0, 30],
+                                           'size':[206, 201],
+                                           'parent':this});
+        var scrollbar=new GUI.VerticalScrollbar({'parent':this,
+                                                'position':[this.tbg1.getSize()[0], 35],
+                                                'size':[20, this.tbg1.getSize()[1]-10]});
+        this.tbg1.setVerticalScrollbar(scrollbar);
+    }
+                           
+                           
+                           
     this.tbg1.on(GUI.EVT_PAINT, function(){
         gamejs.draw.polygon(this.surface, skin.track_selector.back_color,
                         [[0, 0], [this.size[0], 0], [this.size[0], this.size[1]],
@@ -427,23 +441,24 @@ TrackSelector=exports.TrackSelector=function(pars){
     this.trackdisplay=new TrackDisplay({'parent':this.tbg2,
                                        'position':[0, 0]});
     
-    var ti;
-    var league=leagues[combatracer.game.player.singleplayer.league];
-    
-    new GUI.Label({'parent':this.tbg1,
+    new GUI.Label({'parent':this,
                   'position':[10, 0],
                   'font':getFont('alias'),
-                  'text':league.name});
+                  'text':pars.label});
     
-    league.tracks.forEach(function(track){
-        if(levels[track].title && (!utils.inArray(combatracer.game.player.singleplayer.completed_tracks, track))){
-            ti=new TrackSelectorItem({'parent':this.tbg1,
-                                     'track':track,
-                                     'position':[0, 0]});
-            ti.on('track_select', this.select, this);
-        }
+    pars.tracks.forEach(function(track){
+        ti=new TrackSelectorItem({'parent':this.tbg1,
+                                 'track':track.id,
+                                 'position':[0, 0]});
+        ti.on('track_select', this.select, this);
     }, this);
+    
     GUI.layout.vertical(this.tbg1.children, 5);    
+    
+    if(this.tbg1.autoSetScrollableArea){
+        this.tbg1.autoSetScrollableArea();
+    }
+    
 };
 
 gamejs.utils.objects.extend(TrackSelector, GUI.View);
@@ -552,24 +567,32 @@ var Table=exports.Table=function(pars){
 
 gamejs.utils.objects.extend(Table, GUI.View);
 
-Table.prototype.setData=function(data){
+Table.prototype.setData=function(data, empty_label){
     this.body.children=[];
     var row_ofst=0, col_ofst;
-    data.forEach(function(row){
-        col_ofst=0;
-        var view=new GUI.View({'parent':this.body,
-                              'size':[this.size[0], 30],
-                              'position':[0, row_ofst]});
-        this.columns.forEach(function(column){
-            new GUI.Label({'parent':view,
-                        'position':[col_ofst+20, 3],
-                        'font':getFont(skin.table.header_font),
-                        'text':String(row[column.key]),
-                        'font':getFont(skin.table.data_font)});
-            col_ofst+=column.width;
+    if (data.length){
+        data.forEach(function(row){
+            col_ofst=0;
+            var view=new GUI.View({'parent':this.body,
+                                  'size':[this.size[0], 30],
+                                  'position':[0, row_ofst]});
+            this.columns.forEach(function(column){
+                new GUI.Label({'parent':view,
+                            'position':[col_ofst+20, 3],
+                            'font':getFont(skin.table.header_font),
+                            'text':String(row[column.key]),
+                            'font':getFont(skin.table.data_font)});
+                col_ofst+=column.width;
+            }, this);
+            row_ofst+=30;
         }, this);
-        row_ofst+=30;
-    }, this);
+    } else if(empty_label){
+        new GUI.Label({'parent':this.body,
+                        'position':[20, 3],
+                        'font':getFont(skin.table.header_font),
+                        'text':String(empty_label),
+                        'font':getFont(skin.table.data_font)});
+    }
 };
 
 

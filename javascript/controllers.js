@@ -1,5 +1,5 @@
 var gamejs=require('gamejs');
-var vectors=require('gamejs/utils/vectors');
+var vectors=gamejs.utils.vectors;
 var utils=require('./utils');
 var combatracer=require('./combatracer');
 var vec=utils.vec;

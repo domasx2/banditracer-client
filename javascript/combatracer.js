@@ -1,7 +1,7 @@
 var gamejs = require('gamejs');
 var renderer = require('./renderer');
 var utils = require('./utils');
-var fonts = require('gamejs/font');
+var fonts = gamejs.font;
 var levels=require('./levels');
 var resources = require('./resources');
 var weapons=require('./weapons');
@@ -18,6 +18,12 @@ var requestAnimationFrame=(function(){
     //Check for each browser
     //@paul_irish function
     //Globalises this function to work on any browser as each browser has a different namespace for this
+    try{
+        window;
+    } catch(e){
+        return;
+    }
+    
     return  window.requestAnimationFrame       ||  //Chromium 
             window.webkitRequestAnimationFrame ||  //Webkit
             window.mozRequestAnimationFrame    || //Mozilla Geko
@@ -187,7 +193,7 @@ var Communicator=exports.Communicator=function(game){
 
     this.connect=function(){
         gamejs.log('Connecting...');
-        this.socket = new WebSocket(settings.get('SERVER'));
+        this.socket = new WebSocket(settings.get('SERVER'), 'banditracer');
         this.status='connecting';
         var self=this;
         this.socket.onopen = function() {self.onopen();};

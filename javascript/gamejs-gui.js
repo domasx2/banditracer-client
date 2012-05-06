@@ -181,8 +181,11 @@ CachedFont.prototype.render=function(surface, text, position, space_width){
     }        
 };
 
-
-exports.DEFAULT_FONT=new CachedFont('12px Verdana', 'black');
+try{
+    exports.DEFAULT_FONT=new CachedFont('12px Verdana', 'black');
+}catch(e){
+    
+}
 
 /**
  *View
@@ -643,7 +646,7 @@ var Label=exports.Label=function(pars){
     this.font=pars.font ? pars.font : exports.DEFAULT_FONT;
     pars.size=[1, 1];
     Label.superConstructor.apply(this, [pars]);
-    if(!pars.text) throw "Label: label text must be provided!"
+    if((pars.text == undefined)|| (pars.text == null)) throw "Label: label text must be provided!"
     this.setText(String(pars.text));
     this.type='label'; 
 };

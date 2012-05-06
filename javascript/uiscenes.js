@@ -354,9 +354,77 @@ var JoinLobbyScene2=exports.JoinLobbyScene2=function(game, cache){
 
 };
 gamejs.utils.objects.extend(JoinLobbyScene2, ui.UIScene);
+*/
+
+var CreateLobbyScene = exports.CreateLobbyScene = function(){
+    CreateLobbyScene.superConstructor.apply(this, []);
+    
+    
+    new GUI.Label({'parent':this.container,
+                    'position':[210, 40],
+                    'text':'Create Lobby',
+                    'font':ui.getFont('header_black')});
+                                
+    new GUI.Label({'parent':this.container,
+                   'position':[20, 150],
+                   'text':'Title',
+                   'font':ui.getFont('alias')
+                });
+                
+    this.title = new GUI.TextInput({'parent':this.container,
+                                   'position':[20, 190],
+                                   'size':[200, 34],
+                                   'text':'some game',
+                                   'font':ui.getFont('alias')});
+                                   
+    new GUI.Label({'parent':this.container,
+                   'position':[20, 250],
+                   'text':'Budget',
+                   'font':ui.getFont('alias')
+                });
+                
+    this.title = new GUI.TextInput({'parent':this.container,
+                                   'position':[20, 290],
+                                   'size':[200, 34],
+                                   'text':'10000',
+                                   'font':ui.getFont('alias')});
+                                                              
+    this.track_selector=new ui.TrackSelector({'position':[254, 160],
+                                              'parent':this.container,
+                                              'tracks':levels.all,
+                                              'label':'Tracks'});
+                                              
+                                              
+    this.backbtn=new ui.Button({'size':[130, 50],
+                                'parent':this.container,
+                                'position':[0, 520],
+                                'lean':'left',
+                                'text':'BACK'});
+    this.backbtn.onClick(this.back, this);
+    
+    this.racebtn=new ui.Button({'size':[130, 50],
+                                'parent':this.container,
+                                'position':[this.container.size[0]-130, 520],
+                                'lean':'right',
+                                'text':'CREATE'});
+    this.racebtn.onClick(this.create, this);              
+    
+};
+
+gamejs.utils.objects.extend(CreateLobbyScene, ui.UIScene);
+
+CreateLobbyScene.prototype.back = function(){
+    this.game.showLobbyList();  
+};
+
+CreateLobbyScene.prototype.create = function(){
+    
+};
 
 var JoinLobbyScene=exports.JoinLobbyScene=function(){
     JoinLobbyScene.superConstructor.apply(this, []);
+    
+    
     
     this.titlelbl=new GUI.Label({'parent':this.container,
                                 'position':[210, 40],
@@ -396,10 +464,38 @@ var JoinLobbyScene=exports.JoinLobbyScene=function(){
                                 'lean':'right',
                                 'position':[this.container.size[0]-200, 520],
                                 'text':'Join'});
+                                
+    this.handleMessage=function(cmd, payload){
+        if(cmd=='LOBBY_LIST'){
+            var data=payload.lobbies;
+            var row;
+            for(var i=0;i<data.length;i++){
+                row = data[i];
+                row.track=levels[row.track].title;
+                row.players = row.playercount;
+            }
+            this.table.setData(data, 'No lobbies found.');
+        }else if(cmd == "JOIN_LOBBY_OK"){
+            this.game.joinLobby(payload.lobby_id);
+        }else{
+            this.handleMessageDefault(cmd, payload);
+        }
+
+    };
+    
+    this.refresh_btn.onClick(function(){
+        this.game.getCommunicator().queueMessage('LIST_LOBBIES', {});
+    }, this);
+    
+    this.create_btn.onClick(function(){
+        this.game.createLobby();
+    }, this);
+    
+    this.game.getCommunicator().queueMessage('LIST_LOBBIES', {});
 };
 gamejs.utils.objects.extend(JoinLobbyScene, ui.UIScene);
 
-
+/*
 var CreateLobbyScene=exports.CreateLobbyScene=function(game, cache){
     CreateLobbyScene.superConstructor.apply(this, [game, cache]);
 
@@ -494,14 +590,14 @@ var TitleScene=exports.TitleScene=function(game, cache){
     
     this.btn_single.onClick(this.singleplayer, this);
     
-   /* this.btn_multi=new ui.TitleButton({'position':[440, 300],
+    this.btn_multi=new ui.TitleButton({'position':[440, 300],
                                         'size':[360, 65],
                                         'text':'Multiplayer',
-                                        'parent':this.container});*/
+                                        'parent':this.container});
     
-   // this.btn_multi.onClick(this.joinLobby, this);
+    this.btn_multi.onClick(this.joinLobby, this);
     
-    this.btn_editor=new ui.TitleButton({'position':[440, 300],
+    this.btn_editor=new ui.TitleButton({'position':[440, 390],
                                         'size':[360, 65],
                                         'text':'Track Editor',
                                         'parent':this.container});
@@ -603,8 +699,18 @@ var SinglePlayerScene=exports.SinglePlayerScene=function(){
                                         'gameinfo':combatracer.game.player.singleplayer,
                                           'parent':this.container});
     
+    var tracks = [];
+    
+    leagues[combatracer.game.player.singleplayer.league].tracks.forEach(function(track){
+        if(levels[track].title && (!utils.inArray(combatracer.game.player.singleplayer.completed_tracks, track))){
+            tracks.push(levels[track]);
+        }
+    });
+
     this.track_selector=new ui.TrackSelector({'position':[254, 160],
-                                            'parent':this.container});
+                                              'parent':this.container,
+                                              'tracks':tracks,
+                                              'label':leagues[combatracer.game.player.singleplayer.league].name});
     
     this.diff_selector=new ui.DifficultySelect({'position':[14, 431],
                                                'parent':this.container,

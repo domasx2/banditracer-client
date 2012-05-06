@@ -4,7 +4,7 @@ var settings=exports.settings={SCREEN_WIDTH:800,  //screen width in pixels
                                 PHYS_SCALE:10,    //pixels in a meter
                                 STARTING_BALANCE:100000, //default 3000
                                 STARTING_LEAGUE:0,
-                                SERVER:'ws://www.banditracer.eu:8000',
+                                SERVER:'ws://localhost:8001',
                                 DEBUG:true,
                                 SOUND:true,
                                 ENGINE_SOUND:false};     //game server
