@@ -5,8 +5,8 @@ var settings=exports.settings={SCREEN_WIDTH:800,  //screen width in pixels
                                 STARTING_BALANCE:100000, //default 3000
                                 STARTING_LEAGUE:0,
                                 SERVER:'ws://localhost:8001',
-                                DEBUG:true,
-                                SOUND:true,
+                                DEBUG:false,
+                                SOUND:false,
                                 ENGINE_SOUND:false};     //game server
 
 exports.get=function(name){
