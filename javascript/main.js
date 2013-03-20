@@ -9,7 +9,6 @@ gamejs.display.setCaption("Bandit Racer");
 var img;
 
 function main(){
-   
    var canvas = document.createElement('canvas');
    canvas.width = img.naturalWidth || img.width;
    canvas.height = img.naturalHeight || img.height;
@@ -22,7 +21,7 @@ function main(){
    var progfn;
    var canvas=null;
    var display=null;
-  // var font=new gamejs.font.Font(skin.fonts.loading[0]);
+   //var font=new gamejs.font.Font(skin.fonts.loading[0]);
    var loading_img_size=loading_img.getSize();
    
    function loadTick(){
