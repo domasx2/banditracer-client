@@ -21,33 +21,9 @@ Start the banditracer-client webserver:
 
 Access the game at: <http://localhost:8080/>
 
-Track Editor
-===============
-
-See instructions at: http://www.banditracer.eu/index.php?page=track-editor-help
-
-Your own dedicated multiplayer server
-=======================================
-
-see https://github.com/domasx2/banditracer-server
 
 
-Pack Js files
+Pack Js files / repack gamejs
 ==============
 
-To improve the loading behaviour, use GameJs to wrap your app and the library
-into `gjs-app-wrapped.js` and load that file.
-
-    $ gamejs/wrap-directory.sh ../banditracer-client/javascript/
-
-...then fix banditracer's index.html to use `gjs-app-wrapped.js`.
-
-See gamejs/docs/deployment in the gamejs distribution for more info.
-
-Repack GameJs
-==============
-
-To update the gamejs version used, re-wrap GameJs and copy it into the `banditracer-client/public` directory:
-
-    $ ~/gamejs/wrap-gamejs.sh
-    $ cp ~/gamejs/examples/skeleton/public/gamejs-wrapped.js ~/banditracer-client/public/
+$ bin/build.sh

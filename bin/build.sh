@@ -4,6 +4,8 @@ echo $BASE_DIR
 GAMEJS_REPO="git://github.com/domasx2/gamejs.git"
 GAMEJS_HOME="$BASE_DIR/gamejs"
 cd $SCRIPT_DIR && cd ..
+echo 'compiling levels...'
+node bin/compile_levels.js
 if [ ! -d "./gamejs" ]; then
 	git clone $GAMEJS_REPO
 fi

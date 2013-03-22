@@ -50,7 +50,7 @@ function main(){
 };
 
 //load logo first
-var loadlogo=function(){
+var loadlogo=exports.loadlogo=function(){
    img = new Image();
    img.addEventListener('load', main, true);
    img.src =(window.$g && $g.resourceBaseHref || '.')+'/images/ui/logo.png';

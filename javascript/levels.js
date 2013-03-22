@@ -1,14 +1,24 @@
 var resources=require('./resources');
 var gamejs=require('gamejs');
 
+try{
+	var compiled = require('./levels_compiled').levels;
+}catch(e){
+	var compiled = {};
+}
+
 exports.all = [];
 exports.init=function(){
-    var lname='';
-    for(var i=0; i<resources.levels.length;i++){
-        lname=resources.levels[i];
-        var level = gamejs.http.load('/levels/'+lname+'.json');
-        level.id = lname;
-        exports[lname] = level;
-        exports.all.push(level);
-    }
+	if(!exports.all.length){
+	    var lname='';
+	    for(var i=0; i<resources.levels.length;i++){
+	        lname=resources.levels[i];
+	        var level;
+	        if(compiled[level]) level = compiled[level];
+	        else level = gamejs.http.load('/levels/'+lname+'.json');
+	        level.id = lname;
+	        exports[lname] = level;
+	        exports.all.push(level);
+	    }
+	}
 }
