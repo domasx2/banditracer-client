@@ -27,8 +27,12 @@
     <script src="./javascript/app.min.js"></script>
 
     <script>
+        var SOUND = false;
         require.setModuleRoot('./javascript/');
-        require.run('main')
+        require.run('main');
+        $(document).ready(function(){
+            $('body p').css('display', 'none');
+        });
     </script>
 </head>
 <!-- Html -->
