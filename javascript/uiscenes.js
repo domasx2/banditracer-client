@@ -590,14 +590,14 @@ var TitleScene=exports.TitleScene=function(game, cache){
     
     this.btn_single.onClick(this.singleplayer, this);
     
-    this.btn_multi=new ui.TitleButton({'position':[440, 300],
+   /* this.btn_multi=new ui.TitleButton({'position':[440, 300],
                                         'size':[360, 65],
                                         'text':'Multiplayer',
                                         'parent':this.container});
     
-    this.btn_multi.onClick(this.joinLobby, this);
+    this.btn_multi.onClick(this.joinLobby, this);*/
     
-    this.btn_editor=new ui.TitleButton({'position':[440, 390],
+    this.btn_editor=new ui.TitleButton({'position':[440, 300],
                                         'size':[360, 65],
                                         'text':'Track Editor',
                                         'parent':this.container});
