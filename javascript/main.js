@@ -39,12 +39,11 @@ function main(){
    
    settings.init();
    display=gamejs.display.setMode([settings.get('SCREEN_WIDTH'), settings.get('SCREEN_HEIGHT')]);
-   gamejs.time.fpsCallback(loadTick, this, 50);
+   gamejs.onTick(loadTick, this);
    gamejs.preload(combatracer.get_preload_list());
    levels.init();
    progfn = gamejs.ready(function(){   
       var game=new combatracer.init();
-      gamejs.time.deleteCallback(loadTick, 50);
       game.start(display);
    });
 };

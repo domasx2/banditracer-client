@@ -14,26 +14,7 @@ var editor=require('./editor');
 var garage=require('./garage');
 var engine = require('./engine');
 
-var requestAnimationFrame=(function(){
-    //Check for each browser
-    //@paul_irish function
-    //Globalises this function to work on any browser as each browser has a different namespace for this
-    try{
-        window;
-    } catch(e){
-        return;
-    }
-    
-    return  window.requestAnimationFrame       ||  //Chromium 
-            window.webkitRequestAnimationFrame ||  //Webkit
-            window.mozRequestAnimationFrame    || //Mozilla Geko
-            window.oRequestAnimationFrame      || //Opera Presto
-            window.msRequestAnimationFrame     || //IE Trident?
-            function(callback, element){ //Fallback function
-                window.setTimeout(callback, 1000/settings.get('FPS'));                
-            }
-     
-})()
+
 
 var getDefCarDescr=exports.getDefCarDescr=function(car){
     return {'type':car ? car : 'Sandbug',
@@ -103,36 +84,16 @@ var Director=exports.Director= function Director (display) {
     this.display=display;
     var last_t;
  
-    function tick(t){
-        t=t || (new Date()).getTime();
-        msDuration=t-last_t;
-        last_t=t;
-        if(activeScene){
-            tick_logic(msDuration);
-            tick_render(msDuration);
-        }
-        requestAnimationFrame(tick, display._canvas);
-    }
  
     function tick_logic(msDuration){
-        if (!onAir) return;
-        if (activeScene.handleEvent) {
-            var evts=gamejs.event.get();
-            var i;
-            for(i=0;i<evts.length;i++){
-               activeScene.handleEvent(evts[i]);
-            }
-        } else {
-           // throw all events away
-           gamejs.event.get();
-        }
-        if (activeScene.update) activeScene.update(msDuration);
+        if (activeScene && activeScene.update) activeScene.update(msDuration);
     }
  
     function tick_render(msDuration){
-        if(activeScene.draw) activeScene.draw(display, msDuration);
+        if (activeScene && activeScene.draw) activeScene.draw(display, msDuration);
     }
- 
+
+  
     this.start = function(scene) {
        onAir = true;
        this.replaceScene(scene);
@@ -148,8 +109,14 @@ var Director=exports.Director= function Director (display) {
        return activeScene;
     };
     
-    tick(0);
-    
+    gamejs.onTick(function(msDuration){
+        tick_logic(msDuration);
+        tick_render(msDuration);
+    });
+    gamejs.onEvent(function(evt) {
+        if(activeScene && activeScene.handleEvent) activeScene.handleEvent(evt);
+    });
+     
     
     return this;
 };
