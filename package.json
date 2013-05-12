@@ -9,6 +9,6 @@
         "lib": "javascript"
     },
     "dependencies":{
-    	"gamejs":"git://github.com/oberhamsi/gamejs.git"
+    	"gamejs":"git://github.com/domasx2/gamejs.git"
     }
 }
