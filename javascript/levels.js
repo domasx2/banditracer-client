@@ -14,7 +14,7 @@ exports.init=function(){
 	    for(var i=0; i<resources.levels.length;i++){
 	        lname=resources.levels[i];
 	        var level;
-	        if(compiled[level]) level = compiled[level];
+	        if(compiled[lname]) level = compiled[lname];
 	        else level = gamejs.http.load('/levels/'+lname+'.json');
 	        level.id = lname;
 	        exports[lname] = level;
