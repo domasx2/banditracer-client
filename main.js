@@ -8,9 +8,15 @@ exports.cars=require('./javascript/cars');
 var LEVELS_PATH = './levels/';
 var levels = exports.levels = [];
 var fs=require('fs');
+if(fs && fs.readdirSync){
   var dirName = __dirname +'/' + LEVELS_PATH;
   fs.readdirSync(dirName).forEach(function(fname) {
      var levelname=fname.split('.')[0];
      var content=fs.readFileSync(dirName+fname, 'utf-8');
      levels[levelname]=JSON.parse(content);
   });
+} else {
+  var l = require('./javascript/levels');
+  l.init();
+  exports.levels = l.all;
+}
