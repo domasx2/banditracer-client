@@ -1,278 +1,611 @@
-// TODO: [BUG] music looping is a little bit off. I blame BUFFER and w/e the fuck is going on with that
-// TODO: pan/panning (-1 -> 1)
-// TODO: fade methods?
-// TODO: implement proper looping
-// TODO: repeating via start/end points
-// TODO: if muteAll has been set, any newly created objects should also be muted
+/*
+Audia: <audio> implemented using the Web Audio API
+by Matt Hackett of Lost Decade Games
+*/
+var Audia = (function () {
 
-var Audia = exports.Audia = (function () {
-	var supported = true;
-
+	// Got Web Audio API?
+	var audioContext = null;
 	if (typeof AudioContext == "function") {
-		var audioContext = new AudioContext();
+		audioContext = new AudioContext();
 	} else if (typeof webkitAudioContext == "function") {
-		var audioContext = new webkitAudioContext();
-	} else {
-		supported = false;
+		audioContext = new webkitAudioContext();
 	}
-	exports.supported = supported;
 
-	// Helper
+	// Setup
+	var Audia;
+	var hasWebAudio = Boolean(audioContext);
+
+	// Audia object creation
+	var audioId = 0;
+	var audiaObjectsCache = {};
+	var addAudiaObject = function (object) {
+		var id = ++audioId;
+		audiaObjectsCache[id] = object;
+
+		return id;
+	};
+
+	// Math helper
 	var clamp = function (value, min, max) {
-		if (value < min) {
-			return min;
-		} else if (value > max) {
-			return max;
-		}
-		return value;
+		return Math.min(Math.max(Number(value), min), max);
 	};
 
-	var buffers = {};
-	var cache = {};
-	var cacheId = 0;
+	// Which approach are we taking?…
 
-	var Audia = function () {
-		this._id = ++cacheId;
-		this._currentTime = 0;
-		this._duration = 0;
-		this._gain = null;
-		this._onendedTimeout = null;
-		this._muted = false;
-		this._playing = false;
-		this._source = null;
-		this._startTime = null;
-		this._volume = 1;
+	if (hasWebAudio) {
 
-		var arg = arguments[0];
-		if (typeof arg == "string") {
-			this.src = arg;
-		} else if (typeof arg == "object") {
-			for (var key in arg) {
-				this[key] = arg[key];
+		// Reimplement Audio using Web Audio API…
+
+		// Load audio helper
+		var buffersCache = {};
+		var loadAudioFile = function (object, url) {
+			var onLoad = function (buffer) {
+				// Duration
+				if (buffer.duration !== object._duration) {
+					object._duration = buffer.duration;
+					object.dispatchEvent("durationchange"/*, TODO*/);
+				}
+
+				object.dispatchEvent("canplay"/*, TODO*/);
+				object.dispatchEvent("canplaythrough"/*, TODO*/);
+				object.dispatchEvent("load"/*, TODO*/);
+
+				object._autoplay && object.play();
+			};
+
+			// Got a cached buffer or should we fetch it?
+			if (url in buffersCache) {
+				onLoad(buffersCache[url]);
+			} else {
+				var xhr = new XMLHttpRequest();
+				xhr.open("GET", url, true);
+				xhr.responseType = "arraybuffer";
+				xhr.onload = function () {
+					audioContext.decodeAudioData(xhr.response, function (buffer) {
+						buffersCache[url] = buffer;
+						onLoad(buffer);
+					});
+				};
+				xhr.send();
 			}
-		}
+		};
 
-		cache[this._id] = this;
-	};
+		var refreshBufferSource = function (object) {
+			// Create (or replace) buffer source
+			object.bufferSource = audioContext.createBufferSource();
 
-	Audia.__defineGetter__("version", function () {
-		return 0.1;
-	});
+			// Attach buffer to buffer source
+			object.bufferSource.buffer = buffersCache[object.src];
 
-	Audia.__defineGetter__("supported", function () {
-		return supported;
-	});
+			// Connect to gain node
+			object.bufferSource.connect(object.gainNode);
 
-	if (!supported) {
-		return Audia;
+			// Update settings
+			object.bufferSource.loop = object._loop;
+		};
+
+		// Setup a master gain node
+		var gainNode = audioContext.createGainNode();
+		gainNode.gain.value = 1;
+		gainNode.connect(audioContext.destination);
+
+		// Constructor
+		Audia = function (src) {
+			this.id = addAudiaObject(this);
+
+			// Setup
+			this._listenerId = 0;
+			this._listeners = {};
+
+			// Audio properties
+			this._autoplay = false;
+			this._buffered = []; // TimeRanges
+			this._currentSrc = "";
+			this._currentTime = 0;
+			this._defaultPlaybackRate = 1;
+			this._duration = NaN;
+			this._loop = false;
+			this._muted = false;
+			this._paused = true;
+			this._playbackRate = 1;
+			this._played = []; // TimeRanges
+			this._preload = "auto";
+			this._seekable = []; // TimeRanges
+			this._seeking = false;
+			this._src = "";
+			this._volume = 1;
+
+			// Create gain node
+			this.gainNode = audioContext.createGainNode();
+			this.gainNode.gain.value = this._volume;
+
+			// Connect to master gain node
+			this.gainNode.connect(gainNode);
+
+			// Support for new Audia(src)
+			if (src !== undefined) {
+				this.src = src;
+			}
+		};
+
+		// Methods…
+
+		// load
+		Audia.prototype.load = function () {
+			// TODO: find out what it takes for this to fire
+			// proably just needs src set right?
+			this._src && loadAudioFile(this, this._src);
+		};
+
+		// play()
+		Audia.prototype.play = function () {
+			// TODO: restart from this.currentTime
+			this._paused = false;
+
+			refreshBufferSource(this);
+			this.bufferSource.noteOn(0);
+		};
+
+		// pause()
+		Audia.prototype.pause = function () {
+			if (this._paused) { return; }
+			this._paused = true;
+
+			this.bufferSource.noteOff(0);
+		};
+
+		// stop()
+		Audia.prototype.stop = function () {
+			if (this._paused) { return; }
+
+			this.pause();
+			this.currentTime = 0;
+		};
+
+		// addEventListener()
+		Audia.prototype.addEventListener = function (eventName, callback/*, capture*/) {
+			this._listeners[++this._listenerKey] = {
+				eventName: eventName,
+				callback: callback
+			};
+		};
+
+		// dispatchEvent()
+		Audia.prototype.dispatchEvent = function (eventName, args) {
+			for (var id in this._listeners) {
+				var listener = this._listeners[id];
+				if (listener.eventName == eventName) {
+					listener.callback && listener.callback.apply(listener.callback, args);
+				}
+			}
+		};
+
+		// removeEventListener()
+		Audia.prototype.removeEventListener = function (eventName, callback/*, capture*/) {
+			// Get the id of the listener to remove
+			var listenerId = null;
+			for (var id in this._listeners) {
+				var listener = this._listeners[id];
+				if (listener.eventName === eventName) {
+					if (listener.callback === callback) {
+						listenerId = id;
+						break;
+					}
+				}
+			}
+
+			// Delete the listener
+			if (listenerId !== null) {
+				delete this._listeners[listenerId];
+			}
+		};
+
+		// Properties…
+
+		// autoplay (Boolean)
+		Object.defineProperty(Audia.prototype, "autoplay", {
+			get: function () { return this._autoplay; },
+			set: function (value) {
+				this._autoplay = value;
+			}
+		});
+
+		// buffered (TimeRanges)
+		Object.defineProperty(Audia.prototype, "buffered", {
+			get: function () { return this._buffered; }
+		});
+
+		// currentSrc (String)
+		Object.defineProperty(Audia.prototype, "currentSrc", {
+			get: function () { return this._currentSrc; }
+		});
+
+		// currentTime (Number)
+		Object.defineProperty(Audia.prototype, "currentTime", {
+			get: function () { return this._currentTime; },
+			set: function (value) {
+				this._currentTime = value;
+				// TODO
+				// TODO: throw errors appropriately (eg DOM error)
+			}
+		});
+
+		// defaultPlaybackRate (Number) (default: 1)
+		Object.defineProperty(Audia.prototype, "defaultPlaybackRate", {
+			get: function () { return Number(this._defaultPlaybackRate); },
+			set: function (value) {
+				this._defaultPlaybackRate = value;
+				// todo
+			}
+		});
+
+		// duration (Number)
+		Object.defineProperty(Audia.prototype, "duration", {
+			get: function () { return this._duration; }
+		});
+
+		// loop (Boolean)
+		Object.defineProperty(Audia.prototype, "loop", {
+			get: function () { return this._loop; },
+			set: function (value) {
+				// TODO: buggy, needs revisit
+				if (this._loop === value) { return; }
+				this._loop = value;
+
+				if (!this.bufferSource) { return; }
+
+				if (this._paused) {
+					refreshBufferSource(this);
+					this.bufferSource.loop = value;
+				} else {
+					this.pause();
+					refreshBufferSource(this);
+					this.bufferSource.loop = value;
+					this.play();
+				}
+			}
+		});
+
+		// muted (Boolean)
+		Object.defineProperty(Audia.prototype, "muted", {
+			get: function () { return this._muted; },
+			set: function (value) {
+				this._muted = value;
+				this.gainNode.gain.value = value ? 0 : this._volume;
+			}
+		});
+
+		// paused (Boolean)
+		Object.defineProperty(Audia.prototype, "paused", {
+			get: function () { return this._paused; }
+		});
+
+		// playbackRate (Number) (default: 1)
+		Object.defineProperty(Audia.prototype, "playbackRate", {
+			get: function () { return this._playbackRate; },
+			set: function (value) {
+				this._playbackRate = value;
+				// todo
+			}
+		});
+
+		// played (Boolean)
+		Object.defineProperty(Audia.prototype, "played", {
+			get: function () { return this._played; }
+		});
+
+		// preload (String)
+		Object.defineProperty(Audia.prototype, "preload", {
+			get: function () { return this._preload; },
+			set: function (value) {
+				this._preload = value;
+				// TODO
+			}
+		});
+
+		// seekable (Boolean)
+		Object.defineProperty(Audia.prototype, "seekable", {
+			get: function () { return this._seekable; }
+		});
+
+		// seeking (Boolean)
+		Object.defineProperty(Audia.prototype, "seeking", {
+			get: function () { return this._seeking; }
+		});
+
+		// src (String)
+		Object.defineProperty(Audia.prototype, "src", {
+			get: function () { return this._src; },
+			set: function (value) {
+				this._src = value;
+				loadAudioFile(this, value);
+			}
+		});
+
+		// volume (Number) (range: 0-1) (default: 1)
+		Object.defineProperty(Audia.prototype, "volume", {
+			get: function () { return this._volume; },
+			set: function (value) {
+				// Emulate Audio by throwing an error if volume is out of bounds
+				if (!Audia.preventErrors) {
+					if (clamp(value, 0, 1) !== value) {
+						// TODO: throw DOM error
+					}
+				}
+
+				if (value < 0) { value = 0; }
+				this._volume = value;
+
+				// Don't bother if we're muted!
+				if (this._muted) { return; }
+
+				this.gainNode.gain.value = value;
+
+				this.dispatchEvent("volumechange"/*, TODO*/);
+			}
+		});
+
+	} else {
+
+		// Create a thin wrapper around the Audio object…
+
+		// Constructor
+		Audia = function (src) {
+			this.id = addAudiaObject(this);
+			this._audioNode = new Audio();
+
+			// Support for new Audia(src)
+			if (src !== undefined) {
+				this.src = src;
+			}
+		};
+
+		// Methods…
+
+		// load
+		Audia.prototype.load = function (type) {
+			this._audioNode.load();
+		};
+
+		// play()
+		Audia.prototype.play = function (currentTime) {
+			if (currentTime !== undefined) {
+				this._audioNode.currentTime = currentTime;
+			}
+			this._audioNode.play();
+		};
+
+		// pause()
+		Audia.prototype.pause = function () {
+			this._audioNode.pause();
+		};
+
+		// stop()
+		Audia.prototype.stop = function () {
+			this._audioNode.pause();
+			this._audioNode.currentTime = 0;
+		};
+
+		// addEventListener()
+		Audia.prototype.addEventListener = function (eventName, callback, capture) {
+			this._audioNode.addEventListener(eventName, callback, capture);
+		};
+
+		// removeEventListener()
+		Audia.prototype.removeEventListener = function (eventName, callback, capture) {
+			this._audioNode.removeEventListener(eventName, callback, capture);
+		};
+
+		// Properties…
+
+		// autoplay (Boolean)
+		Object.defineProperty(Audia.prototype, "autoplay", {
+			get: function () { return this._audioNode.autoplay; },
+			set: function (value) {
+				this._audioNode.autoplay = value;
+			}
+		});
+
+		// buffered (TimeRanges)
+		Object.defineProperty(Audia.prototype, "buffered", {
+			get: function () { return this._audioNode.buffered; }
+		});
+
+		// currentSrc (String)
+		Object.defineProperty(Audia.prototype, "currentSrc", {
+			get: function () { return this._audioNode.src; }
+		});
+
+		// currentTime (Number)
+		Object.defineProperty(Audia.prototype, "currentTime", {
+			get: function () { return this._audioNode.currentTime; },
+			set: function (value) {
+				this._audioNode.currentTime = value;
+			}
+		});
+
+		// defaultPlaybackRate (Number) (default: 1)
+		Object.defineProperty(Audia.prototype, "defaultPlaybackRate", {
+			get: function () { return this._audioNode.defaultPlaybackRate; },
+			set: function (value) {
+				// TODO: not being used ATM
+				this._audioNode.defaultPlaybackRate = value;
+			}
+		});
+
+		// duration (Number)
+		Object.defineProperty(Audia.prototype, "duration", {
+			get: function () { return this._audioNode.duration; }
+		});
+
+		// loop (Boolean)
+		Object.defineProperty(Audia.prototype, "loop", {
+			get: function () { return this._audioNode.loop; },
+			set: function (value) {
+				// Fixes a bug in Chrome where audio will not play if currentTime
+				// is at the end of the song
+				if (this._audioNode.currentTime >= this._audioNode.duration) {
+					this._audioNode.currentTime = 0;
+				}
+
+				this._audioNode.loop = value;
+			}
+		});
+
+		// muted (Boolean)
+		Object.defineProperty(Audia.prototype, "muted", {
+			get: function () { return this._audioNode.muted; },
+			set: function (value) {
+				this._audioNode.muted = value;
+			}
+		});
+
+		// paused (Boolean)
+		Object.defineProperty(Audia.prototype, "paused", {
+			get: function () { return this._audioNode.paused; }
+		});
+
+		// playbackRate (Number) (default: 1)
+		Object.defineProperty(Audia.prototype, "playbackRate", {
+			get: function () { return this._audioNode.playbackRate; },
+			set: function (value) {
+				this._audioNode.playbackRate = value;
+			}
+		});
+
+		// played (Boolean)
+		Object.defineProperty(Audia.prototype, "played", {
+			get: function () { return this._audioNode.played; }
+		});
+
+		// preload (String)
+		Object.defineProperty(Audia.prototype, "preload", {
+			get: function () { return this._audioNode.preload; },
+			set: function (value) {
+				this._audioNode.preload = value;
+			}
+		});
+
+		// seekable (Boolean)
+		Object.defineProperty(Audia.prototype, "seekable", {
+			get: function () { return this._audioNode.seekable; }
+		});
+
+		// seeking (Boolean)
+		Object.defineProperty(Audia.prototype, "seeking", {
+			get: function () { return this._audioNode.seeking; }
+		});
+
+		// src (String)
+		Object.defineProperty(Audia.prototype, "src", {
+			get: function () { return this._audioNode.src; },
+			set: function (value) {
+				this._audioNode.src = value;
+			}
+		});
+
+		// volume (Number) (range: 0-1) (default: 1)
+		Object.defineProperty(Audia.prototype, "volume", {
+			get: function () { return this._audioNode.volume; },
+			set: function (value) {
+				if (Audia.preventErrors) {
+					var value = clamp(value, 0, 1);
+				}
+				this._audioNode.volume = value;
+			}
+		});
+
 	}
 
-	Audia.muteAll = function () {
-		for (var id in cache) {
-			cache[id].mute();
-		}
-	};
+	// Prevent errors?
+	Audia.preventErrors = true;
 
-	Audia.unmuteAll = function () {
-		for (var id in cache) {
-			cache[id].unmute();
-		}
-	};
-
-	Audia.prototype.__defineGetter__("currentTime", function () {
-		if (this._playing) {
-			var time = (audioContext.currentTime - this._startTime) + this._currentTime;
-			if (time > this._duration) {
-				return this._duration;
-			} else {
-				return time;
-			}
-		} else {
-			return this._currentTime;
-		}
+	// Public helper
+	Object.defineProperty(Audia, "hasWebAudio", {
+		get: function () { return hasWebAudio; }
 	});
 
-	Audia.prototype.__defineSetter__("currentTime", function (currentTime) {
-		var currentTime = clamp(currentTime, 0, this._duration);
+	// Audio context
+	Object.defineProperty(Audia, "audioContext", {
+		get: function () { return audioContext; }
+	});
 
-		if (this.currentTime != currentTime) {
-			var playing = this._playing;
-			this._stop();
-			this._currentTime = currentTime;
-			if (playing) {
-				this.play();
-			}
+	// Gain node
+	Object.defineProperty(Audia, "gainNode", {
+		get: function () { return gainNode; }
+	});
+
+	// Version
+	Object.defineProperty(Audia, "version", {
+		get: function () { return "0.3.0"; }
+	});
+
+	// canPlayType helper
+	// Can be called with shortcuts, e.g. "mp3" instead of "audio/mp3"
+	var audioNode;
+	Audia.canPlayType = function (type) {
+		if (audioNode === undefined) {
+			audioNode = new Audio();
 		}
-	});
-
-	Audia.prototype.__defineGetter__("duration", function () {
-		return this._duration;
-	});
-
-	Audia.prototype.__defineGetter__("muted", function () {
-		return this._muted;
-	});
-	Audia.prototype.__defineSetter__("muted", function (muted) {
-		if (muted) {
-			this.mute();
-		} else {
-			this.unmute();
-		}
-	});
-
-	Audia.prototype.__defineGetter__("playing", function () {
-		return this._playing;
-	});
-
-	Audia.prototype.__defineGetter__("src", function () {
-		return this._src;
-	});
-
-	Audia.prototype.__defineSetter__("src", function (url) {
-		this._src = url;
-		var sound = this;
-
-		// Create the gain node and set the volume
-		var gain = audioContext.createGainNode();
-		gain.gain.value = this._muted ? 0 : this._volume;
-
-		// Note: panning code is commented out for now, because
-		// the mere presence of a panner is causing everything
-		// to sound muddy.
-		// http://code.google.com/p/chromium/issues/detail?id=108852
-		// Create the panner node and set the panning
-		//var panner = audioContext.createPanner();
-
-		// Create the buffer source and connect everything
-		var source = audioContext.createBufferSource();
-		/*
-		source.connect(panner);
-		panner.connect(gain);
-		gain.connect(audioContext.destination);
-		*/
-		source.connect(gain);
-		gain.connect(audioContext.destination);
-
-		// Retain!
-		this._gain = gain;
-		//this._panner = panner;
-		this._source = source;
-
-		if (url in buffers) {
-			source.buffer = buffers[url];
-
-			return;
-		}
-
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET", url, true);
-		xhr.responseType = "arraybuffer";
-		xhr.onload = function() {
-			var buffer = audioContext.createBuffer(xhr.response, false);
-			source.buffer = buffer;
-			buffers[url] = buffer;
-			sound._duration = buffer.duration;
-			sound.onload();
-		};
-		xhr.send();
-	});
-
-	Audia.prototype.__defineGetter__("volume", function () {
-		return this._volume;
-	});
-
-	Audia.prototype.__defineSetter__("volume", function (volume) {
-		// Note: max volume of 10 is arbitrary
-		var volume = clamp(volume, 0, 10);
-		this._volume = volume;
-
-		if (!this._muted) {
-			this._gain.gain.value = volume;
-		}
-	});
-
-	Audia.prototype.onended = function () {};
-	Audia.prototype.onload = function () {};
-
-	Audia.prototype.play = function (currentTime) {
-		if (currentTime !== undefined) {
-			this.currentTime = currentTime;
-		}
-
-		if (this._playing) {
-			return;
-		}
-		this._regenerateBuffer();
-
-		var BUFFER = 0.01; // TODO: gross? hopefully a better way can be found
-		var grainDuration = (this._duration - this._currentTime - BUFFER);
-		this._source.noteGrainOn(0, this._currentTime, grainDuration);
-		this._playing = true;
-		this._startTime = audioContext.currentTime;
-        
-		var sound = this;
-        
-		this._onendedTimeout = setTimeout(function () {
-			sound.onended();
-			sound._stop();
-			sound.currentTime = 0;
-			if (sound.loop) {
-				sound.play();
-			}
-		}, grainDuration * 1000);
+		var type = (type.match("/") === null ? "audio/" : "") + type;
+		return audioNode.canPlayType(type);
 	};
 
-	Audia.prototype.pause = function () {
-		this._stop();
+	// canPlayType
+	Audia.prototype.canPlayType = function (type) {
+		return Audia.canPlayType(type);
 	};
 
-	Audia.prototype.stop = function () {
-		this._stop();
-		this._currentTime = 0;
-	};
+	// Lastly, wrap all "on" properties up into the events
+	var eventNames = [
+		"abort",
+		"canplay",
+		"canplaythrough",
+		"durationchange",
+		"emptied",
+		"ended",
+		"error",
+		"loadeddata",
+		"loadedmetadata",
+		"loadstart",
+		"pause",
+		"play",
+		"playing",
+		"progress",
+		"ratechange",
+		"seeked",
+		"seeking",
+		"stalled",
+		"suspend",
+		"timeupdate",
+		"volumechange"
+	];
 
-	// "Private" methods
+	for (var i = 0, j = eventNames.length; i < j; ++i) {
+		(function (eventName) {
+			var fauxPrivateName = "_on" + eventName;
+			Audia.prototype[fauxPrivateName] = null;
+			Object.defineProperty(Audia.prototype, "on" + eventName, {
+				get: function () { return this[fauxPrivateName]; },
+				set: function (value) {
+					// Remove the old listener
+					if (this[fauxPrivateName]) {
+						this.removeEventListener(eventName, this[fauxPrivateName], false);
+					}
 
-	Audia.prototype._stop = function () {
-		if (!this._playing) {
-			return;
-		}
-
-		if (this._onendedTimeout) {
-			clearTimeout(this._onendedTimeout);
-			this._onendedTimeout = null;
-		}
-
-		this._source.noteOff(0);
-		this._expireBuffer();
-
-		this._currentTime += (audioContext.currentTime - this._startTime);
-		this._playing = false;
-	};
-
-	Audia.prototype._expireBuffer = function () {
-		this._source = null;
-	};
-
-	Audia.prototype.mute = function () {
-		this._muted = true;
-
-		if (this._gain) {
-			this._gain.gain.value = 0;
-		}
-	};
-
-	Audia.prototype.unmute = function () {
-		this._muted = false;
-
-		if (this._gain) {
-			this._gain.gain.value = this._volume;
-		}
-	};
-
-	Audia.prototype._regenerateBuffer = function () {
-		this.src = this._src;
-	};
+					// Only set functions
+					if (typeof value == "function") {
+						this[fauxPrivateName] = value;
+						this.addEventListener(eventName, value, false);
+					} else {
+						this[fauxPrivateName] = null;
+					}
+				}
+			});
+		})(eventNames[i]);
+	}
 
 	return Audia;
-}());
+
+})();
