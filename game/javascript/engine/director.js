@@ -76,7 +76,7 @@ Director.prototype.tick= function(t){
     requestAnimationFrame(callback, display._canvas);
 }
 
-Director.prototype.tick_logic(msDuration){
+Director.prototype.tick_logic = function(msDuration){
     var active_scene = this.get_active_scene();
     if (active_scene.handleEvent) {
         var evts = gamejs.event.get();

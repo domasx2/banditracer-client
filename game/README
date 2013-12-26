@@ -1,0 +1,29 @@
+Quick start
+============
+
+Create `javascript/settings.js` by copying `javascript/settings-example.js'
+(no change to file necessary for single player).
+
+Open `index.html` with Firefox or Safar (other browsers can only play the game
+if this directory is served via http://).
+
+Or: Install banditracer-client with RingoJs
+-----------------------------------------------------------------
+
+Install RingoJs <http://ringojs.org/getting_started>
+
+   $ ringo-admin install domasx2/banditracer-client
+   $ ringo-admin install hns/stick
+
+Start the banditracer-client webserver:
+
+   $ ringo -e "require('banditracer-client').startUp()"
+
+Access the game at: <http://localhost:8080/>
+
+
+
+Pack Js files / repack gamejs
+==============
+
+$ bin/build.sh

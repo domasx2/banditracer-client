@@ -63,7 +63,7 @@ World.prototype.spawn_animation = function(anim_name, position, follow_obj){
 };
 
 World.prototype.play_sound = function(filename, position){
-    engine.World.prototype.play_sound.apply(this, ['sounds/fx/'+filename, position]);
+    if(settings.get('sound')) engine.World.prototype.play_sound.apply(this, ['sounds/fx/'+filename, position]);
 };
 
 exports.build_world = function(level, mode) {

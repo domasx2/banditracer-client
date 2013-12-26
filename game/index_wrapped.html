@@ -12,7 +12,6 @@
         body{
            background:#fff;
            color:#222;
-           margin:1em 0 2em 6em;
            padding:0;
         }
         #gjs-loader {
@@ -28,8 +27,12 @@
     <script src="./javascript/app.min.js"></script>
 
     <script>
+        var SOUND = false;
         require.setModuleRoot('./javascript/');
-        require.run('main')
+        require.run('main');
+        $(document).ready(function(){
+            $('body p').css('display', 'none');
+        });
     </script>
 </head>
 <!-- Html -->

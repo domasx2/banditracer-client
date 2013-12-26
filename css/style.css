@@ -1,0 +1,44 @@
+@font-face {  
+  font-family: maass;  
+  src: url( ../fonts/maass.ttf ) format("truetype");
+}  
+    
+
+.view {
+	display: none;
+}
+
+#view-play iframe {
+	overflow: visible;
+	border: 0px;
+}
+
+#social {
+	margin-top: 50px;
+	margin-left: 20px;
+}
+
+#menu {
+	margin-top: 30px;
+}
+
+#menu li {
+	line-height: 25px;
+}
+
+
+#menu a {
+	font-family: maass;
+	background-color: white;
+	color: #A67C52;
+	font-size: 15pt;
+}
+
+#menu a:hover {
+	font-size: 18pt;
+}
+
+#menu li.active a {
+	color: #333333; 
+	font-size: 18pt;
+}

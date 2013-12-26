@@ -45,7 +45,7 @@ function Engine() {
     }
 }
 exports.play = function(pars){
-    engine.play_sound('sounds/fx/'+pars.filename); 
+    if(settings.get('sound'))engine.play_sound('sounds/fx/'+pars.filename); 
 };
 exports.engine = null;
 
