@@ -1,5 +1,5 @@
-var settings=exports.settings={SCREEN_WIDTH:800,  //screen width in pixels
-                                SCREEN_HEIGHT:600, //screen height in pixels
+var settings=exports.settings={SCREEN_WIDTH: window.innerWidth,  //screen width in pixels
+                                SCREEN_HEIGHT: window.innerHeight, //screen height in pixels
                                 FPS:60,        //logic updates per second
                                 PHYS_SCALE:10,    //pixels in a meter
                                 STARTING_BALANCE:3000, //default 3000

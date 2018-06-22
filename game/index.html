@@ -13,6 +13,7 @@
            background:#fff;
            color:#222;
            padding:0;
+           margin: 0;
         }
         #gjs-loader {
             width: 50%;
@@ -29,6 +30,7 @@
          <script src="./javascript/gjs-app-wrapped.js"></script>
   -->
     <script>
+	var SOUND = false;
         require.setModuleRoot('./javascript/');
         require.run('main')
         $(document).ready(function(){

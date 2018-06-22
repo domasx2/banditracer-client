@@ -1,45 +1,21 @@
-var audia = require('./audia');
-var Audia = audia.Audia;
+
 var object = require('./object');
 var utils = require('./utils');
 var gamejs = require('gamejs');
 var _sounds = {};
 
-if(audia.supported){ //define class based on condition. SUCK ON THAT STATIC LANGUAGES
-    var Sound = exports.Sound = function(filename){
-        this.cur = 0;
-        this.audios = [];
-        for(var i= 0; i< 8; i++){
-            this.audios.push(new Audia(filename));
-        }
-    };
-    
-    Sound.prototype.play = function(loop){
-        var audio = this.audios[this.cur++];
-        if(this.cur == 8) this.cur = 0;
-        audio.loop = loop ? true : false;
-        audio.play();
-    };
-    
-    Sound.prototype.stop = function(){
-        this.audios.forEach(function(audio){
-            audio.stop(); 
-        });
-    };
-    
-} else {
-    var Sound = exports.Sound = function(filename){
-        this.audio = new gamejs.mixer.Sound(filename);
-    };
-    
-    Sound.prototype.play = function(loop){
-        this.audio.play(loop ? true : false);
-    };
-    
-    Sound.prototype.stop = function(){
-        this.audio.stop();  
-    };
-}
+
+var Sound = exports.Sound = function(filename) {
+    this.audio = new gamejs.mixer.Sound(filename);
+};
+
+Sound.prototype.play = function(loop) {
+    this.audio.play(loop ? true : false);
+};
+
+Sound.prototype.stop = function() {
+    this.audio.stop();
+};
 
 
 var SoundObject = exports.SoundObject = function(pars){
